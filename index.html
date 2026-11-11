@@ -4,37 +4,52 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mapas de Território</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root{--bg:#f4f5f7;--card:#fff;--tx:#1b1f24;--mut:#6b7280;--bd:#d9dde3;--pri:#2563eb;--ok:#16a34a;--bad:#dc2626}
 @media (prefers-color-scheme:dark){:root{--bg:#0f1318;--card:#181e26;--tx:#e8ecf1;--mut:#97a1ae;--bd:#2a323d;--pri:#4c8dff;--ok:#34d399;--bad:#f87171}}
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--tx);padding:16px;display:flex;justify-content:center}
-.wrap{width:100%;max-width:440px}
+html,body{height:100%}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--tx)}
+.wrap{width:100%;max-width:440px;margin:0 auto;padding:16px}
 h1{font-size:1.3rem;margin:8px 0 16px}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:12px}
 label{display:block;font-size:.85rem;color:var(--mut);margin:10px 0 4px}
-input{width:100%;padding:12px;font-size:1rem;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx)}
+input,select{width:100%;padding:12px;font-size:1rem;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx)}
 button{width:100%;padding:12px;margin-top:14px;font-size:1rem;border:0;border-radius:8px;background:var(--pri);color:#fff;font-weight:600}
 button.sec{background:transparent;color:var(--pri);border:1px solid var(--bd)}
 button:disabled{opacity:.6}
 .msg{margin-top:12px;font-size:.9rem;min-height:1.2em}
 .err{color:var(--bad)}.okc{color:var(--ok)}
-.hidden{display:none}
+.hidden{display:none!important}
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--bd)}
 .row:last-child{border-bottom:0}
 .nm{font-weight:600}.st{font-size:.8rem;color:var(--mut)}
 .row .bt{display:flex;gap:6px}
 .row button{width:auto;margin:0;padding:8px 10px;font-size:.85rem}
 .row .no{background:var(--bad)}.row .yes{background:var(--ok)}
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.top button{width:auto;margin:0;padding:8px 12px;font-size:.85rem}
+
+/* Área do mapa */
+#telaApp{display:flex;flex-direction:column;height:100%}
+.barra{display:flex;gap:8px;align-items:center;padding:8px 10px;background:var(--card);border-bottom:1px solid var(--bd)}
+.barra strong{flex:1;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.barra button{width:auto;margin:0;padding:8px 12px;font-size:.85rem}
+.filtros{display:flex;gap:8px;padding:8px 10px;background:var(--card);border-bottom:1px solid var(--bd)}
+.filtros select{padding:10px;font-size:.95rem}
+#mapa{flex:1;min-height:200px}
+#info{background:var(--card);border-top:1px solid var(--bd);padding:10px 12px;max-height:38%;overflow:auto}
+#info .tit{font-weight:700;margin-bottom:6px}
+.qs{display:flex;flex-wrap:wrap;gap:6px}
+.qs a{display:inline-block;padding:8px 12px;border:1px solid var(--bd);border-radius:999px;color:var(--pri);text-decoration:none;font-weight:600;font-size:.9rem}
+#painelAdmin{padding:12px;background:var(--bg);overflow:auto;max-height:50%}
+.quadra-pin{background:var(--pri);color:#fff;border-radius:999px;font-size:11px;font-weight:700;width:22px;height:22px;line-height:22px;text-align:center;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4)}
 </style>
 </head>
 <body>
-<div class="wrap">
+
+<div class="wrap" id="wrapLogin">
   <h1>Mapas de Território</h1>
 
-  <!-- Entrar -->
   <div id="telaLogin" class="card">
     <label for="lNome">Nome</label>
     <input id="lNome" autocomplete="username">
@@ -45,7 +60,6 @@ button:disabled{opacity:.6}
     <div class="msg" id="msgLogin"></div>
   </div>
 
-  <!-- Solicitar acesso -->
   <div id="telaRegistro" class="card hidden">
     <label for="rNome">Seu nome completo</label>
     <input id="rNome" autocomplete="name">
@@ -55,101 +69,178 @@ button:disabled{opacity:.6}
     <button class="sec" id="irLogin">Voltar</button>
     <div class="msg" id="msgReg"></div>
   </div>
-
-  <!-- Área logada -->
-  <div id="telaApp" class="hidden">
-    <div class="top">
-      <strong id="ola"></strong>
-      <button class="sec" id="btnSair">Sair</button>
-    </div>
-    <div class="card">Login funcionando. Os mapas entram na próxima etapa.</div>
-
-    <div id="painelAdmin" class="card hidden">
-      <strong>Pedidos e acessos</strong>
-      <div id="listaAdmin"></div>
-      <div class="msg" id="msgAdm"></div>
-    </div>
-  </div>
 </div>
 
+<div id="telaApp" class="hidden">
+  <div class="barra">
+    <strong id="ola"></strong>
+    <button class="sec" id="btnAdmin">Acessos</button>
+    <button class="sec" id="btnSair">Sair</button>
+  </div>
+  <div id="painelAdmin" class="hidden">
+    <strong>Pedidos e acessos</strong>
+    <div id="listaAdmin"></div>
+    <div class="msg" id="msgAdm"></div>
+  </div>
+  <div class="filtros">
+    <select id="selGrupo"></select>
+    <select id="selMapa"></select>
+  </div>
+  <div id="mapa"></div>
+  <div id="info"><div class="tit">Escolha um grupo e um mapa</div></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// Cole aqui a URL do seu script (a que termina em /exec)
 var API = "https://script.google.com/macros/s/AKfycbw0Qd_t6OxiVmr-mu_mvWdYSJhazM83FO6pmSwdvybdB2o3AlfVvxTBEdy7bEeCgzGe/exec";
-
 var $ = function (id) { return document.getElementById(id); };
-var sessao = null;
+var sessao = null, dados = null, mapaLeaflet = null, camada = null;
 
-function lerSessao() {
-  try { return JSON.parse(localStorage.getItem("sessao") || "null"); } catch (e) { return null; }
-}
-function gravarSessao(s) {
-  try { if (s) localStorage.setItem("sessao", JSON.stringify(s)); else localStorage.removeItem("sessao"); } catch (e) {}
-}
+function lerSessao() { try { return JSON.parse(localStorage.getItem("sessao") || "null"); } catch (e) { return null; } }
+function gravarSessao(s) { try { if (s) localStorage.setItem("sessao", JSON.stringify(s)); else localStorage.removeItem("sessao"); } catch (e) {} }
 
-async function chamar(dados) {
+async function chamar(d) {
   try {
-    var r = await fetch(API, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(dados)
-    });
+    var r = await fetch(API, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(d) });
     return await r.json();
-  } catch (e) {
-    return { ok: false, erro: "Sem conexão com o servidor. Tente de novo." };
-  }
+  } catch (e) { return { ok: false, erro: "Sem conexão com o servidor. Tente de novo." }; }
+}
+function msg(el, t, ok) { el.textContent = t || ""; el.className = "msg " + (ok ? "okc" : "err"); }
+
+function mostrarLogin(tela) {
+  $("wrapLogin").classList.remove("hidden");
+  $("telaApp").classList.add("hidden");
+  $("telaLogin").classList.toggle("hidden", tela !== "login");
+  $("telaRegistro").classList.toggle("hidden", tela !== "registro");
 }
 
-function msg(el, texto, ok) {
-  el.textContent = texto || "";
-  el.className = "msg " + (ok ? "okc" : "err");
-}
-
-function mostrar(tela) {
-  ["telaLogin", "telaRegistro", "telaApp"].forEach(function (t) {
-    $(t).classList.toggle("hidden", t !== tela);
-  });
-}
-
-function entrarNoApp() {
-  mostrar("telaApp");
-  $("ola").textContent = "Olá, " + sessao.nome;
-  $("painelAdmin").classList.toggle("hidden", !sessao.admin);
-  if (sessao.admin) carregarAdmin();
-}
-
-$("irRegistro").onclick = function () { mostrar("telaRegistro"); };
-$("irLogin").onclick = function () { mostrar("telaLogin"); };
+$("irRegistro").onclick = function () { mostrarLogin("registro"); };
+$("irLogin").onclick = function () { mostrarLogin("login"); };
 
 $("btnEntrar").onclick = async function () {
-  var b = $("btnEntrar");
-  b.disabled = true; msg($("msgLogin"), "Entrando…", true);
+  var b = $("btnEntrar"); b.disabled = true; msg($("msgLogin"), "Entrando…", true);
   var r = await chamar({ acao: "login", nome: $("lNome").value, senha: $("lSenha").value });
   b.disabled = false;
   if (!r.ok) { msg($("msgLogin"), r.erro); return; }
   sessao = { token: r.token, nome: r.nome, admin: r.admin };
-  gravarSessao(sessao);
-  $("lSenha").value = "";
-  msg($("msgLogin"), "");
-  entrarNoApp();
+  gravarSessao(sessao); $("lSenha").value = ""; msg($("msgLogin"), "");
+  abrirApp();
 };
 
 $("btnRegistrar").onclick = async function () {
-  var b = $("btnRegistrar");
-  b.disabled = true; msg($("msgReg"), "Enviando…", true);
+  var b = $("btnRegistrar"); b.disabled = true; msg($("msgReg"), "Enviando…", true);
   var r = await chamar({ acao: "registrar", nome: $("rNome").value, senha: $("rSenha").value });
   b.disabled = false;
   if (!r.ok) { msg($("msgReg"), r.erro); return; }
-  $("rSenha").value = "";
-  msg($("msgReg"), r.mensagem, true);
+  $("rSenha").value = ""; msg($("msgReg"), r.mensagem, true);
 };
 
 $("btnSair").onclick = function () {
-  sessao = null; gravarSessao(null); mostrar("telaLogin");
+  sessao = null; dados = null; gravarSessao(null); mostrarLogin("login");
 };
 
+$("btnAdmin").onclick = function () {
+  var p = $("painelAdmin"); p.classList.toggle("hidden");
+  if (!p.classList.contains("hidden")) carregarAdmin();
+  setTimeout(function () { if (mapaLeaflet) mapaLeaflet.invalidateSize(); }, 50);
+};
+
+async function abrirApp() {
+  $("wrapLogin").classList.add("hidden");
+  $("telaApp").classList.remove("hidden");
+  $("ola").textContent = "Olá, " + sessao.nome;
+  $("btnAdmin").classList.toggle("hidden", !sessao.admin);
+  $("painelAdmin").classList.add("hidden");
+  iniciarMapa();
+  var r = await chamar({ acao: "dadosMapas", token: sessao.token });
+  if (!r.ok) {
+    sessao = null; gravarSessao(null);
+    mostrarLogin("login"); msg($("msgLogin"), r.erro || "Sessão expirada. Entre de novo.");
+    return;
+  }
+  dados = r;
+  montarFiltros();
+}
+
+function iniciarMapa() {
+  if (mapaLeaflet) { setTimeout(function () { mapaLeaflet.invalidateSize(); }, 50); return; }
+  mapaLeaflet = L.map("mapa", { zoomControl: true }).setView([-5.13, -42.83], 15);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19, attribution: "© OpenStreetMap"
+  }).addTo(mapaLeaflet);
+  camada = L.layerGroup().addTo(mapaLeaflet);
+}
+
+function montarFiltros() {
+  var grupos = [];
+  dados.mapas.forEach(function (m) { if (grupos.indexOf(m.g) < 0) grupos.push(m.g); });
+  var sg = $("selGrupo"); sg.innerHTML = "";
+  var op0 = document.createElement("option"); op0.value = ""; op0.textContent = "Todos os grupos"; sg.appendChild(op0);
+  grupos.forEach(function (g) { var o = document.createElement("option"); o.value = g; o.textContent = g; sg.appendChild(o); });
+  sg.onchange = function () { preencherMapas(); desenhar(); };
+  $("selMapa").onchange = desenhar;
+  preencherMapas(); desenhar();
+}
+
+function preencherMapas() {
+  var g = $("selGrupo").value, sm = $("selMapa"); sm.innerHTML = "";
+  var op0 = document.createElement("option"); op0.value = ""; op0.textContent = "Todos os mapas"; sm.appendChild(op0);
+  dados.mapas.forEach(function (m, i) {
+    if (g && m.g !== g) return;
+    var o = document.createElement("option"); o.value = String(i); o.textContent = "Mapa " + m.n; sm.appendChild(o);
+  });
+}
+
+function linkGPS(lat, lng) { return "https://www.google.com/maps/search/?api=1&query=" + lat + "," + lng; }
+
+function desenhar() {
+  camada.clearLayers();
+  var g = $("selGrupo").value, idx = $("selMapa").value;
+  var lista = dados.mapas.filter(function (m, i) {
+    if (idx !== "") return String(i) === idx;
+    return !g || m.g === g;
+  });
+  var limites = [];
+  lista.forEach(function (m) {
+    if (m.c && m.c.length) {
+      var poly = L.polygon(m.c, { color: "#2563eb", weight: 2, fillOpacity: 0.08 }).addTo(camada);
+      poly.bindTooltip("Mapa " + m.n);
+      poly.on("click", function () { mostrarInfo(m); });
+      m.c.forEach(function (p) { limites.push(p); });
+    }
+    if (idx !== "") {
+      Object.keys(m.q).forEach(function (q) {
+        var ll = m.q[q];
+        var ic = L.divIcon({ className: "", html: '<div class="quadra-pin">' + q + "</div>", iconSize: [22, 22] });
+        L.marker(ll, { icon: ic }).addTo(camada).on("click", function () { window.open(linkGPS(ll[0], ll[1]), "_blank"); });
+        limites.push(ll);
+      });
+    }
+  });
+  if (limites.length) mapaLeaflet.fitBounds(limites, { padding: [30, 30] });
+  if (idx !== "") mostrarInfo(lista[0]);
+  else $("info").innerHTML = '<div class="tit">Escolha um mapa para ver as quadras</div>';
+  setTimeout(function () { mapaLeaflet.invalidateSize(); }, 50);
+}
+
+function mostrarInfo(m) {
+  var box = $("info"); box.innerHTML = "";
+  var t = document.createElement("div"); t.className = "tit"; t.textContent = "Mapa " + m.n + " - " + m.g; box.appendChild(t);
+  var qs = Object.keys(m.q).sort(function (a, b) { return a - b; });
+  if (!qs.length) { box.appendChild(document.createTextNode("Sem quadras marcadas neste mapa.")); return; }
+  var dica = document.createElement("div"); dica.className = "st"; dica.style.marginBottom = "6px";
+  dica.textContent = "Toque numa quadra para abrir o ponto no Google Maps:"; box.appendChild(dica);
+  var w = document.createElement("div"); w.className = "qs";
+  qs.forEach(function (q) {
+    var a = document.createElement("a"); a.textContent = "Q" + q;
+    a.href = linkGPS(m.q[q][0], m.q[q][1]); a.target = "_blank"; a.rel = "noopener";
+    w.appendChild(a);
+  });
+  box.appendChild(w);
+}
+
 async function carregarAdmin() {
-  var box = $("listaAdmin");
-  box.textContent = "Carregando…";
+  var box = $("listaAdmin"); box.textContent = "Carregando…";
   var r = await chamar({ acao: "listarPendentes", token: sessao.token });
   if (!r.ok) { box.textContent = ""; msg($("msgAdm"), r.erro); return; }
   box.textContent = "";
@@ -159,8 +250,7 @@ async function carregarAdmin() {
     var info = document.createElement("div");
     var n = document.createElement("div"); n.className = "nm"; n.textContent = u.nome;
     var s = document.createElement("div"); s.className = "st"; s.textContent = st;
-    info.appendChild(n); info.appendChild(s);
-    row.appendChild(info);
+    info.appendChild(n); info.appendChild(s); row.appendChild(info);
     if (st !== "admin") {
       var bt = document.createElement("div"); bt.className = "bt";
       if (st !== "aprovado") bt.appendChild(botao("Aprovar", "yes", u.nome, "aprovado"));
@@ -173,21 +263,18 @@ async function carregarAdmin() {
 }
 
 function botao(texto, cls, nome, status) {
-  var b = document.createElement("button");
-  b.textContent = texto; b.className = cls;
+  var b = document.createElement("button"); b.textContent = texto; b.className = cls;
   b.onclick = async function () {
     b.disabled = true;
     var r = await chamar({ acao: "definirStatus", token: sessao.token, nome: nome, status: status });
     if (!r.ok) { msg($("msgAdm"), r.erro); b.disabled = false; return; }
-    msg($("msgAdm"), "");
-    carregarAdmin();
+    msg($("msgAdm"), ""); carregarAdmin();
   };
   return b;
 }
 
-// Reabrir sessão salva
 sessao = lerSessao();
-if (sessao && sessao.token) entrarNoApp(); else mostrar("telaLogin");
+if (sessao && sessao.token) abrirApp(); else mostrarLogin("login");
 </script>
 </body>
 </html>
