@@ -42,6 +42,16 @@ button:disabled{opacity:.6}
 .qs{display:flex;flex-wrap:wrap;gap:6px}
 .qs a{display:inline-block;padding:8px 12px;border:1px solid var(--bd);border-radius:999px;color:var(--pri);text-decoration:none;font-weight:600;font-size:.9rem}
 #painelAdmin{padding:12px;background:var(--bg);overflow:auto;max-height:50%}
+.quadra-pin.feita{background:var(--ok)}
+.qs a.feita{background:var(--ok);color:#fff;border-color:var(--ok)}
+.qs button.qb{width:auto;margin:0;padding:8px 12px;border-radius:999px;font-size:.9rem;background:transparent;color:var(--pri);border:1px solid var(--bd)}
+.qs button.qb.feita{background:var(--ok);color:#fff;border-color:var(--ok)}
+.prog{font-size:.85rem;color:var(--mut);margin:4px 0 8px}
+.sel{display:flex;gap:8px;margin-top:8px}
+.sel button{margin:0;padding:8px 12px;font-size:.85rem;width:auto}
+.sel button.bad{background:var(--bad)}
+.liberar{margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)}
+.liberar input,.liberar select{margin-bottom:8px;padding:10px;font-size:.95rem}
 .quadra-pin{background:var(--pri);color:#fff;border-radius:999px;font-size:11px;font-weight:700;width:22px;height:22px;line-height:22px;text-align:center;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4)}
 </style>
 </head>
@@ -80,6 +90,16 @@ button:disabled{opacity:.6}
   <div id="painelAdmin" class="hidden">
     <strong>Pedidos e acessos</strong>
     <div id="listaAdmin"></div>
+    <div class="liberar">
+      <strong>Liberar alguém temporariamente</strong>
+      <label for="lbNome">Nome (igual ao cadastro)</label>
+      <input id="lbNome">
+      <label for="lbFrente">Frente</label>
+      <select id="lbFrente"></select>
+      <label for="lbAte">Vale até</label>
+      <input id="lbAte" type="date">
+      <button id="btnLiberar">Liberar</button>
+    </div>
     <div class="msg" id="msgAdm"></div>
   </div>
   <div class="filtros">
@@ -95,6 +115,7 @@ button:disabled{opacity:.6}
 var API = "https://script.google.com/macros/s/AKfycbw0Qd_t6OxiVmr-mu_mvWdYSJhazM83FO6pmSwdvybdB2o3AlfVvxTBEdy7bEeCgzGe/exec";
 var $ = function (id) { return document.getElementById(id); };
 var sessao = null, dados = null, mapaLeaflet = null, camada = null;
+var feitas = {}, pode = {}, mapaAtual = null;
 
 function lerSessao() { try { return JSON.parse(localStorage.getItem("sessao") || "null"); } catch (e) { return null; } }
 function gravarSessao(s) { try { if (s) localStorage.setItem("sessao", JSON.stringify(s)); else localStorage.removeItem("sessao"); } catch (e) {} }
@@ -159,8 +180,23 @@ async function abrirApp() {
     return;
   }
   dados = r;
+  await carregarProgresso();
   montarFiltros();
 }
+
+async function carregarProgresso() {
+  var r = await chamar({ acao: "progresso", token: sessao.token });
+  if (!r.ok) return;
+  feitas = {};
+  r.feitas.forEach(function (f) {
+    var k = f.frente + "|" + f.mapa;
+    (feitas[k] = feitas[k] || {})[f.quadra] = f.por;
+  });
+  pode = r.pode || {};
+}
+
+function chave(m) { return m.g + "|" + m.n; }
+function feitasDe(m) { return feitas[chave(m)] || {}; }
 
 function iniciarMapa() {
   if (mapaLeaflet) { setTimeout(function () { mapaLeaflet.invalidateSize(); }, 50); return; }
@@ -179,8 +215,19 @@ function montarFiltros() {
   grupos.forEach(function (g) { var o = document.createElement("option"); o.value = g; o.textContent = g; sg.appendChild(o); });
   sg.onchange = function () { preencherMapas(); desenhar(); };
   $("selMapa").onchange = desenhar;
+  var lf = $("lbFrente"); lf.innerHTML = "";
+  grupos.forEach(function (g) { var o = document.createElement("option"); o.value = g; o.textContent = g; lf.appendChild(o); });
   preencherMapas(); desenhar();
 }
+
+$("btnLiberar").onclick = async function () {
+  var b = $("btnLiberar"); b.disabled = true;
+  var r = await chamar({ acao: "liberarTemporario", token: sessao.token, nome: $("lbNome").value, frente: $("lbFrente").value, ate: $("lbAte").value });
+  b.disabled = false;
+  if (!r.ok) { msg($("msgAdm"), r.erro); return; }
+  $("lbNome").value = "";
+  msg($("msgAdm"), "Permiss\u00e3o liberada.", true);
+};
 
 function preencherMapas() {
   var g = $("selGrupo").value, sm = $("selMapa"); sm.innerHTML = "";
@@ -211,7 +258,8 @@ function desenhar() {
     if (idx !== "") {
       Object.keys(m.q).forEach(function (q) {
         var ll = m.q[q];
-        var ic = L.divIcon({ className: "", html: '<div class="quadra-pin">' + q + "</div>", iconSize: [22, 22] });
+        var cls = feitasDe(m)[q] ? "quadra-pin feita" : "quadra-pin";
+        var ic = L.divIcon({ className: "", html: '<div class="' + cls + '">' + q + "</div>", iconSize: [22, 22] });
         L.marker(ll, { icon: ic }).addTo(camada).on("click", function () { window.open(linkGPS(ll[0], ll[1]), "_blank"); });
         limites.push(ll);
       });
@@ -224,19 +272,65 @@ function desenhar() {
 }
 
 function mostrarInfo(m) {
+  mapaAtual = m;
   var box = $("info"); box.innerHTML = "";
   var t = document.createElement("div"); t.className = "tit"; t.textContent = "Mapa " + m.n + " - " + m.g; box.appendChild(t);
   var qs = Object.keys(m.q).sort(function (a, b) { return a - b; });
   if (!qs.length) { box.appendChild(document.createTextNode("Sem quadras marcadas neste mapa.")); return; }
+  var f = feitasDe(m), feitasN = qs.filter(function (q) { return f[q]; }).length;
+  var p = document.createElement("div"); p.className = "prog";
+  p.textContent = feitasN + " de " + qs.length + " quadras feitas" + (feitasN === qs.length ? " - mapa completo" : "");
+  box.appendChild(p);
+  var podeEste = !!pode[m.g];
   var dica = document.createElement("div"); dica.className = "st"; dica.style.marginBottom = "6px";
-  dica.textContent = "Toque numa quadra para abrir o ponto no Google Maps:"; box.appendChild(dica);
+  dica.textContent = podeEste ? "Toque numa quadra para marcar como feita ou desmarcar:" : "Toque numa quadra para abrir o ponto no Google Maps:";
+  box.appendChild(dica);
   var w = document.createElement("div"); w.className = "qs";
   qs.forEach(function (q) {
-    var a = document.createElement("a"); a.textContent = "Q" + q;
-    a.href = linkGPS(m.q[q][0], m.q[q][1]); a.target = "_blank"; a.rel = "noopener";
-    w.appendChild(a);
+    var feita = !!f[q];
+    if (podeEste) {
+      var b = document.createElement("button"); b.className = "qb" + (feita ? " feita" : ""); b.textContent = "Q" + q + (feita ? " \u2713" : "");
+      b.title = feita ? "Feita por " + f[q] : "";
+      b.onclick = function () { marcar(m, q, !feita, b); };
+      w.appendChild(b);
+    } else {
+      var a = document.createElement("a"); a.className = feita ? "feita" : ""; a.textContent = "Q" + q + (feita ? " \u2713" : "");
+      a.href = linkGPS(m.q[q][0], m.q[q][1]); a.target = "_blank"; a.rel = "noopener";
+      w.appendChild(a);
+    }
   });
   box.appendChild(w);
+  var sel = document.createElement("div"); sel.className = "sel";
+  var gps = document.createElement("button"); gps.className = "sec"; gps.textContent = "Ponto de in\u00edcio no Google Maps";
+  var primeira = qs.filter(function (q) { return !f[q]; })[0] || qs[0];
+  gps.onclick = function () { window.open(linkGPS(m.q[primeira][0], m.q[primeira][1]), "_blank"); };
+  sel.appendChild(gps);
+  if (sessao.admin) {
+    var rs = document.createElement("button"); rs.className = "bad"; rs.textContent = "Reiniciar mapa";
+    rs.onclick = function () { reiniciar(m); };
+    sel.appendChild(rs);
+  }
+  box.appendChild(sel);
+}
+
+async function marcar(m, q, feita, b) {
+  b.disabled = true;
+  var r = await chamar({ acao: "marcarQuadra", token: sessao.token, frente: m.g, mapa: m.n, quadra: q, feita: feita });
+  if (!r.ok) { b.disabled = false; alert(r.erro); return; }
+  await carregarProgresso();
+  var ic = $("selMapa").value;
+  desenhar();
+  if (ic === "") mostrarInfo(m);
+  if (r.completo) alert("Todas as quadras do mapa " + m.n + " foram marcadas. O admin foi avisado.");
+}
+
+async function reiniciar(m) {
+  if (!confirm("Reiniciar o mapa " + m.n + "? Todas as quadras marcadas voltam a ficar pendentes.")) return;
+  var r = await chamar({ acao: "reiniciarMapa", token: sessao.token, frente: m.g, mapa: m.n });
+  if (!r.ok) { alert(r.erro); return; }
+  await carregarProgresso();
+  desenhar();
+  mostrarInfo(m);
 }
 
 async function carregarAdmin() {
