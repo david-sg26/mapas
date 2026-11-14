@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://script.google.com">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-:root{--bg:#f4f5f7;--card:#fff;--tx:#1b1f24;--mut:#6b7280;--bd:#d9dde3;--pri:#2563eb;--ok:#16a34a;--bad:#dc2626}
-@media (prefers-color-scheme:dark){:root{--bg:#0f1318;--card:#181e26;--tx:#e8ecf1;--mut:#97a1ae;--bd:#2a323d;--pri:#4c8dff;--ok:#34d399;--bad:#f87171}}
+:root{--bg:#f4f5f7;--card:#fff;--tx:#1b1f24;--mut:#6b7280;--bd:#d9dde3;--pri:#2563eb;--ok:#16a34a;--warn:#eab308;--bad:#dc2626}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1318;--card:#181e26;--tx:#e8ecf1;--mut:#97a1ae;--bd:#2a323d;--pri:#4c8dff;--ok:#34d399;--warn:#fbbf24;--bad:#f87171}}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--tx)}
@@ -19,16 +19,16 @@ h1{font-size:1.3rem;margin:8px 0 16px}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:12px}
 label{display:block;font-size:.85rem;color:var(--mut);margin:10px 0 4px}
 input,select{width:100%;padding:12px;font-size:1rem;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx)}
-button{width:100%;padding:12px;margin-top:14px;font-size:1rem;border:0;border-radius:8px;background:var(--pri);color:#fff;font-weight:600}
+button{width:100%;padding:12px;margin-top:14px;font-size:1rem;border:0;border-radius:8px;background:var(--pri);color:#fff;font-weight:600;cursor:pointer}
 button.sec{background:transparent;color:var(--pri);border:1px solid var(--bd)}
-button:disabled{opacity:.6}
+button:disabled{opacity:.6;cursor:default}
 .msg{margin-top:12px;font-size:.9rem;min-height:1.2em}
 .err{color:var(--bad)}.okc{color:var(--ok)}
 .hidden{display:none!important}
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--bd)}
 .row:last-child{border-bottom:0}
 .nm{font-weight:600}.st{font-size:.8rem;color:var(--mut)}
-.row .bt{display:flex;gap:6px}
+.row .bt{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .row button{width:auto;margin:0;padding:8px 10px;font-size:.85rem}
 .row .no{background:var(--bad)}.row .yes{background:var(--ok)}
 
@@ -44,18 +44,32 @@ button:disabled{opacity:.6}
 #info .tit{font-weight:700;margin-bottom:6px}
 .qs{display:flex;flex-wrap:wrap;gap:6px}
 .qs a{display:inline-block;padding:8px 12px;border:1px solid var(--bd);border-radius:999px;color:var(--pri);text-decoration:none;font-weight:600;font-size:.9rem}
-#painelAdmin{padding:12px;background:var(--bg);overflow:auto;max-height:50%}
+#painelAdmin{padding:12px;background:var(--bg);overflow:auto;max-height:55%;border-bottom:1px solid var(--bd)}
 .quadra-pin.feita{background:var(--ok)}
 .qs a.feita{background:var(--ok);color:#fff;border-color:var(--ok)}
 .qs button.qb{width:auto;margin:0;padding:8px 12px;border-radius:999px;font-size:.9rem;background:transparent;color:var(--pri);border:1px solid var(--bd)}
 .qs button.qb.feita{background:var(--ok);color:#fff;border-color:var(--ok)}
 .prog{font-size:.85rem;color:var(--mut);margin:4px 0 8px}
-.sel{display:flex;gap:8px;margin-top:8px}
+.sel{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
 .sel button{margin:0;padding:8px 12px;font-size:.85rem;width:auto}
 .sel button.bad{background:var(--bad)}
 .liberar{margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)}
 .liberar input,.liberar select{margin-bottom:8px;padding:10px;font-size:.95rem}
 .quadra-pin{background:var(--pri);color:#fff;border-radius:999px;font-size:11px;font-weight:700;width:22px;height:22px;line-height:22px;text-align:center;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+
+/* Lista de mapas na visão completa */
+.lista-mapas{display:flex;flex-direction:column;gap:4px}
+.item-mapa{display:flex;align-items:center;gap:10px;width:100%;margin:0;padding:10px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:8px;text-align:left;font-weight:500;font-size:.92rem}
+.item-mapa:hover{border-color:var(--pri)}
+.item-mapa .bol{width:10px;height:10px;border-radius:999px;flex-shrink:0}
+.item-mapa .bol.completo{background:var(--ok)}
+.item-mapa .bol.andamento{background:var(--warn)}
+.item-mapa .bol.pendente{background:var(--pri)}
+.item-mapa .nome{flex:1;font-weight:600}
+.item-mapa .cont{font-size:.85rem;color:var(--mut);font-weight:600}
+.aviso-perm{font-size:.82rem;color:var(--pri);background:rgba(37,99,235,.08);border:1px solid var(--bd);border-radius:8px;padding:6px 10px;margin:4px 0 8px}
+.resp-box{font-size:.82rem;color:var(--mut);margin:2px 0 6px}
+.sec-adm{margin-top:14px;padding-top:12px;border-top:1px solid var(--bd)}
 </style>
 </head>
 <body>
@@ -91,17 +105,37 @@ button:disabled{opacity:.6}
     <button class="sec" id="btnSair">Sair</button>
   </div>
   <div id="painelAdmin" class="hidden">
-    <strong>Pedidos e acessos</strong>
+    <strong>Dirigentes e pedidos</strong>
     <div id="listaAdmin"></div>
-    <div class="liberar">
-      <strong>Liberar alguém temporariamente</strong>
-      <label for="lbNome">Nome (igual ao cadastro)</label>
-      <input id="lbNome">
-      <label for="lbFrente">Frente</label>
-      <select id="lbFrente"></select>
-      <label for="lbAte">Vale até</label>
-      <input id="lbAte" type="date">
-      <button id="btnLiberar">Liberar</button>
+
+    <div class="sec-adm">
+      <strong>Designar mapa para dirigente</strong>
+      <div class="liberar" style="border-top:0;padding-top:4px;margin-top:4px">
+        <label for="dgNome">Nome (igual ao cadastro)</label>
+        <input id="dgNome">
+        <label for="dgFrente">Frente</label>
+        <select id="dgFrente"></select>
+        <label for="dgMapa">Mapa</label>
+        <select id="dgMapa"></select>
+        <label for="dgAte">Validade</label>
+        <input id="dgAte" type="date">
+        <button id="btnDesignar">Designar mapa</button>
+      </div>
+    </div>
+
+    <div class="sec-adm">
+      <strong>Permissões temporárias ativas (por frente)</strong>
+      <div id="listaPermissoes"></div>
+      <div class="liberar">
+        <strong>Liberar alguém temporariamente</strong>
+        <label for="lbNome">Nome (igual ao cadastro)</label>
+        <input id="lbNome">
+        <label for="lbFrente">Frente</label>
+        <select id="lbFrente"></select>
+        <label for="lbAte">Vale até</label>
+        <input id="lbAte" type="date">
+        <button id="btnLiberar">Liberar</button>
+      </div>
     </div>
     <div class="msg" id="msgAdm"></div>
   </div>
@@ -118,7 +152,10 @@ button:disabled{opacity:.6}
 var API = "https://script.google.com/macros/s/AKfycbw0Qd_t6OxiVmr-mu_mvWdYSJhazM83FO6pmSwdvybdB2o3AlfVvxTBEdy7bEeCgzGe/exec";
 var $ = function (id) { return document.getElementById(id); };
 var sessao = null, dados = null, mapaLeaflet = null, camada = null;
-var feitas = {}, pode = {}, mapaAtual = null;
+var feitas = {}, pode = {}, podeMapa = {};
+var permissoesAte = {}, designacoesAtivas = {}, minhasDesignacoes = {}, responsaveisFrente = {};
+var mapaAtual = null;
+var progTimer = null, ultimoProg = 0, atualizandoProg = false, hashProg = "";
 
 var CACHE_KEY = "cacheMapas";
 function lerCache() {
@@ -133,6 +170,12 @@ function limparCache() { try { localStorage.removeItem(CACHE_KEY); } catch (e) {
 function lerSessao() { try { return JSON.parse(localStorage.getItem("sessao") || "null"); } catch (e) { return null; } }
 function gravarSessao(s) { try { if (s) localStorage.setItem("sessao", JSON.stringify(s)); else localStorage.removeItem("sessao"); } catch (e) {} }
 
+function fmtData(s) {
+  if (!s) return "";
+  var m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? (m[3] + "/" + m[2] + "/" + m[1]) : String(s);
+}
+
 async function chamar(d) {
   try {
     var r = await fetch(API, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(d) });
@@ -142,6 +185,7 @@ async function chamar(d) {
 function msg(el, t, ok) { el.textContent = t || ""; el.className = "msg " + (ok ? "okc" : "err"); }
 
 function mostrarLogin(tela) {
+  pararAtualizacao();
   $("wrapLogin").classList.remove("hidden");
   $("telaApp").classList.add("hidden");
   $("telaLogin").classList.toggle("hidden", tela !== "login");
@@ -170,7 +214,8 @@ $("btnRegistrar").onclick = async function () {
 };
 
 $("btnSair").onclick = function () {
-  sessao = null; dados = null; gravarSessao(null); limparCache(); mostrarLogin("login");
+  sessao = null; dados = null; mapaAtual = null; hashProg = "";
+  gravarSessao(null); limparCache(); mostrarLogin("login");
 };
 
 $("btnAdmin").onclick = function () {
@@ -178,6 +223,40 @@ $("btnAdmin").onclick = function () {
   if (!p.classList.contains("hidden")) carregarAdmin();
   setTimeout(function () { if (mapaLeaflet) mapaLeaflet.invalidateSize(); }, 50);
 };
+
+function iniciarAtualizacao() {
+  pararAtualizacao();
+  progTimer = setInterval(function () { atualizarProgressoSilencioso(false); }, 30000);
+}
+function pararAtualizacao() {
+  if (progTimer) { clearInterval(progTimer); progTimer = null; }
+}
+document.addEventListener("visibilitychange", function () {
+  if (!document.hidden && sessao && sessao.token) atualizarProgressoSilencioso(false);
+});
+
+async function atualizarProgressoSilencioso(forcar) {
+  if (!sessao || !sessao.token || document.hidden || atualizandoProg) return;
+  if (!forcar && Date.now() - ultimoProg < 5000) return;
+  atualizandoProg = true;
+  try {
+    var r = await chamar({ acao: "progresso", token: sessao.token });
+    ultimoProg = Date.now();
+    if (!r || !r.ok) return;
+    var novoHash = JSON.stringify({
+      f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente
+    });
+    if (novoHash !== hashProg) {
+      aplicarProgresso(r);
+      if (dados) {
+        desenhar(false);
+        if (mapaAtual) mostrarInfo(mapaAtual);
+      }
+    }
+  } finally {
+    atualizandoProg = false;
+  }
+}
 
 async function abrirApp() {
   $("wrapLogin").classList.add("hidden");
@@ -187,11 +266,9 @@ async function abrirApp() {
   $("painelAdmin").classList.add("hidden");
   iniciarMapa();
 
-  // Dispara as duas consultas ao mesmo tempo (antes uma esperava a outra)
   var pDados = chamar({ acao: "dadosMapas", token: sessao.token });
   var pProg = chamar({ acao: "progresso", token: sessao.token });
 
-  // Se já tem cópia guardada neste aparelho, mostra o mapa na hora
   var cache = lerCache();
   if (cache) { dados = cache; montarFiltros(); }
 
@@ -205,35 +282,58 @@ async function abrirApp() {
   if (mudou) { dados = r; gravarCache(r); }
 
   aplicarProgresso(await pProg);
+  ultimoProg = Date.now();
 
   if (!cache) montarFiltros();
   else if (mudou) refazerFiltros();
-  else desenhar();
+  else desenhar(true);
+
+  iniciarAtualizacao();
 }
 
 function refazerFiltros() {
   var g = $("selGrupo").value, m = $("selMapa").value;
   montarFiltros();
   $("selGrupo").value = g; preencherMapas();
-  $("selMapa").value = m; desenhar();
+  $("selMapa").value = m; desenhar(true);
 }
 
 function aplicarProgresso(r) {
   if (!r || !r.ok) return;
   feitas = {};
-  r.feitas.forEach(function (f) {
+  (r.feitas || []).forEach(function (f) {
     var k = f.frente + "|" + f.mapa;
     (feitas[k] = feitas[k] || {})[f.quadra] = f.por;
   });
   pode = r.pode || {};
+  podeMapa = r.podeMapa || {};
+  permissoesAte = r.permissoesAte || {};
+  designacoesAtivas = r.designacoesAtivas || {};
+  minhasDesignacoes = r.minhasDesignacoes || {};
+  responsaveisFrente = r.responsaveisFrente || {};
+  hashProg = JSON.stringify({
+    f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente
+  });
 }
 
 async function carregarProgresso() {
-  aplicarProgresso(await chamar({ acao: "progresso", token: sessao.token }));
+  var r = await chamar({ acao: "progresso", token: sessao.token });
+  ultimoProg = Date.now();
+  aplicarProgresso(r);
 }
 
 function chave(m) { return m.g + "|" + m.n; }
 function feitasDe(m) { return feitas[chave(m)] || {}; }
+
+function statusMapa(m) {
+  var qs = Object.keys(m.q || {});
+  var f = feitasDe(m);
+  var feitasN = qs.filter(function (q) { return f[q]; }).length;
+  var total = qs.length;
+  if (total > 0 && feitasN === total) return { estado: "completo", cor: "#16a34a", feitasN: feitasN, total: total };
+  if (feitasN > 0) return { estado: "andamento", cor: "#eab308", feitasN: feitasN, total: total };
+  return { estado: "pendente", cor: "#2563eb", feitasN: feitasN, total: total };
+}
 
 function iniciarMapa() {
   if (mapaLeaflet) { setTimeout(function () { mapaLeaflet.invalidateSize(); }, 50); return; }
@@ -250,11 +350,28 @@ function montarFiltros() {
   var sg = $("selGrupo"); sg.innerHTML = "";
   var op0 = document.createElement("option"); op0.value = ""; op0.textContent = "Todos os grupos"; sg.appendChild(op0);
   grupos.forEach(function (g) { var o = document.createElement("option"); o.value = g; o.textContent = g; sg.appendChild(o); });
-  sg.onchange = function () { preencherMapas(); desenhar(); };
-  $("selMapa").onchange = desenhar;
+  sg.onchange = function () { mapaAtual = null; preencherMapas(); desenhar(true); };
+  $("selMapa").onchange = function () { mapaAtual = null; desenhar(true); };
+
   var lf = $("lbFrente"); lf.innerHTML = "";
-  grupos.forEach(function (g) { var o = document.createElement("option"); o.value = g; o.textContent = g; lf.appendChild(o); });
-  preencherMapas(); desenhar();
+  var df = $("dgFrente"); df.innerHTML = "";
+  grupos.forEach(function (g) {
+    var o1 = document.createElement("option"); o1.value = g; o1.textContent = g; lf.appendChild(o1);
+    var o2 = document.createElement("option"); o2.value = g; o2.textContent = g; df.appendChild(o2);
+  });
+  df.onchange = preencherMapasDesignar;
+  preencherMapasDesignar();
+  preencherMapas();
+  desenhar(true);
+}
+
+function preencherMapasDesignar() {
+  if (!dados) return;
+  var g = $("dgFrente").value, dm = $("dgMapa"); dm.innerHTML = "";
+  dados.mapas.forEach(function (m) {
+    if (g && m.g !== g) return;
+    var o = document.createElement("option"); o.value = m.n; o.textContent = "Mapa " + m.n; dm.appendChild(o);
+  });
 }
 
 $("btnLiberar").onclick = async function () {
@@ -263,7 +380,28 @@ $("btnLiberar").onclick = async function () {
   b.disabled = false;
   if (!r.ok) { msg($("msgAdm"), r.erro); return; }
   $("lbNome").value = "";
-  msg($("msgAdm"), "Permiss\u00e3o liberada.", true);
+  msg($("msgAdm"), "Permissão liberada.", true);
+  carregarAdmin();
+};
+
+$("btnDesignar").onclick = async function () {
+  var b = $("btnDesignar"); b.disabled = true;
+  var r = await chamar({
+    acao: "designarMapa",
+    token: sessao.token,
+    nome: $("dgNome").value,
+    frente: $("dgFrente").value,
+    mapa: $("dgMapa").value,
+    validade: $("dgAte").value
+  });
+  b.disabled = false;
+  if (!r.ok) { msg($("msgAdm"), r.erro); return; }
+  $("dgNome").value = "";
+  msg($("msgAdm"), "Mapa designado.", true);
+  await carregarProgresso();
+  desenhar(false);
+  if (mapaAtual) mostrarInfo(mapaAtual);
+  carregarAdmin();
 };
 
 function preencherMapas() {
@@ -277,23 +415,30 @@ function preencherMapas() {
 
 function linkGPS(lat, lng) { return "https://www.google.com/maps/search/?api=1&query=" + lat + "," + lng; }
 
-function desenhar() {
+function desenhar(ajustarZoom) {
+  if (ajustarZoom === undefined) ajustarZoom = true;
   camada.clearLayers();
   var g = $("selGrupo").value, idx = $("selMapa").value;
-  var lista = dados.mapas.filter(function (m, i) {
-    if (idx !== "") return String(i) === idx;
-    return !g || m.g === g;
+  var lista = [];
+  dados.mapas.forEach(function (m, i) {
+    if (idx !== "") { if (String(i) === idx) lista.push({ m: m, i: i }); }
+    else if (!g || m.g === g) lista.push({ m: m, i: i });
   });
   var limites = [];
-  lista.forEach(function (m) {
+  lista.forEach(function (item) {
+    var m = item.m;
+    var st = statusMapa(m);
     if (m.c && m.c.length) {
-      var poly = L.polygon(m.c, { color: "#2563eb", weight: 2, fillOpacity: 0.08 }).addTo(camada);
-      poly.bindTooltip("Mapa " + m.n);
-      poly.on("click", function () { mostrarInfo(m); });
+      var poly = L.polygon(m.c, { color: st.cor, weight: 2.5, fillOpacity: 0.14 }).addTo(camada);
+      poly.bindTooltip("Mapa " + m.n + (st.total ? " (" + st.feitasN + " de " + st.total + ")" : ""));
+      poly.on("click", function () {
+        $("selMapa").value = String(item.i);
+        desenhar(true);
+      });
       m.c.forEach(function (p) { limites.push(p); });
     }
     if (idx !== "") {
-      Object.keys(m.q).forEach(function (q) {
+      Object.keys(m.q || {}).forEach(function (q) {
         var ll = m.q[q];
         var cls = feitasDe(m)[q] ? "quadra-pin feita" : "quadra-pin";
         var ic = L.divIcon({ className: "", html: '<div class="' + cls + '">' + q + "</div>", iconSize: [22, 22] });
@@ -302,23 +447,71 @@ function desenhar() {
       });
     }
   });
-  if (limites.length) mapaLeaflet.fitBounds(limites, { padding: [30, 30] });
-  if (idx !== "") mostrarInfo(lista[0]);
-  else $("info").innerHTML = '<div class="tit">Escolha um mapa para ver as quadras</div>';
+  if (ajustarZoom && limites.length) mapaLeaflet.fitBounds(limites, { padding: [30, 30] });
+  if (idx !== "" && lista.length) mostrarInfo(lista[0].m);
+  else if (!mapaAtual) mostrarListaMapas(lista);
   setTimeout(function () { mapaLeaflet.invalidateSize(); }, 50);
+}
+
+function mostrarListaMapas(lista) {
+  var box = $("info"); box.innerHTML = "";
+  var tit = document.createElement("div"); tit.className = "tit";
+  tit.textContent = lista.length ? "Toque em um mapa (" + lista.length + ")" : "Nenhum mapa encontrado";
+  box.appendChild(tit);
+  var wrap = document.createElement("div"); wrap.className = "lista-mapas";
+  lista.forEach(function (item) {
+    var m = item.m, st = statusMapa(m);
+    var b = document.createElement("button"); b.className = "item-mapa";
+    var bol = document.createElement("span"); bol.className = "bol " + st.estado;
+    var nm = document.createElement("span"); nm.className = "nome";
+    nm.textContent = "Mapa " + m.n + ($("selGrupo").value ? "" : " · " + m.g);
+    var ct = document.createElement("span"); ct.className = "cont";
+    ct.textContent = st.total ? (st.feitasN + " de " + st.total) : "Sem quadras";
+    b.appendChild(bol); b.appendChild(nm); b.appendChild(ct);
+    b.onclick = function () {
+      $("selMapa").value = String(item.i);
+      desenhar(true);
+    };
+    wrap.appendChild(b);
+  });
+  box.appendChild(wrap);
 }
 
 function mostrarInfo(m) {
   mapaAtual = m;
   var box = $("info"); box.innerHTML = "";
   var t = document.createElement("div"); t.className = "tit"; t.textContent = "Mapa " + m.n + " - " + m.g; box.appendChild(t);
-  var qs = Object.keys(m.q).sort(function (a, b) { return a - b; });
+
+  var k = chave(m);
+  var respFrente = responsaveisFrente[m.g];
+  var desig = designacoesAtivas[k];
+  if (desig || respFrente) {
+    var rb = document.createElement("div"); rb.className = "resp-box";
+    var partes = [];
+    if (desig) partes.push("Designado: " + desig.nome + (desig.validade ? " (até " + fmtData(desig.validade) + ")" : ""));
+    if (respFrente) partes.push("Responsáveis da frente: " + respFrente);
+    rb.textContent = partes.join(" · ");
+    box.appendChild(rb);
+  }
+
+  var permAte = permissoesAte[m.g];
+  var minhaDesig = minhasDesignacoes[k];
+  if (permAte || minhaDesig) {
+    var av = document.createElement("div"); av.className = "aviso-perm";
+    var msgs = [];
+    if (permAte) msgs.push("Sua permissão temporária nesta frente vale até " + fmtData(permAte));
+    if (minhaDesig) msgs.push("Sua designação neste mapa vale até " + fmtData(minhaDesig));
+    av.textContent = msgs.join(" · ");
+    box.appendChild(av);
+  }
+
+  var qs = Object.keys(m.q || {}).sort(function (a, b) { return a - b; });
   if (!qs.length) { box.appendChild(document.createTextNode("Sem quadras marcadas neste mapa.")); return; }
   var f = feitasDe(m), feitasN = qs.filter(function (q) { return f[q]; }).length;
   var p = document.createElement("div"); p.className = "prog";
   p.textContent = feitasN + " de " + qs.length + " quadras feitas" + (feitasN === qs.length ? " - mapa completo" : "");
   box.appendChild(p);
-  var podeEste = !!pode[m.g];
+  var podeEste = !!(pode[m.g] || podeMapa[k]);
   var dica = document.createElement("div"); dica.className = "st"; dica.style.marginBottom = "6px";
   dica.textContent = podeEste ? "Toque numa quadra para marcar como feita ou desmarcar:" : "Toque numa quadra para abrir o ponto no Google Maps:";
   box.appendChild(dica);
@@ -338,7 +531,7 @@ function mostrarInfo(m) {
   });
   box.appendChild(w);
   var sel = document.createElement("div"); sel.className = "sel";
-  var gps = document.createElement("button"); gps.className = "sec"; gps.textContent = "Ponto de in\u00edcio no Google Maps";
+  var gps = document.createElement("button"); gps.className = "sec"; gps.textContent = "Ponto de início no Google Maps";
   var primeira = qs.filter(function (q) { return !f[q]; })[0] || qs[0];
   gps.onclick = function () { window.open(linkGPS(m.q[primeira][0], m.q[primeira][1]), "_blank"); };
   sel.appendChild(gps);
@@ -356,7 +549,7 @@ async function marcar(m, q, feita, b) {
   if (!r.ok) { b.disabled = false; alert(r.erro); return; }
   await carregarProgresso();
   var ic = $("selMapa").value;
-  desenhar();
+  desenhar(false);
   if (ic === "") mostrarInfo(m);
   if (r.completo) alert("Todas as quadras do mapa " + m.n + " foram marcadas. O admin foi avisado.");
 }
@@ -366,31 +559,94 @@ async function reiniciar(m) {
   var r = await chamar({ acao: "reiniciarMapa", token: sessao.token, frente: m.g, mapa: m.n });
   if (!r.ok) { alert(r.erro); return; }
   await carregarProgresso();
-  desenhar();
+  desenhar(false);
   mostrarInfo(m);
 }
 
 async function carregarAdmin() {
   var box = $("listaAdmin"); box.textContent = "Carregando…";
+  var pBox = $("listaPermissoes"); pBox.textContent = "Carregando…";
   var r = await chamar({ acao: "listarPendentes", token: sessao.token });
-  if (!r.ok) { box.textContent = ""; msg($("msgAdm"), r.erro); return; }
+  if (!r.ok) { box.textContent = ""; pBox.textContent = ""; msg($("msgAdm"), r.erro); return; }
   box.textContent = "";
-  r.lista.forEach(function (u) {
+  (r.lista || []).forEach(function (u) {
     var st = String(u.status).toLowerCase();
     var row = document.createElement("div"); row.className = "row";
     var info = document.createElement("div");
     var n = document.createElement("div"); n.className = "nm"; n.textContent = u.nome;
-    var s = document.createElement("div"); s.className = "st"; s.textContent = st;
+    var detalhes = [st];
+    if (u.frentes && u.frentes.length) detalhes.push("Resp: " + u.frentes.join(", "));
+    if (u.designacoes && u.designacoes.length) {
+      detalhes.push("Designado: " + u.designacoes.map(function (d) {
+        return d.frente + " Mapa " + d.mapa + (d.validade ? " até " + fmtData(d.validade) : "");
+      }).join("; "));
+    }
+    var s = document.createElement("div"); s.className = "st"; s.textContent = detalhes.join(" · ");
     info.appendChild(n); info.appendChild(s); row.appendChild(info);
+
+    var bt = document.createElement("div"); bt.className = "bt";
     if (st !== "admin") {
-      var bt = document.createElement("div"); bt.className = "bt";
       if (st !== "aprovado") bt.appendChild(botao("Aprovar", "yes", u.nome, "aprovado"));
       if (st !== "bloqueado") bt.appendChild(botao("Bloquear", "no", u.nome, "bloqueado"));
-      row.appendChild(bt);
     }
+    if (st === "aprovado" || st === "admin") {
+      var bd = document.createElement("button"); bd.className = "sec"; bd.textContent = "Designar";
+      bd.onclick = function () {
+        $("dgNome").value = u.nome;
+        if (u.frentes && u.frentes.length) { $("dgFrente").value = u.frentes[0]; preencherMapasDesignar(); }
+        $("dgNome").scrollIntoView({ behavior: "smooth", block: "center" });
+      };
+      bt.appendChild(bd);
+      if (u.designacoes && u.designacoes.length) {
+        u.designacoes.forEach(function (d) {
+          var br = document.createElement("button"); br.className = "no";
+          br.textContent = "Remover M" + d.mapa;
+          br.onclick = async function () {
+            br.disabled = true;
+            var res = await chamar({ acao: "removerDesignacao", token: sessao.token, nome: u.nome, frente: d.frente, mapa: d.mapa });
+            if (!res.ok) { msg($("msgAdm"), res.erro); br.disabled = false; return; }
+            msg($("msgAdm"), "Designação removida.", true);
+            await carregarProgresso();
+            desenhar(false);
+            if (mapaAtual) mostrarInfo(mapaAtual);
+            carregarAdmin();
+          };
+          bt.appendChild(br);
+        });
+      }
+    }
+    row.appendChild(bt);
     box.appendChild(row);
   });
-  if (!r.lista.length) box.textContent = "Nenhum pedido ainda.";
+  if (!r.lista || !r.lista.length) box.textContent = "Nenhum dirigente ainda.";
+
+  pBox.textContent = "";
+  var perms = r.permissoes || [];
+  if (!perms.length) {
+    pBox.textContent = "Nenhuma permissão temporária ativa.";
+  } else {
+    perms.forEach(function (pm) {
+      var row = document.createElement("div"); row.className = "row";
+      var info = document.createElement("div");
+      var n = document.createElement("div"); n.className = "nm"; n.textContent = pm.nome + " · " + pm.frente;
+      var s = document.createElement("div"); s.className = "st"; s.textContent = "Vale até " + fmtData(pm.ate);
+      info.appendChild(n); info.appendChild(s); row.appendChild(info);
+      var bt = document.createElement("div"); bt.className = "bt";
+      var bRem = document.createElement("button"); bRem.className = "no"; bRem.textContent = "Remover";
+      bRem.onclick = async function () {
+        bRem.disabled = true;
+        var res = await chamar({ acao: "removerPermissao", token: sessao.token, nome: pm.nome, frente: pm.frente });
+        if (!res.ok) { msg($("msgAdm"), res.erro); bRem.disabled = false; return; }
+        msg($("msgAdm"), "Permissão removida.", true);
+        await carregarProgresso();
+        desenhar(false);
+        if (mapaAtual) mostrarInfo(mapaAtual);
+        carregarAdmin();
+      };
+      bt.appendChild(bRem); row.appendChild(bt);
+      pBox.appendChild(row);
+    });
+  }
 }
 
 function botao(texto, cls, nome, status) {
