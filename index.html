@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mapas de Território</title>
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
+<link rel="preconnect" href="https://script.google.com">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root{--bg:#f4f5f7;--card:#fff;--tx:#1b1f24;--mut:#6b7280;--bd:#d9dde3;--pri:#2563eb;--ok:#16a34a;--bad:#dc2626}
@@ -117,6 +120,16 @@ var $ = function (id) { return document.getElementById(id); };
 var sessao = null, dados = null, mapaLeaflet = null, camada = null;
 var feitas = {}, pode = {}, mapaAtual = null;
 
+var CACHE_KEY = "cacheMapas";
+function lerCache() {
+  try {
+    var c = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+    return (c && sessao && c.nome === sessao.nome && c.dados) ? c.dados : null;
+  } catch (e) { return null; }
+}
+function gravarCache(d) { try { localStorage.setItem(CACHE_KEY, JSON.stringify({ nome: sessao.nome, dados: d })); } catch (e) {} }
+function limparCache() { try { localStorage.removeItem(CACHE_KEY); } catch (e) {} }
+
 function lerSessao() { try { return JSON.parse(localStorage.getItem("sessao") || "null"); } catch (e) { return null; } }
 function gravarSessao(s) { try { if (s) localStorage.setItem("sessao", JSON.stringify(s)); else localStorage.removeItem("sessao"); } catch (e) {} }
 
@@ -157,7 +170,7 @@ $("btnRegistrar").onclick = async function () {
 };
 
 $("btnSair").onclick = function () {
-  sessao = null; dados = null; gravarSessao(null); mostrarLogin("login");
+  sessao = null; dados = null; gravarSessao(null); limparCache(); mostrarLogin("login");
 };
 
 $("btnAdmin").onclick = function () {
@@ -173,20 +186,40 @@ async function abrirApp() {
   $("btnAdmin").classList.toggle("hidden", !sessao.admin);
   $("painelAdmin").classList.add("hidden");
   iniciarMapa();
-  var r = await chamar({ acao: "dadosMapas", token: sessao.token });
+
+  // Dispara as duas consultas ao mesmo tempo (antes uma esperava a outra)
+  var pDados = chamar({ acao: "dadosMapas", token: sessao.token });
+  var pProg = chamar({ acao: "progresso", token: sessao.token });
+
+  // Se já tem cópia guardada neste aparelho, mostra o mapa na hora
+  var cache = lerCache();
+  if (cache) { dados = cache; montarFiltros(); }
+
+  var r = await pDados;
   if (!r.ok) {
-    sessao = null; gravarSessao(null);
+    sessao = null; dados = null; gravarSessao(null); limparCache();
     mostrarLogin("login"); msg($("msgLogin"), r.erro || "Sessão expirada. Entre de novo.");
     return;
   }
-  dados = r;
-  await carregarProgresso();
-  montarFiltros();
+  var mudou = !cache || JSON.stringify(cache) !== JSON.stringify(r);
+  if (mudou) { dados = r; gravarCache(r); }
+
+  aplicarProgresso(await pProg);
+
+  if (!cache) montarFiltros();
+  else if (mudou) refazerFiltros();
+  else desenhar();
 }
 
-async function carregarProgresso() {
-  var r = await chamar({ acao: "progresso", token: sessao.token });
-  if (!r.ok) return;
+function refazerFiltros() {
+  var g = $("selGrupo").value, m = $("selMapa").value;
+  montarFiltros();
+  $("selGrupo").value = g; preencherMapas();
+  $("selMapa").value = m; desenhar();
+}
+
+function aplicarProgresso(r) {
+  if (!r || !r.ok) return;
   feitas = {};
   r.feitas.forEach(function (f) {
     var k = f.frente + "|" + f.mapa;
@@ -195,12 +228,16 @@ async function carregarProgresso() {
   pode = r.pode || {};
 }
 
+async function carregarProgresso() {
+  aplicarProgresso(await chamar({ acao: "progresso", token: sessao.token }));
+}
+
 function chave(m) { return m.g + "|" + m.n; }
 function feitasDe(m) { return feitas[chave(m)] || {}; }
 
 function iniciarMapa() {
   if (mapaLeaflet) { setTimeout(function () { mapaLeaflet.invalidateSize(); }, 50); return; }
-  mapaLeaflet = L.map("mapa", { zoomControl: true }).setView([-5.13, -42.83], 15);
+  mapaLeaflet = L.map("mapa", { zoomControl: true, preferCanvas: true }).setView([-5.13, -42.83], 15);
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19, attribution: "© OpenStreetMap"
   }).addTo(mapaLeaflet);
