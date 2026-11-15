@@ -85,6 +85,8 @@ button:disabled{opacity:.55;cursor:default}
 .mapa-badge.completo{background:#15803d}
 .mapa-badge.andamento{background:#b45309}
 .mapa-badge.pendente{background:#1d4ed8}
+#mapa.zoom-longe .mapa-badge-wrap{display:none!important}
+#mapa.zoom-medio .mapa-badge{font-size:9.5px;padding:1px 5px;gap:2px;border-width:1px;opacity:.92}
 
 /* Pin GPS do usuário */
 .gps-pin{width:16px;height:16px;border-radius:999px;background:#2563eb;border:3px solid #fff;box-shadow:0 0 0 6px rgba(37,99,235,.28)}
@@ -152,9 +154,20 @@ button:disabled{opacity:.55;cursor:default}
 .badge-tipo{font-size:.7rem;padding:2px 8px;border-radius:999px;font-weight:700;border:1px solid var(--bd);color:var(--tx);background:var(--card)}
 .badge-tipo.perm{border-color:var(--ok);color:var(--ok)}
 .badge-aut{font-size:.7rem;padding:2px 8px;border-radius:999px;font-weight:700;background:var(--warn-bg);color:var(--warn)}
-.row .bt{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+#listaAdmin{padding-bottom:140px}
+.row .bt{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
 .row button{width:auto;margin:0;padding:7px 12px;font-size:.8rem;min-height:34px;border-radius:20px}
 .row .no{background:var(--bad);color:var(--on-bad)}.row .yes{background:var(--ok);color:var(--on-ok)}.row .sec-btn{background:var(--card);color:var(--tx);border:1px solid var(--bd)}
+.menu-adm-wrap{position:relative;display:inline-block}
+.row .btn-menu-adm{width:36px;height:36px;min-height:36px;padding:0;margin:0;border-radius:999px;background:var(--card);color:var(--tx);border:1px solid var(--bd);font-size:1.15rem;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+.row .btn-menu-adm:hover,.menu-adm-wrap.aberto .btn-menu-adm{background:var(--pri);color:var(--on-pri);border-color:var(--pri)}
+.menu-adm-lista{position:absolute;right:0;top:calc(100% + 6px);min-width:200px;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:6px;box-shadow:var(--sh);z-index:2100;display:none;flex-direction:column;gap:3px}
+.menu-adm-wrap.aberto .menu-adm-lista{display:flex}
+.menu-adm-lista button{width:100%;margin:0;padding:9px 12px;font-size:.82rem;border-radius:10px;text-align:left;background:transparent;color:var(--tx);border:0;font-weight:600;min-height:36px}
+.menu-adm-lista button:hover{background:var(--modal)}
+.menu-adm-lista button.no{background:transparent;color:var(--bad)}
+.menu-adm-lista button.no:hover{background:rgba(248,113,113,.14)}
+.menu-adm-lista button.yes{background:transparent;color:var(--ok)}
 .pills-data{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
 .pill-data{width:auto;margin:0;padding:7px 13px;font-size:.82rem;border-radius:20px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);min-height:34px}
 .pill-data.ativo{background:var(--pri);color:var(--on-pri);border-color:var(--pri)}
@@ -556,8 +569,15 @@ $("btnSalvarSenha").onclick = async function () {
   msg($("msgSenha"), "Senha alterada com sucesso.", true);
 };
 
+function fecharMenusAdm() {
+  var abertos = document.querySelectorAll(".menu-adm-wrap.aberto");
+  for (var i = 0; i < abertos.length; i++) abertos[i].classList.remove("aberto");
+}
+document.addEventListener("click", function () { fecharMenusAdm(); });
+
 document.addEventListener("keydown", function (e) {
   if (e.key !== "Escape") return;
+  fecharMenusAdm();
   if (!$("modalGerenciar").classList.contains("hidden")) fecharModalGerenciar();
   if (!$("painelAdmin").classList.contains("hidden")) fecharModalAdmin();
   if (!$("modalSenha").classList.contains("hidden")) fecharModalSenha();
@@ -748,6 +768,14 @@ function statusMapa(m) {
   return { estado: "pendente", cor: "#2563eb", icone: "○", feitasN: feitasN, total: total };
 }
 
+function atualizarClasseZoomMapa() {
+  if (!mapaLeaflet) return;
+  var z = mapaLeaflet.getZoom();
+  var el = $("mapa");
+  el.classList.toggle("zoom-longe", z < 15);
+  el.classList.toggle("zoom-medio", z === 15);
+}
+
 function iniciarMapa() {
   if (mapaLeaflet) { setTimeout(function () { mapaLeaflet.invalidateSize(); }, 50); return; }
   mapaLeaflet = L.map("mapa", { zoomControl: true, preferCanvas: true }).setView([-5.13, -42.83], 15);
@@ -755,6 +783,8 @@ function iniciarMapa() {
     maxZoom: 19, attribution: "© OpenStreetMap"
   }).addTo(mapaLeaflet);
   camada = L.layerGroup().addTo(mapaLeaflet);
+  mapaLeaflet.on("zoomend", atualizarClasseZoomMapa);
+  atualizarClasseZoomMapa();
 }
 
 function atualizarPinGps(lat, lng, centralizar) {
@@ -957,6 +987,7 @@ function desenhar(ajustarZoom) {
     }
   });
   if (ajustarZoom && limites.length) mapaLeaflet.fitBounds(limites, { padding: [30, 30] });
+  atualizarClasseZoomMapa();
   if (idx !== "" && lista.length) mostrarInfo(lista[0].m);
   else {
     mapaAtual = null;
@@ -1476,17 +1507,10 @@ function renderizarAdmin() {
     row.appendChild(info);
 
     var bt = document.createElement("div"); bt.className = "bt";
-    if (!isAdm) {
-      if (st !== "aprovado") bt.appendChild(acaoAdmBtn("Aprovar", "yes", { acao: "definirStatus", nome: u.nome, status: "aprovado" }, "Dirigente aprovado."));
-      if (st !== "bloqueado") bt.appendChild(acaoAdmBtn("Bloquear", "no", { acao: "definirStatus", nome: u.nome, status: "bloqueado" }, "Dirigente bloqueado."));
-      if (st === "aprovado") {
-        if (tp === "permanente") {
-          bt.appendChild(acaoAdmBtn("Tornar Temporário", "sec-btn", { acao: "definirTipo", nome: u.nome, tipo: "temporario" }, "Tipo alterado para temporário."));
-          bt.appendChild(acaoAdmBtn(u.autoridade ? "Revogar Autoridade" : "Conceder Autoridade", "sec-btn", { acao: "definirAutoridade", nome: u.nome, autoridade: !u.autoridade }, u.autoridade ? "Autoridade revogada." : "Autoridade concedida."));
-        } else {
-          bt.appendChild(acaoAdmBtn("Tornar Permanente", "sec-btn", { acao: "definirTipo", nome: u.nome, tipo: "permanente" }, "Tipo alterado para permanente."));
-        }
-      }
+    var secBtns = [];
+
+    if (!isAdm && st !== "aprovado") {
+      bt.appendChild(acaoAdmBtn("Aprovar", "yes", { acao: "definirStatus", nome: u.nome, status: "aprovado" }, "Dirigente aprovado."));
     }
 
     if (st === "aprovado" || isAdm) {
@@ -1502,28 +1526,33 @@ function renderizarAdmin() {
         $("dgMapa").focus();
       };
       bt.appendChild(bd);
-      if (u.designacoes && u.designacoes.length) {
-        u.designacoes.forEach(function (d) {
-          var br = document.createElement("button"); br.type = "button"; br.className = "no";
-          br.textContent = "Remover M" + d.mapa;
-          br.onclick = async function () {
-            br.disabled = true;
-            var res = await chamar({ acao: "removerDesignacao", token: sessao.token, nome: u.nome, frente: d.frente, mapa: d.mapa });
-            if (!res.ok) { msg($("msgAdm"), res.erro); br.disabled = false; return; }
-            msg($("msgAdm"), "Designação removida.", true);
-            await carregarProgresso();
-            desenhar(false);
-            if (mapaAtual) mostrarInfo(mapaAtual);
-            carregarAdmin();
-          };
-          bt.appendChild(br);
-        });
+    }
+
+    if (!isAdm && st === "aprovado") {
+      if (tp === "permanente") {
+        secBtns.push(acaoAdmBtn("Tornar Temporário", "sec-btn", { acao: "definirTipo", nome: u.nome, tipo: "temporario" }, "Tipo alterado para temporário."));
+        secBtns.push(acaoAdmBtn(u.autoridade ? "Revogar Autoridade" : "Conceder Autoridade", "sec-btn", { acao: "definirAutoridade", nome: u.nome, autoridade: !u.autoridade }, u.autoridade ? "Autoridade revogada." : "Autoridade concedida."));
+      } else {
+        secBtns.push(acaoAdmBtn("Tornar Permanente", "sec-btn", { acao: "definirTipo", nome: u.nome, tipo: "permanente" }, "Tipo alterado para permanente."));
       }
     }
 
-    if (!isAdm) {
-      var bDel = acaoAdmBtn("Apagar conta", "no", { acao: "apagarDirigente", nome: u.nome }, "Conta removida.", "Apagar permanentemente a conta de " + u.nome + "? Isso remove login, permissões e designações.");
-      bt.appendChild(bDel);
+    if ((st === "aprovado" || isAdm) && u.designacoes && u.designacoes.length) {
+      u.designacoes.forEach(function (d) {
+        var br = document.createElement("button"); br.type = "button"; br.className = "no";
+        br.textContent = "Remover M" + d.mapa;
+        br.onclick = async function () {
+          br.disabled = true;
+          var res = await chamar({ acao: "removerDesignacao", token: sessao.token, nome: u.nome, frente: d.frente, mapa: d.mapa });
+          if (!res.ok) { msg($("msgAdm"), res.erro); br.disabled = false; return; }
+          msg($("msgAdm"), "Designação removida.", true);
+          await carregarProgresso();
+          desenhar(false);
+          if (mapaAtual) mostrarInfo(mapaAtual);
+          carregarAdmin();
+        };
+        secBtns.push(br);
+      });
     }
 
     var bPass = document.createElement("button"); bPass.type = "button"; bPass.className = "sec-btn"; bPass.textContent = "Redefinir senha";
@@ -1537,7 +1566,33 @@ function renderizarAdmin() {
       if (!res.ok) { msg($("msgAdm"), res.erro); return; }
       msg($("msgAdm"), "Senha de " + u.nome + " redefinida.", true);
     };
-    bt.appendChild(bPass);
+    secBtns.push(bPass);
+
+    if (!isAdm) {
+      if (st !== "bloqueado") secBtns.push(acaoAdmBtn("Bloquear", "no", { acao: "definirStatus", nome: u.nome, status: "bloqueado" }, "Dirigente bloqueado."));
+      var bDel = acaoAdmBtn("Apagar conta", "no", { acao: "apagarDirigente", nome: u.nome }, "Conta removida.", "Apagar permanentemente a conta de " + u.nome + "? Isso remove login, permissões e designações.");
+      secBtns.push(bDel);
+    }
+
+    if (secBtns.length) {
+      var menuWrap = document.createElement("div"); menuWrap.className = "menu-adm-wrap";
+      var btnMenu = document.createElement("button"); btnMenu.type = "button"; btnMenu.className = "btn-menu-adm";
+      btnMenu.textContent = "⋮";
+      btnMenu.title = "Mais ações";
+      btnMenu.setAttribute("aria-label", "Mais ações");
+      var menuLista = document.createElement("div"); menuLista.className = "menu-adm-lista";
+      menuLista.onclick = function (e) { if (e.target === menuLista) e.stopPropagation(); };
+      btnMenu.onclick = function (e) {
+        e.stopPropagation();
+        var jaAberto = menuWrap.classList.contains("aberto");
+        fecharMenusAdm();
+        if (!jaAberto) menuWrap.classList.add("aberto");
+      };
+      secBtns.forEach(function (sb) { menuLista.appendChild(sb); });
+      menuWrap.appendChild(btnMenu);
+      menuWrap.appendChild(menuLista);
+      bt.appendChild(menuWrap);
+    }
 
     row.appendChild(bt);
     box.appendChild(row);
