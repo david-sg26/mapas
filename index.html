@@ -122,9 +122,9 @@ button:disabled{opacity:.55;cursor:default}
 .aviso-perm{font-size:.82rem;color:var(--pri);background:var(--soft);border:1px solid var(--bd);border-radius:8px;padding:7px 10px;margin:4px 0 8px;font-weight:500}
 .resp-box{font-size:.82rem;color:var(--mut);margin:2px 0 6px}
 
-/* Modal Admin */
-#painelAdmin{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:12px}
-.adm-card{width:100%;max-width:580px;max-height:90vh;background:var(--card);border:1px solid var(--bd);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--sh)}
+/* Modais Gerenciar e Admin */
+#painelAdmin,#modalGerenciar{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:12px}
+.adm-card{width:100%;max-width:600px;max-height:90vh;background:var(--card);border:1px solid var(--bd);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--sh)}
 .adm-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;border-bottom:1px solid var(--bd)}
 .adm-head strong{font-size:1rem}
 .adm-head button{width:auto;margin:0;padding:6px 12px;font-size:.85rem;min-height:36px}
@@ -132,17 +132,20 @@ button:disabled{opacity:.55;cursor:default}
 .adm-tab{width:auto;margin:0;flex:1;padding:8px 10px;font-size:.82rem;background:transparent;color:var(--mut);border:1px solid transparent;border-radius:8px;white-space:nowrap;min-height:36px}
 .adm-tab.ativo{background:var(--card);color:var(--tx);border-color:var(--bd)}
 .adm-body{padding:14px;overflow:auto;flex:1}
-.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--bd)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--bd);flex-wrap:wrap}
 .row:last-child{border-bottom:0}
 .nm{font-weight:600;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.badge-st{font-size:.72rem;padding:2px 7px;border-radius:999px;font-weight:700;text-transform:uppercase}
+.badge-st{font-size:.7rem;padding:2px 7px;border-radius:999px;font-weight:700;text-transform:uppercase}
 .badge-st.admin{background:var(--soft);color:var(--pri)}
 .badge-st.aprovado{background:rgba(22,163,74,.14);color:var(--ok)}
 .badge-st.pendente{background:var(--warn-bg);color:var(--warn)}
 .badge-st.bloqueado{background:rgba(220,38,38,.14);color:var(--bad)}
+.badge-tipo{font-size:.7rem;padding:2px 7px;border-radius:999px;font-weight:700;border:1px solid var(--bd);color:var(--tx);background:var(--bg)}
+.badge-tipo.perm{border-color:var(--ok);color:var(--ok)}
+.badge-aut{font-size:.7rem;padding:2px 7px;border-radius:999px;font-weight:700;background:var(--warn-bg);color:var(--warn)}
 .row .bt{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.row button{width:auto;margin:0;padding:7px 10px;font-size:.82rem;min-height:34px}
-.row .no{background:var(--bad)}.row .yes{background:var(--ok)}
+.row button{width:auto;margin:0;padding:7px 10px;font-size:.8rem;min-height:34px}
+.row .no{background:var(--bad)}.row .yes{background:var(--ok)}.row .sec-btn{background:transparent;color:var(--tx);border:1px solid var(--bd)}
 .pills-data{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
 .pill-data{width:auto;margin:0;padding:7px 11px;font-size:.82rem;border-radius:999px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);min-height:34px}
 .pill-data.ativo{background:var(--pri);color:#fff;border-color:var(--pri)}
@@ -181,7 +184,8 @@ button:disabled{opacity:.55;cursor:default}
   <div class="barra">
     <strong id="ola"></strong>
     <button class="sec" id="btnPainel" title="Mostrar ou recolher lista de mapas">Recolher</button>
-    <button class="sec" id="btnAdmin">Acessos</button>
+    <button class="sec hidden" id="btnGerenciar">Gerenciar</button>
+    <button class="sec hidden" id="btnAdmin">Admin</button>
     <button class="sec" id="btnSair">Sair</button>
   </div>
 
@@ -207,23 +211,18 @@ button:disabled{opacity:.55;cursor:default}
     <div id="info"><div class="tit">Carregando mapas…</div></div>
   </div>
 
-  <div id="painelAdmin" class="hidden" role="dialog" aria-modal="true" aria-labelledby="titAdmin">
+  <div id="modalGerenciar" class="hidden" role="dialog" aria-modal="true" aria-labelledby="titGer">
     <div class="adm-card">
       <div class="adm-head">
-        <strong id="titAdmin">Gerenciar Acessos e Designações</strong>
-        <button type="button" class="sec" id="btnFecharAdmin">Fechar ✕</button>
+        <strong id="titGer">Gerenciar Mapas e Permissões</strong>
+        <button type="button" class="sec" id="btnFecharGerenciar">Fechar ✕</button>
       </div>
       <div class="adm-tabs" role="tablist">
-        <button type="button" class="adm-tab ativo" id="tabDir" role="tab" aria-selected="true">Dirigentes</button>
-        <button type="button" class="adm-tab" id="tabDesig" role="tab" aria-selected="false">Designar Mapa</button>
-        <button type="button" class="adm-tab" id="tabPerm" role="tab" aria-selected="false">Permissão Temporária</button>
+        <button type="button" class="adm-tab ativo" id="tabGerDesig" role="tab" aria-selected="true">Designar Mapa</button>
+        <button type="button" class="adm-tab" id="tabGerPerm" role="tab" aria-selected="false">Permissão Temporária</button>
       </div>
       <div class="adm-body">
-        <div id="secDir">
-          <div id="listaAdmin"></div>
-        </div>
-
-        <div id="secDesig" class="hidden">
+        <div id="secGerDesig">
           <label for="dgNome">Dirigente</label>
           <select id="dgNome"></select>
           <label for="dgFrente">Frente</label>
@@ -239,9 +238,14 @@ button:disabled{opacity:.55;cursor:default}
           <label for="dgAte">Ou defina uma data limite (opcional)</label>
           <input id="dgAte" type="date">
           <button type="button" id="btnDesignar">Designar mapa</button>
+
+          <div class="sec-adm">
+            <strong>Designações ativas</strong>
+            <div id="listaDesignacoesGer" style="margin-top:8px"></div>
+          </div>
         </div>
 
-        <div id="secPerm" class="hidden">
+        <div id="secGerPerm" class="hidden">
           <label for="lbNome">Dirigente</label>
           <select id="lbNome"></select>
           <label for="lbFrente">Frente</label>
@@ -263,6 +267,22 @@ button:disabled{opacity:.55;cursor:default}
         </div>
       </div>
       <div class="adm-foot">
+        <div class="msg" id="msgGer"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="painelAdmin" class="hidden" role="dialog" aria-modal="true" aria-labelledby="titAdmin">
+    <div class="adm-card">
+      <div class="adm-head">
+        <strong id="titAdmin">Administração de Dirigentes</strong>
+        <button type="button" class="sec" id="btnFecharAdmin">Fechar ✕</button>
+      </div>
+      <div class="adm-body">
+        <div class="chips-filtro" id="chipsAdmin"></div>
+        <div id="listaAdmin"></div>
+      </div>
+      <div class="adm-foot">
         <div class="msg" id="msgAdm"></div>
       </div>
     </div>
@@ -276,7 +296,7 @@ var $ = function (id) { return document.getElementById(id); };
 var sessao = null, dados = null, mapaLeaflet = null, camada = null, gpsMarker = null;
 var feitas = {}, pode = {}, podeMapa = {};
 var permissoesAte = {}, permissoesMapaAte = {}, designacoesAtivas = {}, minhasDesignacoes = {}, responsaveisFrente = {};
-var mapaAtual = null, filtroStatus = "todos", abaAdminAtual = "dir";
+var mapaAtual = null, filtroStatus = "todos", filtroAdmin = "todos", adminListaCache = [];
 var painelRecolhido = false;
 var mostrarNumeros = (function () { try { return localStorage.getItem("mostrarNumerosMapa") !== "0"; } catch (e) { return true; } })();
 var progTimer = null, ultimoProg = 0, atualizandoProg = false, hashProg = "";
@@ -360,7 +380,7 @@ $("btnEntrar").onclick = async function () {
   var r = await chamar({ acao: "login", nome: $("lNome").value, senha: $("lSenha").value });
   b.disabled = false;
   if (!r.ok) { msg($("msgLogin"), r.erro); return; }
-  sessao = { token: r.token, nome: r.nome, admin: r.admin };
+  sessao = { token: r.token, nome: r.nome, admin: r.admin, podeGerenciar: !!r.podeGerenciar, tipo: r.tipo };
   gravarSessao(sessao); $("lSenha").value = ""; msg($("msgLogin"), "");
   abrirApp();
 };
@@ -378,27 +398,44 @@ $("btnSair").onclick = function () {
   gravarSessao(null); limparCache(); mostrarLogin("login");
 };
 
-function abrirAbaAdm(aba) {
-  abaAdminAtual = aba;
-  $("tabDir").classList.toggle("ativo", aba === "dir");
-  $("tabDesig").classList.toggle("ativo", aba === "desig");
-  $("tabPerm").classList.toggle("ativo", aba === "perm");
-  $("tabDir").setAttribute("aria-selected", aba === "dir");
-  $("tabDesig").setAttribute("aria-selected", aba === "desig");
-  $("tabPerm").setAttribute("aria-selected", aba === "perm");
-  $("secDir").classList.toggle("hidden", aba !== "dir");
-  $("secDesig").classList.toggle("hidden", aba !== "desig");
-  $("secPerm").classList.toggle("hidden", aba !== "perm");
+function atualizarBotoesTopo() {
+  var podeGer = !!(sessao && (sessao.admin || sessao.podeGerenciar));
+  var ehAdm = !!(sessao && sessao.admin);
+  $("btnGerenciar").classList.toggle("hidden", !podeGer);
+  $("btnAdmin").classList.toggle("hidden", !ehAdm);
+  if (!podeGer && !$("modalGerenciar").classList.contains("hidden")) fecharModalGerenciar();
+  if (!ehAdm && !$("painelAdmin").classList.contains("hidden")) fecharModalAdmin();
 }
 
-$("tabDir").onclick = function () { abrirAbaAdm("dir"); };
-$("tabDesig").onclick = function () { abrirAbaAdm("desig"); };
-$("tabPerm").onclick = function () { abrirAbaAdm("perm"); };
+function abrirAbaGer(aba) {
+  $("tabGerDesig").classList.toggle("ativo", aba === "desig");
+  $("tabGerPerm").classList.toggle("ativo", aba === "perm");
+  $("tabGerDesig").setAttribute("aria-selected", aba === "desig");
+  $("tabGerPerm").setAttribute("aria-selected", aba === "perm");
+  $("secGerDesig").classList.toggle("hidden", aba !== "desig");
+  $("secGerPerm").classList.toggle("hidden", aba !== "perm");
+}
+
+$("tabGerDesig").onclick = function () { abrirAbaGer("desig"); };
+$("tabGerPerm").onclick = function () { abrirAbaGer("perm"); };
+
+function fecharModalGerenciar() {
+  $("modalGerenciar").classList.add("hidden");
+  setTimeout(function () { if (mapaLeaflet) mapaLeaflet.invalidateSize(); }, 50);
+}
 
 function fecharModalAdmin() {
   $("painelAdmin").classList.add("hidden");
   setTimeout(function () { if (mapaLeaflet) mapaLeaflet.invalidateSize(); }, 50);
 }
+
+$("btnGerenciar").onclick = function () {
+  $("modalGerenciar").classList.remove("hidden");
+  msg($("msgGer"), "");
+  carregarGerenciar();
+};
+$("btnFecharGerenciar").onclick = fecharModalGerenciar;
+$("modalGerenciar").onclick = function (e) { if (e.target === $("modalGerenciar")) fecharModalGerenciar(); };
 
 $("btnAdmin").onclick = function () {
   $("painelAdmin").classList.remove("hidden");
@@ -408,7 +445,9 @@ $("btnAdmin").onclick = function () {
 $("btnFecharAdmin").onclick = fecharModalAdmin;
 $("painelAdmin").onclick = function (e) { if (e.target === $("painelAdmin")) fecharModalAdmin(); };
 document.addEventListener("keydown", function (e) {
-  if (e.key === "Escape" && !$("painelAdmin").classList.contains("hidden")) fecharModalAdmin();
+  if (e.key !== "Escape") return;
+  if (!$("modalGerenciar").classList.contains("hidden")) fecharModalGerenciar();
+  if (!$("painelAdmin").classList.contains("hidden")) fecharModalAdmin();
 });
 
 function atualizarPillsDesignar() {
@@ -473,7 +512,7 @@ async function atualizarProgressoSilencioso(forcar) {
     ultimoProg = Date.now();
     if (!r || !r.ok || emVoo > 0) return;
     var novoHash = JSON.stringify({
-      f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente
+      adm: !!r.admin, pg: !!r.podeGerenciar, f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente
     });
     if (novoHash !== hashProg) {
       aplicarProgresso(r);
@@ -491,8 +530,9 @@ async function abrirApp() {
   $("wrapLogin").classList.add("hidden");
   $("telaApp").classList.remove("hidden");
   $("ola").textContent = "Olá, " + sessao.nome;
-  $("btnAdmin").classList.toggle("hidden", !sessao.admin);
+  atualizarBotoesTopo();
   $("painelAdmin").classList.add("hidden");
+  $("modalGerenciar").classList.add("hidden");
   $("lbAte").value = dataLocalYMD(0);
   atualizarPillsPerm();
   atualizarPillsDesignar();
@@ -534,6 +574,12 @@ function refazerFiltros() {
 
 function aplicarProgresso(r) {
   if (!r || !r.ok) return;
+  if (sessao && typeof r.podeGerenciar === "boolean") {
+    sessao.admin = !!r.admin;
+    sessao.podeGerenciar = !!r.podeGerenciar;
+    gravarSessao(sessao);
+    atualizarBotoesTopo();
+  }
   feitas = {};
   (r.feitas || []).forEach(function (f) {
     var mp = canonMapa(f.frente, f.mapa);
@@ -558,7 +604,7 @@ function aplicarProgresso(r) {
 
   responsaveisFrente = r.responsaveisFrente || {};
   hashProg = JSON.stringify({
-    f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente
+    adm: !!(sessao && sessao.admin), pg: !!(sessao && sessao.podeGerenciar), f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente
   });
 }
 
@@ -655,7 +701,7 @@ function preencherMapasPerm() {
 
 $("btnLiberar").onclick = async function () {
   var nome = $("lbNome").value;
-  if (!nome) { msg($("msgAdm"), "Selecione um dirigente."); return; }
+  if (!nome) { msg($("msgGer"), "Selecione um dirigente."); return; }
   var b = $("btnLiberar"); b.disabled = true;
   var r = await chamar({
     acao: "liberarTemporario",
@@ -666,17 +712,17 @@ $("btnLiberar").onclick = async function () {
     ate: $("lbAte").value
   });
   b.disabled = false;
-  if (!r.ok) { msg($("msgAdm"), r.erro); return; }
-  msg($("msgAdm"), "Permissão temporária liberada para " + nome + ".", true);
+  if (!r.ok) { msg($("msgGer"), r.erro); return; }
+  msg($("msgGer"), "Permissão temporária liberada para " + nome + ".", true);
   await carregarProgresso();
   desenhar(false);
   if (mapaAtual) mostrarInfo(mapaAtual);
-  carregarAdmin();
+  carregarGerenciar();
 };
 
 $("btnDesignar").onclick = async function () {
   var nome = $("dgNome").value;
-  if (!nome) { msg($("msgAdm"), "Selecione um dirigente."); return; }
+  if (!nome) { msg($("msgGer"), "Selecione um dirigente."); return; }
   var b = $("btnDesignar"); b.disabled = true;
   var r = await chamar({
     acao: "designarMapa",
@@ -687,12 +733,12 @@ $("btnDesignar").onclick = async function () {
     validade: $("dgAte").value
   });
   b.disabled = false;
-  if (!r.ok) { msg($("msgAdm"), r.erro); return; }
-  msg($("msgAdm"), "Mapa designado para " + nome + ".", true);
+  if (!r.ok) { msg($("msgGer"), r.erro); return; }
+  msg($("msgGer"), "Mapa designado para " + nome + ".", true);
   await carregarProgresso();
   desenhar(false);
   if (mapaAtual) mostrarInfo(mapaAtual);
-  carregarAdmin();
+  carregarGerenciar();
 };
 
 function preencherMapas() {
@@ -1032,23 +1078,146 @@ function preencherSelectDirigentes(lista) {
   });
 }
 
-async function carregarAdmin() {
-  var box = $("listaAdmin"); box.textContent = "Carregando…";
+async function carregarGerenciar() {
+  var dBox = $("listaDesignacoesGer"); dBox.textContent = "Carregando…";
   var pBox = $("listaPermissoes"); pBox.textContent = "Carregando…";
-  var r = await chamar({ acao: "listarPendentes", token: sessao.token });
-  if (!r.ok) { box.textContent = ""; pBox.textContent = ""; msg($("msgAdm"), r.erro); return; }
+  var r = await chamar({ acao: "listarGerenciar", token: sessao.token });
+  if (!r.ok) { dBox.textContent = ""; pBox.textContent = ""; msg($("msgGer"), r.erro); return; }
 
   preencherSelectDirigentes(r.lista || []);
 
+  dBox.textContent = "";
+  var desigs = r.designacoes || [];
+  if (!desigs.length) {
+    dBox.textContent = "Nenhuma designação ativa.";
+  } else {
+    desigs.forEach(function (d) {
+      var row = document.createElement("div"); row.className = "row";
+      var info = document.createElement("div");
+      var n = document.createElement("div"); n.className = "nm"; n.textContent = d.nome + " · " + d.frente + " · Mapa " + d.mapa;
+      var s = document.createElement("div"); s.className = "st"; s.textContent = d.validade ? ("Vale até " + fmtData(d.validade)) : "Sem prazo (até concluir)";
+      info.appendChild(n); info.appendChild(s); row.appendChild(info);
+      var bt = document.createElement("div"); bt.className = "bt";
+      var bRem = document.createElement("button"); bRem.type = "button"; bRem.className = "no"; bRem.textContent = "Remover";
+      bRem.onclick = async function () {
+        bRem.disabled = true;
+        var res = await chamar({ acao: "removerDesignacao", token: sessao.token, nome: d.nome, frente: d.frente, mapa: d.mapa });
+        if (!res.ok) { msg($("msgGer"), res.erro); bRem.disabled = false; return; }
+        msg($("msgGer"), "Designação removida.", true);
+        await carregarProgresso();
+        desenhar(false);
+        if (mapaAtual) mostrarInfo(mapaAtual);
+        carregarGerenciar();
+      };
+      bt.appendChild(bRem); row.appendChild(bt);
+      dBox.appendChild(row);
+    });
+  }
+
+  pBox.textContent = "";
+  var perms = r.permissoes || [];
+  if (!perms.length) {
+    pBox.textContent = "Nenhuma permissão temporária ativa.";
+  } else {
+    perms.forEach(function (pm) {
+      var row = document.createElement("div"); row.className = "row";
+      var info = document.createElement("div");
+      var n = document.createElement("div"); n.className = "nm"; n.textContent = pm.nome + " · " + pm.frente + (pm.mapa ? " · Mapa " + pm.mapa : " (toda a frente)");
+      var s = document.createElement("div"); s.className = "st"; s.textContent = "Vale até " + fmtData(pm.ate);
+      info.appendChild(n); info.appendChild(s); row.appendChild(info);
+      var bt = document.createElement("div"); bt.className = "bt";
+      var bRem = document.createElement("button"); bRem.type = "button"; bRem.className = "no"; bRem.textContent = "Remover";
+      bRem.onclick = async function () {
+        bRem.disabled = true;
+        var res = await chamar({ acao: "removerPermissao", token: sessao.token, nome: pm.nome, frente: pm.frente, mapa: pm.mapa || "" });
+        if (!res.ok) { msg($("msgGer"), res.erro); bRem.disabled = false; return; }
+        msg($("msgGer"), "Permissão removida.", true);
+        await carregarProgresso();
+        desenhar(false);
+        if (mapaAtual) mostrarInfo(mapaAtual);
+        carregarGerenciar();
+      };
+      bt.appendChild(bRem); row.appendChild(bt);
+      pBox.appendChild(row);
+    });
+  }
+}
+
+async function carregarAdmin() {
+  var box = $("listaAdmin"); box.textContent = "Carregando…";
+  $("chipsAdmin").textContent = "";
+  var r = await chamar({ acao: "listarPendentes", token: sessao.token });
+  if (!r.ok) { box.textContent = ""; msg($("msgAdm"), r.erro); return; }
+  adminListaCache = r.lista || [];
+  renderizarAdmin();
+}
+
+function renderizarAdmin() {
+  var lista = adminListaCache || [];
+  var cont = { todos: lista.length, pendente: 0, permanente: 0, temporario: 0, bloqueado: 0 };
+  lista.forEach(function (u) {
+    var st = String(u.status || "").toLowerCase();
+    var tp = String(u.tipo || "temporario").toLowerCase();
+    if (st === "pendente") cont.pendente++;
+    if (st === "bloqueado") cont.bloqueado++;
+    if (tp === "permanente") cont.permanente++;
+    else cont.temporario++;
+  });
+
+  var chips = $("chipsAdmin"); chips.innerHTML = "";
+  [
+    { id: "todos", label: "Todos (" + cont.todos + ")" },
+    { id: "pendente", label: "⏳ Pendentes (" + cont.pendente + ")" },
+    { id: "permanente", label: "★ Permanentes (" + cont.permanente + ")" },
+    { id: "temporario", label: "⏱️ Temporários (" + cont.temporario + ")" },
+    { id: "bloqueado", label: "🚫 Bloqueados (" + cont.bloqueado + ")" }
+  ].forEach(function (cf) {
+    var c = document.createElement("button");
+    c.type = "button";
+    c.className = "chip" + (filtroAdmin === cf.id ? " ativo" : "");
+    c.textContent = cf.label;
+    c.onclick = function () { filtroAdmin = cf.id; renderizarAdmin(); };
+    chips.appendChild(c);
+  });
+
+  var filtrados = lista.filter(function (u) {
+    var st = String(u.status || "").toLowerCase();
+    var tp = String(u.tipo || "temporario").toLowerCase();
+    if (filtroAdmin === "todos") return true;
+    if (filtroAdmin === "pendente" || filtroAdmin === "bloqueado") return st === filtroAdmin;
+    return tp === filtroAdmin;
+  });
+
+  var box = $("listaAdmin");
   box.textContent = "";
-  (r.lista || []).forEach(function (u) {
-    var st = String(u.status).toLowerCase();
+  if (!filtrados.length) {
+    box.textContent = lista.length ? "Nenhum dirigente neste filtro." : "Nenhum dirigente ainda.";
+    return;
+  }
+
+  filtrados.forEach(function (u) {
+    var st = String(u.status || "").toLowerCase();
+    var tp = String(u.tipo || "temporario").toLowerCase();
+    var isAdm = st === "admin";
     var row = document.createElement("div"); row.className = "row";
     var info = document.createElement("div");
     var n = document.createElement("div"); n.className = "nm";
     var nmTxt = document.createElement("span"); nmTxt.textContent = u.nome;
     var badge = document.createElement("span"); badge.className = "badge-st " + st; badge.textContent = st;
     n.appendChild(nmTxt); n.appendChild(badge);
+
+    if (!isAdm) {
+      var bTipo = document.createElement("span");
+      bTipo.className = "badge-tipo" + (tp === "permanente" ? " perm" : "");
+      bTipo.textContent = tp === "permanente" ? "Permanente" : "Temporário";
+      n.appendChild(bTipo);
+      if (u.autoridade) {
+        var bAut = document.createElement("span");
+        bAut.className = "badge-aut";
+        bAut.textContent = "🔑 Autoridade Gerenciar";
+        n.appendChild(bAut);
+      }
+    }
 
     var detalhes = [];
     if (u.frentes && u.frentes.length) detalhes.push("Resp: " + u.frentes.join(", "));
@@ -1065,16 +1234,29 @@ async function carregarAdmin() {
     row.appendChild(info);
 
     var bt = document.createElement("div"); bt.className = "bt";
-    if (st !== "admin") {
-      if (st !== "aprovado") bt.appendChild(botao("Aprovar", "yes", u.nome, "aprovado"));
-      if (st !== "bloqueado") bt.appendChild(botao("Bloquear", "no", u.nome, "bloqueado"));
+    if (!isAdm) {
+      if (st !== "aprovado") bt.appendChild(acaoAdmBtn("Aprovar", "yes", { acao: "definirStatus", nome: u.nome, status: "aprovado" }, "Dirigente aprovado."));
+      if (st !== "bloqueado") bt.appendChild(acaoAdmBtn("Bloquear", "no", { acao: "definirStatus", nome: u.nome, status: "bloqueado" }, "Dirigente bloqueado."));
+      if (st === "aprovado") {
+        if (tp === "permanente") {
+          bt.appendChild(acaoAdmBtn("Tornar Temporário", "sec-btn", { acao: "definirTipo", nome: u.nome, tipo: "temporario" }, "Tipo alterado para temporário."));
+          bt.appendChild(acaoAdmBtn(u.autoridade ? "Revogar Autoridade" : "Conceder Autoridade", "sec-btn", { acao: "definirAutoridade", nome: u.nome, autoridade: !u.autoridade }, u.autoridade ? "Autoridade revogada." : "Autoridade concedida."));
+        } else {
+          bt.appendChild(acaoAdmBtn("Tornar Permanente", "sec-btn", { acao: "definirTipo", nome: u.nome, tipo: "permanente" }, "Tipo alterado para permanente."));
+        }
+      }
     }
-    if (st === "aprovado" || st === "admin") {
-      var bd = document.createElement("button"); bd.type = "button"; bd.className = "sec"; bd.textContent = "Designar";
-      bd.onclick = function () {
+
+    if (st === "aprovado" || isAdm) {
+      var bd = document.createElement("button"); bd.type = "button"; bd.className = "sec-btn"; bd.textContent = "Designar";
+      bd.onclick = async function () {
+        fecharModalAdmin();
+        $("modalGerenciar").classList.remove("hidden");
+        msg($("msgGer"), "");
+        abrirAbaGer("desig");
+        await carregarGerenciar();
         $("dgNome").value = u.nome;
         if (u.frentes && u.frentes.length) { $("dgFrente").value = u.frentes[0]; preencherMapasDesignar(); }
-        abrirAbaAdm("desig");
         $("dgMapa").focus();
       };
       bt.appendChild(bd);
@@ -1096,47 +1278,30 @@ async function carregarAdmin() {
         });
       }
     }
+
+    if (!isAdm) {
+      var bDel = acaoAdmBtn("Apagar conta", "no", { acao: "apagarDirigente", nome: u.nome }, "Conta removida.", "Apagar permanentemente a conta de " + u.nome + "? Isso remove login, permissões e designações.");
+      bt.appendChild(bDel);
+    }
+
     row.appendChild(bt);
     box.appendChild(row);
   });
-  if (!r.lista || !r.lista.length) box.textContent = "Nenhum dirigente ainda.";
-
-  pBox.textContent = "";
-  var perms = r.permissoes || [];
-  if (!perms.length) {
-    pBox.textContent = "Nenhuma permissão temporária ativa.";
-  } else {
-    perms.forEach(function (pm) {
-      var row = document.createElement("div"); row.className = "row";
-      var info = document.createElement("div");
-      var n = document.createElement("div"); n.className = "nm"; n.textContent = pm.nome + " · " + pm.frente + (pm.mapa ? " · Mapa " + pm.mapa : " (toda a frente)");
-      var s = document.createElement("div"); s.className = "st"; s.textContent = "Vale até " + fmtData(pm.ate);
-      info.appendChild(n); info.appendChild(s); row.appendChild(info);
-      var bt = document.createElement("div"); bt.className = "bt";
-      var bRem = document.createElement("button"); bRem.type = "button"; bRem.className = "no"; bRem.textContent = "Remover";
-      bRem.onclick = async function () {
-        bRem.disabled = true;
-        var res = await chamar({ acao: "removerPermissao", token: sessao.token, nome: pm.nome, frente: pm.frente, mapa: pm.mapa || "" });
-        if (!res.ok) { msg($("msgAdm"), res.erro); bRem.disabled = false; return; }
-        msg($("msgAdm"), "Permissão removida.", true);
-        await carregarProgresso();
-        desenhar(false);
-        if (mapaAtual) mostrarInfo(mapaAtual);
-        carregarAdmin();
-      };
-      bt.appendChild(bRem); row.appendChild(bt);
-      pBox.appendChild(row);
-    });
-  }
 }
 
-function botao(texto, cls, nome, status) {
+function acaoAdmBtn(texto, cls, payload, msgOk, pergunta) {
   var b = document.createElement("button"); b.type = "button"; b.textContent = texto; b.className = cls;
   b.onclick = async function () {
+    if (pergunta && !confirm(pergunta)) return;
     b.disabled = true;
-    var r = await chamar({ acao: "definirStatus", token: sessao.token, nome: nome, status: status });
+    var envio = Object.assign({ token: sessao.token }, payload);
+    var r = await chamar(envio);
     if (!r.ok) { msg($("msgAdm"), r.erro); b.disabled = false; return; }
-    msg($("msgAdm"), ""); carregarAdmin();
+    msg($("msgAdm"), msgOk || "", true);
+    await carregarProgresso();
+    desenhar(false);
+    if (mapaAtual) mostrarInfo(mapaAtual);
+    carregarAdmin();
   };
   return b;
 }
