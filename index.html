@@ -3,7 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#181e26">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mapas">
 <title>Mapas de Território</title>
+<link rel="icon" id="linkIcon" type="image/svg+xml">
+<link rel="apple-touch-icon" id="linkTouchIcon">
+<link rel="manifest" id="linkManifest">
 <link rel="preconnect" href="https://unpkg.com" crossorigin>
 <link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
 <link rel="preconnect" href="https://script.google.com">
@@ -41,8 +49,8 @@ button:disabled{opacity:.55;cursor:default}
 
 /* Layout principal */
 #telaApp{display:flex;flex-direction:column;height:100%;overflow:hidden}
-.barra{display:flex;gap:8px;align-items:center;padding:8px 12px;background:var(--card);border-bottom:1px solid var(--bd);z-index:10}
-.barra strong{flex:1;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.barra{display:flex;gap:8px;align-items:center;padding:8px 12px;background:var(--card);border-bottom:1px solid var(--bd);z-index:10;flex-wrap:wrap}
+.barra strong{flex:1;min-width:110px;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .barra button{width:auto;margin:0;padding:8px 12px;font-size:.85rem;min-height:38px}
 .filtros{display:flex;gap:8px;padding:8px 12px;background:var(--card);border-bottom:1px solid var(--bd);z-index:10}
 .filtros select{padding:9px 10px;font-size:.92rem}
@@ -64,6 +72,7 @@ button:disabled{opacity:.55;cursor:default}
 .controles-mapa{position:absolute;top:10px;right:10px;z-index:800;display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;max-width:calc(100% - 56px)}
 .btn-mapa-ctrl{width:auto;margin:0;padding:7px 11px;font-size:.8rem;border-radius:999px;background:var(--card);color:var(--tx);border:1px solid var(--bd);box-shadow:var(--sh);min-height:36px;display:inline-flex;align-items:center;gap:5px}
 .btn-mapa-ctrl.off{opacity:.8}
+.btn-mapa-ctrl.ativo-gps{background:var(--pri);color:#fff;border-color:var(--pri)}
 .btn-abrir-painel{position:absolute;bottom:10px;right:10px;z-index:800;width:auto;margin:0;padding:8px 13px;font-size:.84rem;border-radius:999px;background:var(--pri);color:#fff;box-shadow:var(--sh);min-height:38px}
 .legenda-mapa{position:absolute;bottom:10px;left:10px;z-index:800;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:6px 10px;font-size:.76rem;display:flex;flex-wrap:wrap;gap:10px;box-shadow:var(--sh);pointer-events:none}
 .leg-item{display:inline-flex;align-items:center;gap:4px;font-weight:600}
@@ -101,6 +110,8 @@ button:disabled{opacity:.55;cursor:default}
 .item-nome{flex:1;font-weight:700;min-width:0}
 .item-sub{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.76rem;color:var(--mut);margin-top:2px}
 .tag-desig{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:999px;background:var(--soft);color:var(--pri);font-weight:600;font-size:.74rem}
+.tag-hist{color:var(--mut);font-size:.73rem}
+.tag-nota{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:999px;background:var(--warn-bg);color:var(--warn);font-weight:600;font-size:.72rem}
 .item-cont{font-size:.84rem;color:var(--tx);font-weight:700;white-space:nowrap}
 .barra-prog{width:100%;height:6px;background:var(--bd);border-radius:999px;overflow:hidden}
 .barra-prog > span{display:block;height:100%;border-radius:999px;transition:width .2s}
@@ -122,8 +133,8 @@ button:disabled{opacity:.55;cursor:default}
 .aviso-perm{font-size:.82rem;color:var(--pri);background:var(--soft);border:1px solid var(--bd);border-radius:8px;padding:7px 10px;margin:4px 0 8px;font-weight:500}
 .resp-box{font-size:.82rem;color:var(--mut);margin:2px 0 6px}
 
-/* Modais Gerenciar e Admin */
-#painelAdmin,#modalGerenciar{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:12px}
+/* Modais Gerenciar, Admin e Senha */
+#painelAdmin,#modalGerenciar,#modalSenha{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:12px}
 .adm-card{width:100%;max-width:600px;max-height:90vh;background:var(--card);border:1px solid var(--bd);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--sh)}
 .adm-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;border-bottom:1px solid var(--bd)}
 .adm-head strong{font-size:1rem}
@@ -152,6 +163,20 @@ button:disabled{opacity:.55;cursor:default}
 .sec-adm{margin-top:14px;padding-top:12px;border-top:1px solid var(--bd)}
 .adm-foot{padding:0 14px 12px}
 .adm-foot .msg{margin-top:6px}
+.nota-box{background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:9px 10px;margin:8px 0}
+.nota-txt{font-size:.86rem;line-height:1.35;margin-top:4px;white-space:pre-wrap;word-break:break-word}
+.nota-meta{font-size:.74rem;color:var(--mut);margin-top:3px}
+.nota-form{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.nota-form input{flex:1;min-width:160px;padding:8px 10px;font-size:.86rem}
+.nota-form button{width:auto;margin:0;padding:8px 11px;font-size:.8rem;min-height:36px}
+.frente-card{padding:10px 0;border-bottom:1px solid var(--bd)}
+.frente-card:last-child{border-bottom:0}
+.frente-edit{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.frente-edit input{flex:1;min-width:180px;padding:8px 10px;font-size:.88rem}
+.frente-edit button{width:auto;margin:0;padding:8px 12px;font-size:.82rem;min-height:36px}
+.pills-resp{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.pill-resp{width:auto;margin:0;padding:4px 9px;font-size:.75rem;border-radius:999px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);min-height:28px;font-weight:600}
+.pill-resp.ativo{background:var(--soft);color:var(--pri);border-color:var(--pri)}
 </style>
 </head>
 <body>
@@ -186,6 +211,7 @@ button:disabled{opacity:.55;cursor:default}
     <button class="sec" id="btnPainel" title="Mostrar ou recolher lista de mapas">Recolher</button>
     <button class="sec hidden" id="btnGerenciar">Gerenciar</button>
     <button class="sec hidden" id="btnAdmin">Admin</button>
+    <button class="sec" id="btnSenha" title="Trocar minha senha">🔑 Senha</button>
     <button class="sec" id="btnSair">Sair</button>
   </div>
 
@@ -275,15 +301,44 @@ button:disabled{opacity:.55;cursor:default}
   <div id="painelAdmin" class="hidden" role="dialog" aria-modal="true" aria-labelledby="titAdmin">
     <div class="adm-card">
       <div class="adm-head">
-        <strong id="titAdmin">Administração de Dirigentes</strong>
+        <strong id="titAdmin">Administração</strong>
         <button type="button" class="sec" id="btnFecharAdmin">Fechar ✕</button>
       </div>
+      <div class="adm-tabs" role="tablist">
+        <button type="button" class="adm-tab ativo" id="tabAdmDir" role="tab" aria-selected="true">Dirigentes</button>
+        <button type="button" class="adm-tab" id="tabAdmFrentes" role="tab" aria-selected="false">Frentes Fixas</button>
+      </div>
       <div class="adm-body">
-        <div class="chips-filtro" id="chipsAdmin"></div>
-        <div id="listaAdmin"></div>
+        <div id="secAdmDir">
+          <div class="chips-filtro" id="chipsAdmin"></div>
+          <div id="listaAdmin"></div>
+        </div>
+        <div id="secAdmFrentes" class="hidden">
+          <div class="st" style="margin-bottom:8px">Defina os dirigentes responsáveis fixos de cada frente (toque nos nomes ou edite separado por vírgula).</div>
+          <div id="listaFrentesAdmin"></div>
+        </div>
       </div>
       <div class="adm-foot">
         <div class="msg" id="msgAdm"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalSenha" class="hidden" role="dialog" aria-modal="true" aria-labelledby="titSenha">
+    <div class="adm-card" style="max-width:420px">
+      <div class="adm-head">
+        <strong id="titSenha">Trocar minha senha</strong>
+        <button type="button" class="sec" id="btnFecharSenha">Fechar ✕</button>
+      </div>
+      <div class="adm-body">
+        <label for="snAtual">Senha atual</label>
+        <input id="snAtual" type="password" autocomplete="current-password">
+        <label for="snNova">Nova senha (mínimo 6 caracteres)</label>
+        <input id="snNova" type="password" autocomplete="new-password">
+        <button type="button" id="btnSalvarSenha">Salvar nova senha</button>
+      </div>
+      <div class="adm-foot">
+        <div class="msg" id="msgSenha"></div>
       </div>
     </div>
   </div>
@@ -293,14 +348,34 @@ button:disabled{opacity:.55;cursor:default}
 <script>
 var API = "https://script.google.com/macros/s/AKfycbw0Qd_t6OxiVmr-mu_mvWdYSJhazM83FO6pmSwdvybdB2o3AlfVvxTBEdy7bEeCgzGe/exec";
 var $ = function (id) { return document.getElementById(id); };
-var sessao = null, dados = null, mapaLeaflet = null, camada = null, gpsMarker = null;
+var sessao = null, dados = null, mapaLeaflet = null, camada = null, gpsMarker = null, gpsWatchId = null, gpsPrimeiroFix = false;
 var feitas = {}, pode = {}, podeMapa = {};
-var permissoesAte = {}, permissoesMapaAte = {}, designacoesAtivas = {}, minhasDesignacoes = {}, responsaveisFrente = {};
-var mapaAtual = null, filtroStatus = "todos", filtroAdmin = "todos", adminListaCache = [];
+var permissoesAte = {}, permissoesMapaAte = {}, designacoesAtivas = {}, minhasDesignacoes = {}, responsaveisFrente = {}, ultimoHistorico = {}, notasMapa = {};
+var mapaAtual = null, filtroStatus = "todos", filtroAdmin = "todos", adminListaCache = [], adminFrentesCache = [];
 var painelRecolhido = false;
 var mostrarNumeros = (function () { try { return localStorage.getItem("mostrarNumerosMapa") !== "0"; } catch (e) { return true; } })();
 var progTimer = null, ultimoProg = 0, atualizandoProg = false, hashProg = "";
 var emVoo = 0, marcandoQ = {};
+
+(function iniciarPWA() {
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="38" fill="#181e26"/><path d="M96 34c-25.4 0-46 20.6-46 46 0 34.5 46 78 46 78s46-43.5 46-78c0-25.4-20.6-46-46-46zm0 64c-9.9 0-18-8.1-18-18s8.1-18 18-18 18 8.1 18 18-8.1 18-18 18z" fill="#4c8dff"/></svg>';
+  var iconeUrl = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  var elIcon = $("linkIcon"), elTouch = $("linkTouchIcon"), elMan = $("linkManifest");
+  if (elIcon) elIcon.href = iconeUrl;
+  if (elTouch) elTouch.href = iconeUrl;
+  if (elMan) {
+    var manifesto = {
+      name: "Mapas de Território",
+      short_name: "Mapas",
+      start_url: location.href.split("#")[0],
+      display: "standalone",
+      background_color: "#0f1318",
+      theme_color: "#181e26",
+      icons: [{ src: iconeUrl, sizes: "192x192", type: "image/svg+xml", purpose: "any" }]
+    };
+    elMan.href = "data:application/manifest+json;charset=utf-8," + encodeURIComponent(JSON.stringify(manifesto));
+  }
+})();
 
 var CACHE_KEY = "cacheMapas";
 function lerCache() {
@@ -366,6 +441,7 @@ function msg(el, t, ok) { el.textContent = t || ""; el.className = "msg " + (ok 
 
 function mostrarLogin(tela) {
   pararAtualizacao();
+  pararGps();
   $("wrapLogin").classList.remove("hidden");
   $("telaApp").classList.add("hidden");
   $("telaLogin").classList.toggle("hidden", tela !== "login");
@@ -429,6 +505,21 @@ function fecharModalAdmin() {
   setTimeout(function () { if (mapaLeaflet) mapaLeaflet.invalidateSize(); }, 50);
 }
 
+function fecharModalSenha() {
+  $("modalSenha").classList.add("hidden");
+}
+
+function abrirAbaAdm(aba) {
+  $("tabAdmDir").classList.toggle("ativo", aba === "dir");
+  $("tabAdmFrentes").classList.toggle("ativo", aba === "frentes");
+  $("tabAdmDir").setAttribute("aria-selected", aba === "dir");
+  $("tabAdmFrentes").setAttribute("aria-selected", aba === "frentes");
+  $("secAdmDir").classList.toggle("hidden", aba !== "dir");
+  $("secAdmFrentes").classList.toggle("hidden", aba !== "frentes");
+}
+$("tabAdmDir").onclick = function () { abrirAbaAdm("dir"); };
+$("tabAdmFrentes").onclick = function () { abrirAbaAdm("frentes"); };
+
 $("btnGerenciar").onclick = function () {
   $("modalGerenciar").classList.remove("hidden");
   msg($("msgGer"), "");
@@ -440,14 +531,38 @@ $("modalGerenciar").onclick = function (e) { if (e.target === $("modalGerenciar"
 $("btnAdmin").onclick = function () {
   $("painelAdmin").classList.remove("hidden");
   msg($("msgAdm"), "");
+  abrirAbaAdm("dir");
   carregarAdmin();
 };
 $("btnFecharAdmin").onclick = fecharModalAdmin;
 $("painelAdmin").onclick = function (e) { if (e.target === $("painelAdmin")) fecharModalAdmin(); };
+
+$("btnSenha").onclick = function () {
+  $("modalSenha").classList.remove("hidden");
+  $("snAtual").value = "";
+  $("snNova").value = "";
+  msg($("msgSenha"), "");
+  $("snAtual").focus();
+};
+$("btnFecharSenha").onclick = fecharModalSenha;
+$("modalSenha").onclick = function (e) { if (e.target === $("modalSenha")) fecharModalSenha(); };
+$("btnSalvarSenha").onclick = async function () {
+  var atual = $("snAtual").value, nova = $("snNova").value;
+  if (nova.length < 6) { msg($("msgSenha"), "A nova senha precisa ter pelo menos 6 caracteres."); return; }
+  var b = $("btnSalvarSenha"); b.disabled = true;
+  var r = await chamar({ acao: "trocarSenha", token: sessao.token, senhaAtual: atual, novaSenha: nova });
+  b.disabled = false;
+  if (!r.ok) { msg($("msgSenha"), r.erro); return; }
+  $("snAtual").value = "";
+  $("snNova").value = "";
+  msg($("msgSenha"), "Senha alterada com sucesso.", true);
+};
+
 document.addEventListener("keydown", function (e) {
   if (e.key !== "Escape") return;
   if (!$("modalGerenciar").classList.contains("hidden")) fecharModalGerenciar();
   if (!$("painelAdmin").classList.contains("hidden")) fecharModalAdmin();
+  if (!$("modalSenha").classList.contains("hidden")) fecharModalSenha();
 });
 
 function atualizarPillsDesignar() {
@@ -512,13 +627,13 @@ async function atualizarProgressoSilencioso(forcar) {
     ultimoProg = Date.now();
     if (!r || !r.ok || emVoo > 0) return;
     var novoHash = JSON.stringify({
-      adm: !!r.admin, pg: !!r.podeGerenciar, f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente
+      adm: !!r.admin, pg: !!r.podeGerenciar, f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente, uh: r.ultimoHistorico, nm: r.notasMapa
     });
     if (novoHash !== hashProg) {
       aplicarProgresso(r);
       if (dados) {
         desenhar(false);
-        if (mapaAtual) mostrarInfo(mapaAtual);
+        if (mapaAtual && (!document.activeElement || document.activeElement.id !== "inpNotaMapa")) mostrarInfo(mapaAtual);
       }
     }
   } finally {
@@ -603,8 +718,15 @@ function aplicarProgresso(r) {
   Object.keys(r.minhasDesignacoes || {}).forEach(function (k) { minhasDesignacoes[normKey(k)] = r.minhasDesignacoes[k]; });
 
   responsaveisFrente = r.responsaveisFrente || {};
+
+  ultimoHistorico = {};
+  Object.keys(r.ultimoHistorico || {}).forEach(function (k) { ultimoHistorico[normKey(k)] = r.ultimoHistorico[k]; });
+
+  notasMapa = {};
+  Object.keys(r.notasMapa || {}).forEach(function (k) { notasMapa[normKey(k)] = r.notasMapa[k]; });
+
   hashProg = JSON.stringify({
-    adm: !!(sessao && sessao.admin), pg: !!(sessao && sessao.podeGerenciar), f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente
+    adm: !!(sessao && sessao.admin), pg: !!(sessao && sessao.podeGerenciar), f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente, uh: r.ultimoHistorico, nm: r.notasMapa
   });
 }
 
@@ -637,21 +759,50 @@ function iniciarMapa() {
   camada = L.layerGroup().addTo(mapaLeaflet);
 }
 
+function atualizarPinGps(lat, lng, centralizar) {
+  if (!mapaLeaflet) return;
+  var ic = L.divIcon({ className: "", html: '<div class="gps-pin"></div>', iconSize: [16, 16], iconAnchor: [8, 8] });
+  if (gpsMarker) gpsMarker.setLatLng([lat, lng]);
+  else gpsMarker = L.marker([lat, lng], { icon: ic, zIndexOffset: 1000 }).addTo(mapaLeaflet).bindTooltip("Você está aqui");
+  if (centralizar) mapaLeaflet.setView([lat, lng], Math.max(mapaLeaflet.getZoom(), 16));
+}
+
+function pararGps() {
+  if (gpsWatchId !== null && navigator.geolocation) {
+    navigator.geolocation.clearWatch(gpsWatchId);
+  }
+  gpsWatchId = null;
+  gpsPrimeiroFix = false;
+  if (gpsMarker && mapaLeaflet) {
+    mapaLeaflet.removeLayer(gpsMarker);
+  }
+  gpsMarker = null;
+  var btn = $("btnGps");
+  if (btn) {
+    btn.disabled = false;
+    btn.classList.remove("ativo-gps");
+    btn.textContent = "📍 Minha posição";
+  }
+}
+
 $("btnGps").onclick = function () {
+  if (gpsWatchId !== null) {
+    pararGps();
+    return;
+  }
   if (!navigator.geolocation) { alert("Geolocalização não suportada neste navegador."); return; }
   var btn = $("btnGps");
-  btn.disabled = true; btn.textContent = "Localizando…";
-  navigator.geolocation.getCurrentPosition(function (pos) {
-    btn.disabled = false; btn.textContent = "📍 Minha posição";
-    var lat = pos.coords.latitude, lng = pos.coords.longitude;
-    var ic = L.divIcon({ className: "", html: '<div class="gps-pin"></div>', iconSize: [16, 16], iconAnchor: [8, 8] });
-    if (gpsMarker) gpsMarker.setLatLng([lat, lng]);
-    else gpsMarker = L.marker([lat, lng], { icon: ic, zIndexOffset: 1000 }).addTo(mapaLeaflet).bindTooltip("Você está aqui");
-    mapaLeaflet.setView([lat, lng], Math.max(mapaLeaflet.getZoom(), 16));
+  btn.textContent = "📍 Localizando…";
+  btn.classList.add("ativo-gps");
+  gpsPrimeiroFix = true;
+  gpsWatchId = navigator.geolocation.watchPosition(function (pos) {
+    btn.textContent = "📍 GPS ativo (parar)";
+    atualizarPinGps(pos.coords.latitude, pos.coords.longitude, gpsPrimeiroFix);
+    gpsPrimeiroFix = false;
   }, function (err) {
-    btn.disabled = false; btn.textContent = "📍 Minha posição";
+    pararGps();
     alert("Não foi possível obter sua localização (" + (err.message || "permissão negada") + ").");
-  }, { enableHighAccuracy: true, timeout: 10000 });
+  }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 });
 };
 
 function montarFiltros() {
@@ -878,7 +1029,10 @@ function mostrarListaMapas(lista) {
   var wrap = document.createElement("div"); wrap.className = "lista-mapas";
   filtrados.forEach(function (entry) {
     var item = entry.item, m = item.m, st = entry.st;
-    var desig = designacoesAtivas[chave(m)];
+    var km = chave(m);
+    var desig = designacoesAtivas[km];
+    var hist = ultimoHistorico[km];
+    var nota = notasMapa[km];
     var pct = st.total ? Math.round((st.feitasN / st.total) * 100) : 0;
 
     var b = document.createElement("button"); b.type = "button"; b.className = "item-mapa";
@@ -890,11 +1044,24 @@ function mostrarListaMapas(lista) {
     nm.textContent = "Mapa " + m.n + ($("selGrupo").value ? "" : " · " + m.g);
     meio.appendChild(nm);
 
-    if (desig) {
+    if (desig || (hist && hist.data) || (nota && nota.texto)) {
       var sub = document.createElement("div"); sub.className = "item-sub";
-      var tg = document.createElement("span"); tg.className = "tag-desig";
-      tg.textContent = "👤 " + desig.nome + (desig.validade ? " (até " + fmtData(desig.validade) + ")" : "");
-      sub.appendChild(tg);
+      if (desig) {
+        var tg = document.createElement("span"); tg.className = "tag-desig";
+        tg.textContent = "👤 " + desig.nome + (desig.validade ? " (até " + fmtData(desig.validade) + ")" : "");
+        sub.appendChild(tg);
+      }
+      if (hist && hist.data) {
+        var th = document.createElement("span"); th.className = "tag-hist";
+        th.textContent = "Última: " + fmtData(hist.data);
+        sub.appendChild(th);
+      }
+      if (nota && nota.texto) {
+        var tn = document.createElement("span"); tn.className = "tag-nota";
+        tn.textContent = "📝 Nota";
+        tn.title = nota.texto;
+        sub.appendChild(tn);
+      }
       meio.appendChild(sub);
     }
 
@@ -936,15 +1103,74 @@ function mostrarInfo(m) {
   var t = document.createElement("div"); t.className = "tit"; t.textContent = "Mapa " + m.n + " · " + m.g; box.appendChild(t);
 
   var k = chave(m);
+  var podeEste = podeNoMapa(m);
+  var podeGer = !!(sessao && (sessao.admin || sessao.podeGerenciar));
   var respFrente = responsaveisFrente[m.g];
   var desig = designacoesAtivas[k];
-  if (desig || respFrente) {
+  var uh = ultimoHistorico[k];
+  if (desig || respFrente || (uh && uh.data)) {
     var rb = document.createElement("div"); rb.className = "resp-box";
     var partes = [];
     if (desig) partes.push("Designado: " + desig.nome + (desig.validade ? " (até " + fmtData(desig.validade) + ")" : " (sem prazo)"));
     if (respFrente) partes.push("Responsáveis da frente: " + respFrente);
+    if (uh && uh.data) partes.push("Última conclusão registrada: " + fmtData(uh.data) + (uh.por ? " (" + uh.por + ")" : ""));
     rb.textContent = partes.join(" · ");
     box.appendChild(rb);
+  }
+
+  var notaAtual = notasMapa[k];
+  if ((notaAtual && notaAtual.texto) || podeEste || podeGer) {
+    var nb = document.createElement("div"); nb.className = "nota-box";
+    var nTit = document.createElement("div"); nTit.className = "st"; nTit.style.fontWeight = "700";
+    nTit.textContent = "📝 Observação do mapa";
+    nb.appendChild(nTit);
+    if (notaAtual && notaAtual.texto) {
+      var nTxt = document.createElement("div"); nTxt.className = "nota-txt"; nTxt.textContent = notaAtual.texto;
+      nb.appendChild(nTxt);
+      var metaPartes = [];
+      if (notaAtual.autor) metaPartes.push(notaAtual.autor);
+      if (notaAtual.data) metaPartes.push(fmtData(notaAtual.data));
+      if (metaPartes.length) {
+        var nMeta = document.createElement("div"); nMeta.className = "nota-meta";
+        nMeta.textContent = "Atualizada por " + metaPartes.join(" em ");
+        nb.appendChild(nMeta);
+      }
+    }
+    if (podeEste || podeGer) {
+      var nf = document.createElement("div"); nf.className = "nota-form";
+      var inp = document.createElement("input");
+      inp.id = "inpNotaMapa";
+      inp.maxLength = 300;
+      inp.placeholder = "Adicionar observação curta (máx. 300 chars)…";
+      inp.value = (notaAtual && notaAtual.texto) ? notaAtual.texto : "";
+      var bSal = document.createElement("button"); bSal.type = "button"; bSal.textContent = "Salvar nota";
+      bSal.onclick = async function () {
+        bSal.disabled = true;
+        var res = await chamar({ acao: "salvarNotaMapa", token: sessao.token, frente: m.g, mapa: m.n, nota: inp.value });
+        bSal.disabled = false;
+        if (!res.ok) { alert(res.erro); return; }
+        await carregarProgresso();
+        desenhar(false);
+        if (mapaAtual) mostrarInfo(mapaAtual);
+      };
+      nf.appendChild(inp);
+      nf.appendChild(bSal);
+      if (notaAtual && notaAtual.texto) {
+        var bLim = document.createElement("button"); bLim.type = "button"; bLim.className = "sec"; bLim.textContent = "Limpar";
+        bLim.onclick = async function () {
+          bLim.disabled = true;
+          var res = await chamar({ acao: "salvarNotaMapa", token: sessao.token, frente: m.g, mapa: m.n, nota: "" });
+          bLim.disabled = false;
+          if (!res.ok) { alert(res.erro); return; }
+          await carregarProgresso();
+          desenhar(false);
+          if (mapaAtual) mostrarInfo(mapaAtual);
+        };
+        nf.appendChild(bLim);
+      }
+      nb.appendChild(nf);
+    }
+    box.appendChild(nb);
   }
 
   var permAte = permissoesAte[m.g];
@@ -979,7 +1205,6 @@ function mostrarInfo(m) {
   bar.appendChild(fill);
   box.appendChild(bar);
 
-  var podeEste = podeNoMapa(m);
   var dica = document.createElement("div"); dica.className = "st"; dica.style.marginBottom = "8px";
   dica.textContent = podeEste ? "Toque numa quadra para marcar ou desmarcar:" : "Toque numa quadra para abrir o ponto no Google Maps:";
   box.appendChild(dica);
@@ -1009,6 +1234,22 @@ function mostrarInfo(m) {
   var primeira = qs.filter(function (q) { return !f[q]; })[0] || qs[0];
   gps.onclick = function () { window.open(linkGPS(m.q[primeira][0], m.q[primeira][1]), "_blank"); };
   sel.appendChild(gps);
+
+  if (podeGer) {
+    var dgBtn = document.createElement("button"); dgBtn.type = "button"; dgBtn.className = "sec";
+    dgBtn.textContent = "👤 Designar mapa";
+    dgBtn.onclick = async function () {
+      $("modalGerenciar").classList.remove("hidden");
+      msg($("msgGer"), "");
+      abrirAbaGer("desig");
+      await carregarGerenciar();
+      $("dgFrente").value = m.g;
+      preencherMapasDesignar();
+      $("dgMapa").value = m.n;
+      $("dgNome").focus();
+    };
+    sel.appendChild(dgBtn);
+  }
 
   if (sessao.admin) {
     var rs = document.createElement("button"); rs.type = "button"; rs.className = "bad"; rs.textContent = "Reiniciar mapa";
@@ -1145,11 +1386,14 @@ async function carregarGerenciar() {
 
 async function carregarAdmin() {
   var box = $("listaAdmin"); box.textContent = "Carregando…";
+  var fBox = $("listaFrentesAdmin"); fBox.textContent = "Carregando…";
   $("chipsAdmin").textContent = "";
   var r = await chamar({ acao: "listarPendentes", token: sessao.token });
-  if (!r.ok) { box.textContent = ""; msg($("msgAdm"), r.erro); return; }
+  if (!r.ok) { box.textContent = ""; fBox.textContent = ""; msg($("msgAdm"), r.erro); return; }
   adminListaCache = r.lista || [];
+  adminFrentesCache = r.frentesLista || [];
   renderizarAdmin();
+  renderizarFrentesAdmin();
 }
 
 function renderizarAdmin() {
@@ -1284,8 +1528,108 @@ function renderizarAdmin() {
       bt.appendChild(bDel);
     }
 
+    var bPass = document.createElement("button"); bPass.type = "button"; bPass.className = "sec-btn"; bPass.textContent = "Redefinir senha";
+    bPass.onclick = async function () {
+      var nova = prompt("Digite a nova senha para " + u.nome + " (mínimo 6 caracteres):");
+      if (nova === null) return;
+      if (nova.length < 6) { msg($("msgAdm"), "A nova senha precisa ter pelo menos 6 caracteres."); return; }
+      bPass.disabled = true;
+      var res = await chamar({ acao: "redefinirSenha", token: sessao.token, nome: u.nome, novaSenha: nova });
+      bPass.disabled = false;
+      if (!res.ok) { msg($("msgAdm"), res.erro); return; }
+      msg($("msgAdm"), "Senha de " + u.nome + " redefinida.", true);
+    };
+    bt.appendChild(bPass);
+
     row.appendChild(bt);
     box.appendChild(row);
+  });
+}
+
+function renderizarFrentesAdmin() {
+  var box = $("listaFrentesAdmin");
+  box.textContent = "";
+
+  var frentesOrdem = [];
+  var respAtual = {};
+  if (dados && dados.mapas) {
+    dados.mapas.forEach(function (m) {
+      if (frentesOrdem.indexOf(m.g) < 0) frentesOrdem.push(m.g);
+    });
+  }
+  (adminFrentesCache || []).forEach(function (f) {
+    if (f.frente && frentesOrdem.indexOf(f.frente) < 0) frentesOrdem.push(f.frente);
+    if (f.frente) respAtual[f.frente] = f.respTexto || "";
+  });
+
+  if (!frentesOrdem.length) {
+    box.textContent = "Nenhuma frente encontrada.";
+    return;
+  }
+
+  var dirigentesPills = (adminListaCache || []).filter(function (u) {
+    var st = String(u.status || "").toLowerCase();
+    var tp = String(u.tipo || "").toLowerCase();
+    return st === "admin" || (st === "aprovado" && tp === "permanente");
+  });
+
+  frentesOrdem.forEach(function (frente) {
+    var card = document.createElement("div"); card.className = "frente-card";
+    var tit = document.createElement("div"); tit.className = "nm"; tit.textContent = frente;
+    card.appendChild(tit);
+
+    var edit = document.createElement("div"); edit.className = "frente-edit";
+    var inp = document.createElement("input");
+    inp.value = respAtual[frente] || "";
+    inp.placeholder = "Nomes separados por vírgula";
+    var bSal = document.createElement("button"); bSal.type = "button"; bSal.textContent = "Salvar";
+    bSal.onclick = async function () {
+      bSal.disabled = true;
+      var r = await chamar({ acao: "salvarFrente", token: sessao.token, frente: frente, responsaveis: inp.value });
+      bSal.disabled = false;
+      if (!r.ok) { msg($("msgAdm"), r.erro); return; }
+      msg($("msgAdm"), "Responsáveis de " + frente + " salvos.", true);
+      await carregarProgresso();
+      desenhar(false);
+      if (mapaAtual) mostrarInfo(mapaAtual);
+      carregarAdmin();
+    };
+    edit.appendChild(inp);
+    edit.appendChild(bSal);
+    card.appendChild(edit);
+
+    if (dirigentesPills.length) {
+      var pills = document.createElement("div"); pills.className = "pills-resp";
+      var btnPills = [];
+      var sincronizarPills = function () {
+        var atuais = inp.value.split(",").map(function (x) { return x.trim().toLowerCase(); }).filter(function (x) { return x; });
+        btnPills.forEach(function (item) {
+          item.btn.classList.toggle("ativo", atuais.indexOf(item.nome.toLowerCase()) >= 0);
+        });
+      };
+      dirigentesPills.forEach(function (u) {
+        var pb = document.createElement("button"); pb.type = "button"; pb.className = "pill-resp"; pb.textContent = u.nome;
+        pb.onclick = function () {
+          var lista = inp.value.split(",").map(function (x) { return x.trim(); }).filter(function (x) { return x; });
+          var alvo = u.nome.toLowerCase();
+          var idx = -1;
+          for (var i = 0; i < lista.length; i++) {
+            if (lista[i].toLowerCase() === alvo) { idx = i; break; }
+          }
+          if (idx >= 0) lista.splice(idx, 1);
+          else lista.push(u.nome);
+          inp.value = lista.join(", ");
+          sincronizarPills();
+        };
+        btnPills.push({ btn: pb, nome: u.nome });
+        pills.appendChild(pb);
+      });
+      inp.oninput = sincronizarPills;
+      sincronizarPills();
+      card.appendChild(pills);
+    }
+
+    box.appendChild(card);
   });
 }
 
