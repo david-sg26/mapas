@@ -51,13 +51,20 @@ button:disabled{opacity:.55;cursor:default}
 #wrapMapa{position:relative;flex:1;min-height:200px}
 #mapa{width:100%;height:100%}
 #info{background:var(--card);border-top:1px solid var(--bd);padding:12px;max-height:44%;overflow:auto}
+#info.recolhido{display:none!important}
+.so-desk{display:none}
 @media (min-width:860px){
   #corpoApp{flex-direction:row}
   #info{width:400px;flex-shrink:0;max-height:none;height:100%;border-top:0;border-left:1px solid var(--bd);padding:14px}
+  .so-mob{display:none}
+  .so-desk{display:inline}
 }
 
 /* Controles sobre o mapa */
-.btn-gps{position:absolute;top:10px;right:10px;z-index:800;width:auto;margin:0;padding:8px 12px;font-size:.82rem;border-radius:999px;background:var(--card);color:var(--tx);border:1px solid var(--bd);box-shadow:var(--sh);min-height:38px;display:flex;align-items:center;gap:5px}
+.controles-mapa{position:absolute;top:10px;right:10px;z-index:800;display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;max-width:calc(100% - 56px)}
+.btn-mapa-ctrl{width:auto;margin:0;padding:7px 11px;font-size:.8rem;border-radius:999px;background:var(--card);color:var(--tx);border:1px solid var(--bd);box-shadow:var(--sh);min-height:36px;display:inline-flex;align-items:center;gap:5px}
+.btn-mapa-ctrl.off{opacity:.8}
+.btn-abrir-painel{position:absolute;bottom:10px;right:10px;z-index:800;width:auto;margin:0;padding:8px 13px;font-size:.84rem;border-radius:999px;background:var(--pri);color:#fff;box-shadow:var(--sh);min-height:38px}
 .legenda-mapa{position:absolute;bottom:10px;left:10px;z-index:800;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:6px 10px;font-size:.76rem;display:flex;flex-wrap:wrap;gap:10px;box-shadow:var(--sh);pointer-events:none}
 .leg-item{display:inline-flex;align-items:center;gap:4px;font-weight:600}
 .leg-dot{width:10px;height:10px;border-radius:999px;display:inline-block}
@@ -67,7 +74,7 @@ button:disabled{opacity:.55;cursor:default}
 
 /* Badges nos polígonos */
 .mapa-badge-wrap{background:transparent;border:0}
-.mapa-badge{transform:translate(-50%,-50%);display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:800;color:#fff;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.45);white-space:nowrap;cursor:pointer;line-height:1.2}
+.mapa-badge{transform:translate(-50%,-50%);will-change:transform;display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:800;color:#fff;border:1.5px solid #fff;white-space:nowrap;cursor:pointer;line-height:1.2}
 .mapa-badge.completo{background:#15803d}
 .mapa-badge.andamento{background:#b45309}
 .mapa-badge.pendente{background:#1d4ed8}
@@ -173,6 +180,7 @@ button:disabled{opacity:.55;cursor:default}
 <div id="telaApp" class="hidden">
   <div class="barra">
     <strong id="ola"></strong>
+    <button class="sec" id="btnPainel" title="Mostrar ou recolher lista de mapas">Recolher</button>
     <button class="sec" id="btnAdmin">Acessos</button>
     <button class="sec" id="btnSair">Sair</button>
   </div>
@@ -185,7 +193,11 @@ button:disabled{opacity:.55;cursor:default}
   <div id="corpoApp">
     <div id="wrapMapa">
       <div id="mapa"></div>
-      <button type="button" class="btn-gps" id="btnGps" title="Centralizar na minha posição atual">📍 Minha posição</button>
+      <div class="controles-mapa">
+        <button type="button" class="btn-mapa-ctrl" id="btnTogglePills" title="Ativar ou desativar números sobre o mapa">🏷️ Números no mapa: ON</button>
+        <button type="button" class="btn-mapa-ctrl" id="btnGps" title="Centralizar na minha posição atual">📍 Minha posição</button>
+      </div>
+      <button type="button" class="btn-abrir-painel hidden" id="btnAbrirPainel">📋 Mostrar mapas</button>
       <div class="legenda-mapa" aria-hidden="true">
         <span class="leg-item"><span class="leg-dot completo"></span>✓ Completo</span>
         <span class="leg-item"><span class="leg-dot andamento"></span>◐ Em andamento</span>
@@ -222,6 +234,7 @@ button:disabled{opacity:.55;cursor:default}
           <div class="pills-data">
             <button type="button" class="pill-data ativo" id="dgSemPrazo">Sem prazo (até concluir)</button>
             <button type="button" class="pill-data" id="dgHoje">Hoje (1 dia)</button>
+            <button type="button" class="pill-data" id="dgAmanha">Amanhã</button>
           </div>
           <label for="dgAte">Ou defina uma data limite (opcional)</label>
           <input id="dgAte" type="date">
@@ -233,7 +246,9 @@ button:disabled{opacity:.55;cursor:default}
           <select id="lbNome"></select>
           <label for="lbFrente">Frente</label>
           <select id="lbFrente"></select>
-          <label for="lbAte">Vale até (para exceções na frente)</label>
+          <label for="lbMapa">Escopo (frente inteira ou mapa específico)</label>
+          <select id="lbMapa"></select>
+          <label for="lbAte">Vale até (para exceções na frente ou mapa)</label>
           <div class="pills-data">
             <button type="button" class="pill-data" id="lbHoje">Hoje (1 dia)</button>
             <button type="button" class="pill-data" id="lbAmanha">Amanhã</button>
@@ -242,7 +257,7 @@ button:disabled{opacity:.55;cursor:default}
           <button type="button" id="btnLiberar">Liberar acesso temporário</button>
 
           <div class="sec-adm">
-            <strong>Permissões temporárias ativas (por frente)</strong>
+            <strong>Permissões temporárias ativas (frentes e mapas)</strong>
             <div id="listaPermissoes" style="margin-top:8px"></div>
           </div>
         </div>
@@ -260,8 +275,10 @@ var API = "https://script.google.com/macros/s/AKfycbw0Qd_t6OxiVmr-mu_mvWdYSJhazM
 var $ = function (id) { return document.getElementById(id); };
 var sessao = null, dados = null, mapaLeaflet = null, camada = null, gpsMarker = null;
 var feitas = {}, pode = {}, podeMapa = {};
-var permissoesAte = {}, designacoesAtivas = {}, minhasDesignacoes = {}, responsaveisFrente = {};
+var permissoesAte = {}, permissoesMapaAte = {}, designacoesAtivas = {}, minhasDesignacoes = {}, responsaveisFrente = {};
 var mapaAtual = null, filtroStatus = "todos", abaAdminAtual = "dir";
+var painelRecolhido = false;
+var mostrarNumeros = (function () { try { return localStorage.getItem("mostrarNumerosMapa") !== "0"; } catch (e) { return true; } })();
 var progTimer = null, ultimoProg = 0, atualizandoProg = false, hashProg = "";
 var emVoo = 0, marcandoQ = {};
 
@@ -398,10 +415,34 @@ function atualizarPillsDesignar() {
   var v = $("dgAte").value;
   $("dgSemPrazo").classList.toggle("ativo", !v);
   $("dgHoje").classList.toggle("ativo", v === dataLocalYMD(0));
+  $("dgAmanha").classList.toggle("ativo", v === dataLocalYMD(1));
 }
 $("dgSemPrazo").onclick = function () { $("dgAte").value = ""; atualizarPillsDesignar(); };
 $("dgHoje").onclick = function () { $("dgAte").value = dataLocalYMD(0); atualizarPillsDesignar(); };
+$("dgAmanha").onclick = function () { $("dgAte").value = dataLocalYMD(1); atualizarPillsDesignar(); };
 $("dgAte").onchange = atualizarPillsDesignar;
+
+function atualizarPainelRecolhido(recolher) {
+  painelRecolhido = !!recolher;
+  $("info").classList.toggle("recolhido", painelRecolhido);
+  $("btnAbrirPainel").classList.toggle("hidden", !painelRecolhido);
+  $("btnPainel").textContent = painelRecolhido ? "Mostrar mapas" : "Recolher";
+  setTimeout(function () { if (mapaLeaflet) mapaLeaflet.invalidateSize(); }, 50);
+}
+$("btnPainel").onclick = function () { atualizarPainelRecolhido(!painelRecolhido); };
+$("btnAbrirPainel").onclick = function () { atualizarPainelRecolhido(false); };
+
+function atualizarBtnPills() {
+  var b = $("btnTogglePills");
+  b.textContent = mostrarNumeros ? "🏷️ Números no mapa: ON" : "🏷️ Números no mapa: OFF";
+  b.classList.toggle("off", !mostrarNumeros);
+}
+$("btnTogglePills").onclick = function () {
+  mostrarNumeros = !mostrarNumeros;
+  try { localStorage.setItem("mostrarNumerosMapa", mostrarNumeros ? "1" : "0"); } catch (e) {}
+  atualizarBtnPills();
+  if (dados) desenhar(false);
+};
 
 function atualizarPillsPerm() {
   var v = $("lbAte").value;
@@ -432,7 +473,7 @@ async function atualizarProgressoSilencioso(forcar) {
     ultimoProg = Date.now();
     if (!r || !r.ok || emVoo > 0) return;
     var novoHash = JSON.stringify({
-      f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente
+      f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente
     });
     if (novoHash !== hashProg) {
       aplicarProgresso(r);
@@ -455,6 +496,8 @@ async function abrirApp() {
   $("lbAte").value = dataLocalYMD(0);
   atualizarPillsPerm();
   atualizarPillsDesignar();
+  atualizarBtnPills();
+  atualizarPainelRecolhido(false);
   iniciarMapa();
 
   var pDados = chamar({ acao: "dadosMapas", token: sessao.token });
@@ -504,6 +547,9 @@ function aplicarProgresso(r) {
 
   permissoesAte = r.permissoesAte || {};
 
+  permissoesMapaAte = {};
+  Object.keys(r.permissoesMapaAte || {}).forEach(function (k) { permissoesMapaAte[normKey(k)] = r.permissoesMapaAte[k]; });
+
   designacoesAtivas = {};
   Object.keys(r.designacoesAtivas || {}).forEach(function (k) { designacoesAtivas[normKey(k)] = r.designacoesAtivas[k]; });
 
@@ -512,7 +558,7 @@ function aplicarProgresso(r) {
 
   responsaveisFrente = r.responsaveisFrente || {};
   hashProg = JSON.stringify({
-    f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente
+    f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente
   });
 }
 
@@ -578,7 +624,9 @@ function montarFiltros() {
     var o2 = document.createElement("option"); o2.value = g; o2.textContent = g; df.appendChild(o2);
   });
   df.onchange = preencherMapasDesignar;
+  lf.onchange = preencherMapasPerm;
   preencherMapasDesignar();
+  preencherMapasPerm();
   preencherMapas();
   desenhar(true);
 }
@@ -592,11 +640,31 @@ function preencherMapasDesignar() {
   });
 }
 
+function preencherMapasPerm() {
+  if (!dados) return;
+  var g = $("lbFrente").value, lm = $("lbMapa"); lm.innerHTML = "";
+  var op0 = document.createElement("option");
+  op0.value = "";
+  op0.textContent = "Toda a frente (todos os mapas)";
+  lm.appendChild(op0);
+  dados.mapas.forEach(function (m) {
+    if (g && m.g !== g) return;
+    var o = document.createElement("option"); o.value = m.n; o.textContent = "Apenas Mapa " + m.n; lm.appendChild(o);
+  });
+}
+
 $("btnLiberar").onclick = async function () {
   var nome = $("lbNome").value;
   if (!nome) { msg($("msgAdm"), "Selecione um dirigente."); return; }
   var b = $("btnLiberar"); b.disabled = true;
-  var r = await chamar({ acao: "liberarTemporario", token: sessao.token, nome: nome, frente: $("lbFrente").value, ate: $("lbAte").value });
+  var r = await chamar({
+    acao: "liberarTemporario",
+    token: sessao.token,
+    nome: nome,
+    frente: $("lbFrente").value,
+    mapa: $("lbMapa").value,
+    ate: $("lbAte").value
+  });
   b.disabled = false;
   if (!r.ok) { msg($("msgAdm"), r.erro); return; }
   msg($("msgAdm"), "Permissão temporária liberada para " + nome + ".", true);
@@ -656,6 +724,7 @@ function desenhar(ajustarZoom) {
       var tip = "Mapa " + m.n + " · " + st.icone + " " + (st.total ? (st.feitasN + " de " + st.total) : "0");
       poly.bindTooltip(tip);
       var abrir = function () {
+        if (painelRecolhido) atualizarPainelRecolhido(false);
         $("selMapa").value = String(item.i);
         desenhar(true);
       };
@@ -665,7 +734,7 @@ function desenhar(ajustarZoom) {
       poly.on("mouseout", restaurar);
       poly.on("click", abrir);
 
-      if (idx === "") {
+      if (idx === "" && mostrarNumeros) {
         var centro = poly.getBounds().getCenter();
         var badge = L.marker(centro, {
           icon: L.divIcon({
@@ -675,9 +744,6 @@ function desenhar(ajustarZoom) {
             iconAnchor: [0, 0]
           })
         }).addTo(camada);
-        badge.bindTooltip(tip);
-        badge.on("mouseover", destacar);
-        badge.on("mouseout", restaurar);
         badge.on("click", abrir);
       }
 
@@ -686,9 +752,11 @@ function desenhar(ajustarZoom) {
     if (idx !== "") {
       Object.keys(m.q || {}).forEach(function (q) {
         var ll = m.q[q];
-        var cls = feitasDe(m)[q] ? "quadra-pin feita" : "quadra-pin";
-        var ic = L.divIcon({ className: "", html: '<div class="' + cls + '">' + q + "</div>", iconSize: [24, 24], iconAnchor: [12, 12] });
-        L.marker(ll, { icon: ic }).addTo(camada).on("click", function () { window.open(linkGPS(ll[0], ll[1]), "_blank"); });
+        if (mostrarNumeros) {
+          var cls = feitasDe(m)[q] ? "quadra-pin feita" : "quadra-pin";
+          var ic = L.divIcon({ className: "", html: '<div class="' + cls + '">' + q + "</div>", iconSize: [24, 24], iconAnchor: [12, 12] });
+          L.marker(ll, { icon: ic }).addTo(camada).on("click", function () { window.open(linkGPS(ll[0], ll[1]), "_blank"); });
+        }
         limites.push(ll);
       });
     }
@@ -702,11 +770,23 @@ function desenhar(ajustarZoom) {
   setTimeout(function () { mapaLeaflet.invalidateSize(); }, 50);
 }
 
+function criarBtnRecolher() {
+  var b = document.createElement("button");
+  b.type = "button";
+  b.className = "btn-voltar";
+  b.innerHTML = '<span class="so-mob">Recolher painel ▾</span><span class="so-desk">Recolher ▸</span>';
+  b.onclick = function () { atualizarPainelRecolhido(true); };
+  return b;
+}
+
 function mostrarListaMapas(lista) {
   var box = $("info"); box.innerHTML = "";
-  var tit = document.createElement("div"); tit.className = "tit";
+  var topo = document.createElement("div"); topo.className = "info-topo";
+  var tit = document.createElement("div"); tit.className = "tit"; tit.style.marginBottom = "0";
   tit.textContent = lista.length ? "Mapas (" + lista.length + ")" : "Nenhum mapa encontrado";
-  box.appendChild(tit);
+  topo.appendChild(tit);
+  topo.appendChild(criarBtnRecolher());
+  box.appendChild(topo);
 
   if (!lista.length) return;
 
@@ -804,6 +884,7 @@ function mostrarInfo(m) {
     desenhar(true);
   };
   topo.appendChild(voltar);
+  topo.appendChild(criarBtnRecolher());
   box.appendChild(topo);
 
   var t = document.createElement("div"); t.className = "tit"; t.textContent = "Mapa " + m.n + " · " + m.g; box.appendChild(t);
@@ -821,11 +902,13 @@ function mostrarInfo(m) {
   }
 
   var permAte = permissoesAte[m.g];
+  var permMapaAte = permissoesMapaAte[k];
   var minhaDesig = minhasDesignacoes[k];
-  if (permAte || minhaDesig) {
+  if (permAte || permMapaAte || minhaDesig) {
     var av = document.createElement("div"); av.className = "aviso-perm";
     var msgs = [];
     if (permAte) msgs.push("Sua permissão temporária nesta frente vale até " + fmtData(permAte));
+    if (permMapaAte) msgs.push("Sua permissão temporária neste mapa vale até " + fmtData(permMapaAte));
     if (minhaDesig) {
       msgs.push(minhaDesig === "indeterminado"
         ? "Você está designado neste mapa (sem prazo)"
@@ -1026,14 +1109,14 @@ async function carregarAdmin() {
     perms.forEach(function (pm) {
       var row = document.createElement("div"); row.className = "row";
       var info = document.createElement("div");
-      var n = document.createElement("div"); n.className = "nm"; n.textContent = pm.nome + " · " + pm.frente;
+      var n = document.createElement("div"); n.className = "nm"; n.textContent = pm.nome + " · " + pm.frente + (pm.mapa ? " · Mapa " + pm.mapa : " (toda a frente)");
       var s = document.createElement("div"); s.className = "st"; s.textContent = "Vale até " + fmtData(pm.ate);
       info.appendChild(n); info.appendChild(s); row.appendChild(info);
       var bt = document.createElement("div"); bt.className = "bt";
       var bRem = document.createElement("button"); bRem.type = "button"; bRem.className = "no"; bRem.textContent = "Remover";
       bRem.onclick = async function () {
         bRem.disabled = true;
-        var res = await chamar({ acao: "removerPermissao", token: sessao.token, nome: pm.nome, frente: pm.frente });
+        var res = await chamar({ acao: "removerPermissao", token: sessao.token, nome: pm.nome, frente: pm.frente, mapa: pm.mapa || "" });
         if (!res.ok) { msg($("msgAdm"), res.erro); bRem.disabled = false; return; }
         msg($("msgAdm"), "Permissão removida.", true);
         await carregarProgresso();
