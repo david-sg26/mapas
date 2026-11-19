@@ -22,38 +22,79 @@
 <style>
 :root{
   color-scheme:dark;
-  --bg:#111318;--card:#1D2026;--modal:#282C34;--tx:#E2E2E9;--mut:#9396A0;--bd:#2E333D;
-  --pri:#A8C7FA;--on-pri:#062E6F;--ok:#22c55e;--on-ok:#052e16;--warn:#f59e0b;--warn-bg:rgba(245,158,11,.16);--bad:#f87171;--on-bad:#3b0808;
-  --soft:rgba(168,199,250,.14);--sh:0 12px 32px rgba(0,0,0,.5)
+  --bg:#111318;--card:#1D2026;--modal:#282C34;--hover:#303540;--tx:#E3E2E6;--mut:#9EA3AE;--bd:rgba(255,255,255,.08);
+  --pri:#A8C7FA;--on-pri:#062E6F;--sec-bg:#2B3445;--sec-tx:#D3E3FD;
+  --ok:#22c55e;--on-ok:#052e16;--warn:#f59e0b;--warn-bg:rgba(245,158,11,.16);--bad:#F2B8B5;--on-bad:#601410;--notif:#EF4444;
+  --soft:rgba(168,199,250,.14);--sh:0 12px 32px rgba(0,0,0,.48)
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;font-family:'Plus Jakarta Sans','Outfit',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--tx)}
+body{margin:0;font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx)}
 button,input,select{font-family:inherit}
 :focus-visible{outline:2px solid var(--pri);outline-offset:2px}
 .wrap{width:100%;max-width:440px;margin:0 auto;padding:16px}
 h1{font-size:1.35rem;font-weight:700;letter-spacing:-.01em;margin:8px 0 16px}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:18px;margin-bottom:12px;box-shadow:var(--sh)}
 label{display:block;font-size:.85rem;color:var(--mut);margin:10px 0 4px;font-weight:500}
-input,select{width:100%;padding:12px 14px;font-size:1rem;border:1px solid var(--bd);border-radius:12px;background:var(--bg);color:var(--tx);transition:border-color .15s}
+input,select{width:100%;padding:12px 14px;font-size:1rem;border:1px solid var(--bd);border-radius:20px;background:var(--bg);color:var(--tx);transition:border-color .15s}
 input:focus,select:focus{border-color:var(--pri)}
-button{width:100%;padding:12px 18px;margin-top:14px;font-size:.95rem;border:0;border-radius:20px;background:var(--pri);color:var(--on-pri);font-weight:700;cursor:pointer;transition:opacity .15s,background-color .15s,border-color .15s,transform .05s}
+button{width:100%;padding:12px 18px;margin-top:14px;font-size:.95rem;border:0;border-radius:20px;background:var(--pri);color:var(--on-pri);font-weight:700;cursor:pointer;transition:opacity .15s,background-color .15s,border-color .15s,transform .05s;min-height:42px}
 button:active{transform:scale(.99)}
-button.sec{background:rgba(168,199,250,.08);color:var(--pri);border:1px solid var(--bd)}
+button.sec{background:var(--sec-bg);color:var(--sec-tx);border:1px solid var(--bd)}
 button:disabled{opacity:.55;cursor:default}
 .msg{margin-top:12px;font-size:.9rem;min-height:1.2em;font-weight:500}
 .err{color:var(--bad)}.okc{color:var(--ok)}
 .hidden{display:none!important}
 
-/* Layout principal */
-#telaApp{display:flex;flex-direction:column;height:100%;overflow:hidden}
-.barra{display:flex;gap:8px;align-items:center;padding:8px 12px;background:var(--card);border-bottom:1px solid var(--bd);z-index:10;flex-wrap:wrap}
-.barra strong{flex:1;min-width:110px;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.barra button{width:auto;margin:0;padding:8px 14px;font-size:.84rem;min-height:38px;border-radius:20px}
-.filtros{display:flex;gap:8px;padding:8px 12px;background:var(--card);border-bottom:1px solid var(--bd);z-index:10}
-.filtros select{padding:9px 12px;font-size:.92rem;border-radius:12px}
+/* Layout principal e Navbar Unificada */
+#telaApp{display:flex;flex-direction:column;height:100vh;height:100dvh;padding-top:56px;overflow:hidden}
+.barra{position:fixed;top:0;left:0;width:100%;height:56px;z-index:1000;display:flex;align-items:center;justify-content:space-between;gap:4px;padding:0 10px;background:var(--card);border-bottom:1px solid var(--bd);flex-wrap:nowrap}
+.nav-esq,.nav-dir{display:flex;align-items:center;gap:4px;min-width:0}
+.nav-dir{flex:1;justify-content:flex-end}
+.nav-icon-btn{width:40px;min-width:40px;height:40px;min-height:40px;padding:0;margin:0;border-radius:20px;background:transparent;color:var(--tx);border:1px solid transparent;display:inline-flex;align-items:center;justify-content:center;position:relative;flex-shrink:0}
+.nav-icon-btn:hover,.nav-icon-btn.ativo{background:var(--hover);color:var(--pri)}
+#btnBuscaMapa{width:auto;padding:0 12px;gap:6px;background:var(--bg);border-color:var(--bd);font-size:.84rem;font-weight:600}
+.nav-brand{display:inline-flex;align-items:center;gap:7px;padding:0 4px;font-weight:700;font-size:.96rem;color:var(--tx);white-space:nowrap;flex-shrink:0}
+.nav-brand-ico{color:var(--pri);flex-shrink:0}
+.sync-dot{width:6px;height:6px;border-radius:999px;background:var(--ok);opacity:.35;transition:opacity .35s ease;flex-shrink:0}
+.sync-dot.pulso{opacity:1}
+.nav-div{width:1px;height:24px;background:var(--bd);margin:0 2px;flex-shrink:0}
+#selGrupo{width:auto;min-width:68px;max-width:210px;height:40px;padding:0 26px 0 10px;font-size:.85rem;font-weight:600;border-radius:20px;background:transparent url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239EA3AE' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 8px center;color:var(--tx);border:1px solid transparent;appearance:none;-webkit-appearance:none;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;cursor:pointer;flex:0 1 auto}
+#selGrupo:hover{background-color:var(--hover)}
+#selGrupo:focus{background-color:var(--bg);border-color:var(--pri)}
+.nav-user-wrap{position:relative;flex-shrink:0}
+.nav-user-btn{width:auto;height:40px;min-height:40px;min-width:40px;margin:0;padding:3px 8px 3px 3px;border-radius:20px;background:transparent;color:var(--tx);border:1px solid transparent;display:inline-flex;align-items:center;gap:8px}
+.nav-user-btn:hover,.nav-user-btn.ativo{background:var(--hover)}
+.avatar-circ{width:34px;height:34px;border-radius:999px;background:var(--sec-bg);color:var(--sec-tx);font-weight:700;font-size:.88rem;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--bd);flex-shrink:0}
+.nav-user-meta{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15;min-width:0}
+#navUserNome{font-size:.82rem;font-weight:700;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-user-tag{font-size:.68rem;color:var(--mut);font-weight:600}
+@media (max-width:639px){
+  .barra{padding:0 6px;gap:2px}
+  .nav-esq,.nav-dir{gap:2px}
+  .nav-div{margin:0 1px}
+  .nav-brand-txt,.nav-busca-txt,.nav-user-meta{display:none}
+  #btnBuscaMapa{width:40px;padding:0;background:transparent;border-color:transparent}
+  #selGrupo{max-width:122px;padding:0 22px 0 8px;font-size:.8rem}
+  .nav-user-btn{padding:3px}
+}
 
-#corpoApp{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
+/* Popovers da Navbar (Busca e Menu Usuário) */
+#popBuscaMapa{position:fixed;top:62px;right:12px;width:min(360px,calc(100vw - 24px));max-height:min(420px,calc(100dvh - 80px));background:var(--modal);border:1px solid var(--bd);border-radius:16px;padding:12px;box-shadow:var(--sh);z-index:1500;display:flex;flex-direction:column;gap:8px}
+#inpBuscaMapa{padding:10px 14px;font-size:.92rem;border-radius:20px;background:var(--bg);border:1px solid var(--bd)}
+#listaBuscaMapa{overflow-y:auto;display:flex;flex-direction:column;gap:5px;max-height:310px}
+.item-busca-mapa{width:100%;margin:0;padding:10px 12px;min-height:42px;border-radius:14px;background:var(--card);color:var(--tx);border:1px solid var(--bd);text-align:left;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.86rem;font-weight:600}
+.item-busca-mapa:hover,.item-busca-mapa.ativo{background:var(--hover);border-color:var(--pri)}
+.busca-esq{display:inline-flex;align-items:center;gap:8px;min-width:0}
+.busca-esq span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.busca-dot{width:9px;height:9px;border-radius:999px;flex-shrink:0}
+.busca-cont{font-size:.76rem;color:var(--mut);font-weight:600;white-space:nowrap}
+#menuUsuario{position:fixed;top:62px;right:10px;width:236px;background:var(--modal);border:1px solid var(--bd);border-radius:16px;padding:12px;box-shadow:var(--sh);z-index:1500;display:flex;flex-direction:column;gap:8px}
+.menu-user-head{padding-bottom:8px;border-bottom:1px solid var(--bd)}
+.menu-user-head strong{display:block;font-size:.92rem;word-break:break-word}
+#menuUsuario button{width:100%;margin:0;min-height:40px;padding:8px 14px;font-size:.85rem;text-align:left}
+
+#corpoApp{display:flex;flex-direction:column;flex:1;height:calc(100vh - 56px);height:calc(100dvh - 56px);min-height:0;overflow:hidden}
 #wrapMapa{position:relative;flex:1;min-height:200px}
 #mapa{width:100%;height:100%}
 #info{background:var(--bg);border-top:1px solid var(--bd);padding:12px;max-height:44%;overflow:auto}
@@ -68,10 +109,10 @@ button:disabled{opacity:.55;cursor:default}
 
 /* Controles sobre o mapa */
 .controles-mapa{position:absolute;top:10px;right:10px;z-index:800;display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;max-width:calc(100% - 56px)}
-.btn-mapa-ctrl{width:auto;margin:0;padding:7px 14px;font-size:.8rem;border-radius:20px;background:var(--card);color:var(--tx);border:1px solid var(--bd);box-shadow:var(--sh);min-height:36px;display:inline-flex;align-items:center;gap:5px}
+.btn-mapa-ctrl{width:auto;margin:0;padding:8px 14px;font-size:.8rem;border-radius:20px;background:var(--card);color:var(--tx);border:1px solid var(--bd);box-shadow:var(--sh);min-height:40px;display:inline-flex;align-items:center;gap:5px}
 .btn-mapa-ctrl.off{opacity:.8}
 .btn-mapa-ctrl.ativo-gps{background:var(--pri);color:var(--on-pri);border-color:var(--pri)}
-.btn-abrir-painel{position:absolute;bottom:10px;right:10px;z-index:800;width:auto;margin:0;padding:8px 16px;font-size:.84rem;border-radius:20px;background:var(--pri);color:var(--on-pri);box-shadow:var(--sh);min-height:38px}
+.btn-abrir-painel{position:absolute;bottom:10px;right:10px;z-index:800;width:auto;margin:0;padding:8px 16px;font-size:.84rem;border-radius:20px;background:var(--pri);color:var(--on-pri);box-shadow:var(--sh);min-height:40px}
 .legenda-mapa{position:absolute;bottom:10px;left:10px;z-index:800;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:7px 12px;font-size:.76rem;display:flex;flex-wrap:wrap;gap:10px;box-shadow:var(--sh);pointer-events:none}
 .leg-item{display:inline-flex;align-items:center;gap:4px;font-weight:600}
 .leg-dot{width:10px;height:10px;border-radius:999px;display:inline-block}
@@ -93,15 +134,15 @@ button:disabled{opacity:.55;cursor:default}
 
 /* Lista e detalhes em #info */
 .info-topo{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap}
-.btn-voltar{width:auto;margin:0;padding:7px 14px;font-size:.84rem;border-radius:20px;background:var(--card);color:var(--tx);border:1px solid var(--bd);min-height:36px}
+.btn-voltar{width:auto;margin:0;padding:7px 14px;font-size:.84rem;border-radius:20px;background:var(--sec-bg);color:var(--sec-tx);border:1px solid var(--bd);min-height:40px}
 #info .tit{font-weight:700;font-size:1.05rem;margin-bottom:4px}
-.chips-filtro{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
-.chip{width:auto;margin:0;padding:6px 12px;font-size:.78rem;border-radius:20px;background:var(--card);color:var(--tx);border:1px solid var(--bd);font-weight:600;min-height:32px}
+.chips-filtro{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
+.chip{width:auto;margin:0;padding:6px 12px;font-size:.78rem;border-radius:20px;background:var(--card);color:var(--tx);border:1px solid var(--bd);font-weight:600;min-height:36px}
 .chip.ativo{background:var(--pri);color:var(--on-pri);border-color:var(--pri)}
 
-.lista-mapas{display:flex;flex-direction:column;gap:8px}
-.item-mapa{display:flex;flex-direction:column;gap:6px;width:100%;margin:0;padding:12px 14px;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:16px;text-align:left;font-weight:500;font-size:.92rem;transition:border-color .15s,background-color .15s}
-.item-mapa:hover{background:var(--modal);border-color:var(--pri)}
+.lista-mapas{display:flex;flex-direction:column;gap:10px}
+.item-mapa{display:flex;flex-direction:column;gap:8px;width:100%;margin:0;padding:14px 16px;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:16px;text-align:left;font-weight:500;font-size:.92rem;transition:border-color .15s,background-color .15s}
+.item-mapa:hover{background:var(--hover);border-color:var(--pri)}
 .item-linha{display:flex;align-items:center;gap:8px;width:100%}
 .item-icone{width:22px;height:22px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;color:#fff;flex-shrink:0}
 .item-icone.completo{background:#16a34a}
@@ -109,12 +150,12 @@ button:disabled{opacity:.55;cursor:default}
 .item-icone.pendente{background:#2563eb}
 .item-nome{flex:1;font-weight:700;min-width:0}
 .item-sub{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.76rem;color:var(--mut);margin-top:2px}
-.tag-desig{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;background:var(--soft);color:var(--pri);font-weight:600;font-size:.74rem}
+.tag-desig{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;background:var(--sec-bg);color:var(--sec-tx);font-weight:600;font-size:.74rem}
 .tag-hist{color:var(--mut);font-size:.73rem}
 .tag-nota{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;background:var(--warn-bg);color:var(--warn);font-weight:600;font-size:.72rem}
 .item-cont{font-size:.84rem;color:var(--tx);font-weight:700;white-space:nowrap}
 .barra-prog{width:100%;height:6px;background:var(--bd);border-radius:999px;overflow:hidden}
-.barra-prog > span{display:block;height:100%;border-radius:999px;transition:width .2s}
+.barra-prog > span{display:block;height:100%;border-radius:999px;transition:width .25s ease}
 .barra-prog > span.completo{background:#16a34a}
 .barra-prog > span.andamento{background:#eab308}
 .barra-prog > span.pendente{background:#2563eb}
@@ -130,17 +171,17 @@ button:disabled{opacity:.55;cursor:default}
 .sel{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .sel button{margin:0;padding:10px 16px;font-size:.88rem;width:auto;min-height:42px;border-radius:20px}
 .sel button.bad{background:var(--bad);color:var(--on-bad)}
-.aviso-perm{font-size:.82rem;color:var(--pri);background:var(--soft);border:1px solid var(--bd);border-radius:12px;padding:8px 11px;margin:4px 0 8px;font-weight:500}
+.aviso-perm{font-size:.82rem;color:var(--sec-tx);background:var(--sec-bg);border:1px solid var(--bd);border-radius:16px;padding:9px 12px;margin:4px 0 8px;font-weight:500}
 .resp-box{font-size:.82rem;color:var(--mut);margin:2px 0 6px}
 
 /* Modais Gerenciar, Admin e Senha */
-#painelAdmin,#modalGerenciar,#modalSenha{position:fixed;inset:0;z-index:2000;background:rgba(8,10,14,.68);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:12px}
+#painelAdmin,#modalGerenciar,#modalSenha{position:fixed;inset:0;z-index:2000;background:rgba(10,12,16,.72);display:flex;align-items:center;justify-content:center;padding:12px}
 .adm-card{width:100%;max-width:600px;max-height:90vh;background:var(--modal);border:1px solid var(--bd);border-radius:16px;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--sh)}
 .adm-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px;border-bottom:1px solid var(--bd)}
 .adm-head strong{font-size:1.02rem}
-.adm-head button{width:auto;margin:0;padding:6px 14px;font-size:.84rem;min-height:36px;border-radius:20px}
+.adm-head button{width:auto;margin:0;padding:6px 14px;font-size:.84rem;min-height:40px;border-radius:20px}
 .adm-tabs{display:flex;gap:6px;padding:8px 12px;background:var(--card);border-bottom:1px solid var(--bd);overflow-x:auto}
-.adm-tab{width:auto;margin:0;flex:1;padding:8px 12px;font-size:.82rem;background:transparent;color:var(--mut);border:1px solid transparent;border-radius:20px;white-space:nowrap;min-height:36px}
+.adm-tab{width:auto;margin:0;flex:1;padding:8px 12px;font-size:.82rem;background:transparent;color:var(--mut);border:1px solid transparent;border-radius:20px;white-space:nowrap;min-height:40px}
 .adm-tab.ativo{background:var(--pri);color:var(--on-pri);border-color:var(--pri);font-weight:700}
 .adm-body{padding:16px;overflow:auto;flex:1}
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--bd);flex-wrap:wrap}
@@ -150,26 +191,26 @@ button:disabled{opacity:.55;cursor:default}
 .badge-st.admin{background:var(--soft);color:var(--pri)}
 .badge-st.aprovado{background:rgba(34,197,94,.16);color:var(--ok)}
 .badge-st.pendente{background:var(--warn-bg);color:var(--warn)}
-.badge-st.bloqueado{background:rgba(248,113,113,.16);color:var(--bad)}
+.badge-st.bloqueado{background:rgba(242,184,181,.16);color:var(--bad)}
 .badge-tipo{font-size:.7rem;padding:2px 8px;border-radius:999px;font-weight:700;border:1px solid var(--bd);color:var(--tx);background:var(--card)}
 .badge-tipo.perm{border-color:var(--ok);color:var(--ok)}
 .badge-aut{font-size:.7rem;padding:2px 8px;border-radius:999px;font-weight:700;background:var(--warn-bg);color:var(--warn)}
 #listaAdmin{padding-bottom:140px}
 .row .bt{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
-.row button{width:auto;margin:0;padding:7px 12px;font-size:.8rem;min-height:34px;border-radius:20px}
-.row .no{background:var(--bad);color:var(--on-bad)}.row .yes{background:var(--ok);color:var(--on-ok)}.row .sec-btn{background:var(--card);color:var(--tx);border:1px solid var(--bd)}
+.row button{width:auto;margin:0;padding:7px 14px;font-size:.8rem;min-height:38px;border-radius:20px}
+.row .no{background:var(--bad);color:var(--on-bad)}.row .yes{background:var(--ok);color:var(--on-ok)}.row .sec-btn{background:var(--sec-bg);color:var(--sec-tx);border:1px solid var(--bd)}
 .menu-adm-wrap{position:relative;display:inline-block}
-.row .btn-menu-adm{width:36px;height:36px;min-height:36px;padding:0;margin:0;border-radius:999px;background:var(--card);color:var(--tx);border:1px solid var(--bd);font-size:1.15rem;line-height:1;display:inline-flex;align-items:center;justify-content:center}
-.row .btn-menu-adm:hover,.menu-adm-wrap.aberto .btn-menu-adm{background:var(--pri);color:var(--on-pri);border-color:var(--pri)}
-.menu-adm-lista{position:absolute;right:0;top:calc(100% + 6px);min-width:200px;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:6px;box-shadow:var(--sh);z-index:2100;display:none;flex-direction:column;gap:3px}
+.row .btn-menu-adm{width:40px;height:40px;min-height:40px;padding:0;margin:0;border-radius:999px;background:var(--card);color:var(--tx);border:1px solid var(--bd);font-size:1.15rem;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+.row .btn-menu-adm:hover,.menu-adm-wrap.aberto .btn-menu-adm{background:var(--hover);color:var(--pri);border-color:var(--pri)}
+.menu-adm-lista{position:absolute;right:0;top:calc(100% + 6px);min-width:200px;background:var(--modal);border:1px solid var(--bd);border-radius:16px;padding:6px;box-shadow:var(--sh);z-index:2100;display:none;flex-direction:column;gap:3px}
 .menu-adm-wrap.aberto .menu-adm-lista{display:flex}
-.menu-adm-lista button{width:100%;margin:0;padding:9px 12px;font-size:.82rem;border-radius:10px;text-align:left;background:transparent;color:var(--tx);border:0;font-weight:600;min-height:36px}
-.menu-adm-lista button:hover{background:var(--modal)}
+.menu-adm-lista button{width:100%;margin:0;padding:9px 12px;font-size:.82rem;border-radius:12px;text-align:left;background:transparent;color:var(--tx);border:0;font-weight:600;min-height:38px}
+.menu-adm-lista button:hover{background:var(--hover)}
 .menu-adm-lista button.no{background:transparent;color:var(--bad)}
-.menu-adm-lista button.no:hover{background:rgba(248,113,113,.14)}
+.menu-adm-lista button.no:hover{background:rgba(242,184,181,.14)}
 .menu-adm-lista button.yes{background:transparent;color:var(--ok)}
 .pills-data{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
-.pill-data{width:auto;margin:0;padding:7px 13px;font-size:.82rem;border-radius:20px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);min-height:34px}
+.pill-data{width:auto;margin:0;padding:7px 13px;font-size:.82rem;border-radius:20px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);min-height:38px}
 .pill-data.ativo{background:var(--pri);color:var(--on-pri);border-color:var(--pri)}
 .sec-adm{margin-top:14px;padding-top:12px;border-top:1px solid var(--bd)}
 .adm-foot{padding:0 16px 14px}
@@ -178,19 +219,18 @@ button:disabled{opacity:.55;cursor:default}
 .nota-txt{font-size:.86rem;line-height:1.35;margin-top:4px;white-space:pre-wrap;word-break:break-word}
 .nota-meta{font-size:.74rem;color:var(--mut);margin-top:3px}
 .nota-form{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
-.nota-form input{flex:1;min-width:160px;padding:8px 12px;font-size:.86rem}
-.nota-form button{width:auto;margin:0;padding:8px 14px;font-size:.8rem;min-height:36px;border-radius:20px}
+.nota-form input{flex:1;min-width:160px;padding:9px 14px;font-size:.86rem}
+.nota-form button{width:auto;margin:0;padding:8px 14px;font-size:.8rem;min-height:40px;border-radius:20px}
 .frente-card{padding:10px 0;border-bottom:1px solid var(--bd)}
 .frente-card:last-child{border-bottom:0}
 .frente-edit{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
-.frente-edit input{flex:1;min-width:180px;padding:8px 12px;font-size:.88rem}
-.frente-edit button{width:auto;margin:0;padding:8px 14px;font-size:.82rem;min-height:36px;border-radius:20px}
+.frente-edit input{flex:1;min-width:180px;padding:9px 14px;font-size:.88rem}
+.frente-edit button{width:auto;margin:0;padding:8px 14px;font-size:.82rem;min-height:40px;border-radius:20px}
 .pills-resp{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
-.pill-resp{width:auto;margin:0;padding:4px 11px;font-size:.75rem;border-radius:20px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);min-height:28px;font-weight:600}
+.pill-resp{width:auto;margin:0;padding:5px 11px;font-size:.75rem;border-radius:20px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);min-height:32px;font-weight:600}
 .pill-resp.ativo{background:var(--pri);color:var(--on-pri);border-color:var(--pri)}
-.dica-login{font-size:.82rem;color:var(--mut);background:var(--soft);border:1px solid var(--bd);border-radius:12px;padding:8px 11px;margin-top:8px;line-height:1.35}
-#btnAdmin{display:inline-flex;align-items:center;gap:6px}
-.badge-notif{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#ef4444;color:#fff;font-size:.72rem;font-weight:800;line-height:1;box-shadow:0 2px 6px rgba(239,68,68,.45)}
+.dica-login{font-size:.82rem;color:var(--mut);background:var(--soft);border:1px solid var(--bd);border-radius:16px;padding:9px 12px;margin-top:8px;line-height:1.35}
+.badge-notif{position:absolute;top:3px;right:3px;display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--notif);color:#fff;font-size:.68rem;font-weight:800;line-height:1}
 </style>
 </head>
 <body>
@@ -233,18 +273,60 @@ button:disabled{opacity:.55;cursor:default}
 </div>
 
 <div id="telaApp" class="hidden">
-  <div class="barra">
-    <strong id="ola"></strong>
-    <button class="sec" id="btnPainel" title="Mostrar ou recolher lista de mapas">Recolher</button>
-    <button class="sec hidden" id="btnGerenciar">Gerenciar</button>
-    <button class="sec hidden" id="btnAdmin">Admin<span id="badgeNotifAdmin" class="badge-notif hidden">0</span></button>
-    <button class="sec" id="btnSenha" title="Trocar minha senha">🔑 Senha</button>
-    <button class="sec" id="btnSair">Sair</button>
+  <header class="barra">
+    <div class="nav-esq">
+      <button type="button" class="nav-icon-btn" id="btnPainel" title="Recolher painel" aria-label="Mostrar ou recolher lista de mapas">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg>
+      </button>
+      <div class="nav-brand">
+        <svg class="nav-brand-ico" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"></path></svg>
+        <span class="nav-brand-txt">Territórios</span>
+        <span id="syncDot" class="sync-dot" title="Sincronização automática"></span>
+      </div>
+    </div>
+
+    <div class="nav-dir">
+      <button type="button" class="nav-icon-btn hidden" id="btnAdmin" title="Administração" aria-label="Administração">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        <span id="badgeNotifAdmin" class="badge-notif hidden">0</span>
+      </button>
+      <button type="button" class="nav-icon-btn hidden" id="btnGerenciar" title="Gerenciar mapas e permissões" aria-label="Gerenciar mapas e permissões">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
+      </button>
+      <button type="button" class="nav-icon-btn" id="btnBuscaMapa" title="Buscar mapa" aria-label="Buscar mapa" aria-haspopup="true" aria-expanded="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.65" y2="16.65"></line></svg>
+        <span class="nav-busca-txt">Buscar</span>
+      </button>
+
+      <span class="nav-div" aria-hidden="true"></span>
+      <select id="selGrupo" aria-label="Filtrar por frente ou grupo"></select>
+      <select id="selMapa" class="hidden" aria-label="Selecionar mapa"></select>
+      <span class="nav-div" aria-hidden="true"></span>
+
+      <div class="nav-user-wrap">
+        <button type="button" id="btnPerfilUsuario" class="nav-user-btn" title="Conta do usuário" aria-haspopup="true" aria-expanded="false">
+          <span id="avatarInicial" class="avatar-circ">U</span>
+          <span class="nav-user-meta">
+            <span id="navUserNome"></span>
+            <span id="navUserTag" class="nav-user-tag"></span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div id="popBuscaMapa" class="hidden" role="dialog" aria-label="Busca rápida de mapa">
+    <input id="inpBuscaMapa" type="search" placeholder="Buscar mapa (ex: 17, Terça)..." autocomplete="off">
+    <div id="listaBuscaMapa"></div>
   </div>
 
-  <div class="filtros">
-    <select id="selGrupo" aria-label="Filtrar por frente ou grupo"></select>
-    <select id="selMapa" aria-label="Selecionar mapa"></select>
+  <div id="menuUsuario" class="hidden" role="menu" aria-label="Menu do usuário">
+    <div class="menu-user-head">
+      <strong id="ola"></strong>
+      <div id="menuPerfilTag" class="st"></div>
+    </div>
+    <button type="button" class="sec" id="btnSenha" title="Trocar minha senha">🔑 Trocar senha</button>
+    <button type="button" class="sec" id="btnSair">Sair</button>
   </div>
 
   <div id="corpoApp">
@@ -472,6 +554,7 @@ function msg(el, t, ok) { el.textContent = t || ""; el.className = "msg " + (ok 
 function mostrarLogin(tela) {
   pararAtualizacao();
   pararGps();
+  fecharPopoversTopo();
   $("wrapLogin").classList.remove("hidden");
   $("telaApp").classList.add("hidden");
   $("telaLogin").classList.toggle("hidden", tela !== "login");
@@ -525,10 +608,32 @@ $("btnRegistrar").onclick = async function () {
 };
 
 $("btnSair").onclick = function () {
+  fecharPopoversTopo();
   sessao = null; dados = null; mapaAtual = null; hashProg = ""; hashAcesso = "";
   notifAdmin = { total: 0, contas: 0, senhas: 0 };
   gravarSessao(null); limparCache(); mostrarLogin("login");
 };
+
+function atualizarIdentidadeTopo() {
+  var nome = (sessao && sessao.nome) ? String(sessao.nome).trim() : "";
+  var inicial = nome ? nome.charAt(0).toUpperCase() : "U";
+  var curta = !sessao ? "" : (sessao.admin ? "Admin" : (sessao.tipo === "permanente" ? "Perm." : "Temp."));
+  var completa = !sessao ? "" : (sessao.admin ? "Administrador" : (sessao.tipo === "permanente" ? "Dirigente Permanente" : "Dirigente Temporário"));
+  $("ola").textContent = nome ? ("Olá, " + nome) : "";
+  $("navUserNome").textContent = nome;
+  $("avatarInicial").textContent = inicial;
+  $("navUserTag").textContent = curta;
+  $("menuPerfilTag").textContent = completa;
+}
+
+var syncTimer = null;
+function pulsarSync() {
+  var dot = $("syncDot");
+  if (!dot) return;
+  dot.classList.add("pulso");
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(function () { dot.classList.remove("pulso"); }, 900);
+}
 
 function atualizarBadgeAdmin() {
   var b = $("badgeNotifAdmin");
@@ -553,6 +658,7 @@ function atualizarBotoesTopo() {
   var ehAdm = !!(sessao && sessao.admin);
   $("btnGerenciar").classList.toggle("hidden", !podeGer);
   $("btnAdmin").classList.toggle("hidden", !ehAdm);
+  atualizarIdentidadeTopo();
   atualizarBadgeAdmin();
   if (!podeGer && !$("modalGerenciar").classList.contains("hidden")) fecharModalGerenciar();
   if (!ehAdm && !$("painelAdmin").classList.contains("hidden")) fecharModalAdmin();
@@ -613,6 +719,7 @@ $("tabAdmDir").onclick = function () { abrirAbaAdm("dir"); };
 $("tabAdmFrentes").onclick = function () { abrirAbaAdm("frentes"); };
 
 $("btnGerenciar").onclick = function () {
+  fecharPopoversTopo();
   $("modalGerenciar").classList.remove("hidden");
   msg($("msgGer"), "");
   carregarGerenciar();
@@ -621,6 +728,7 @@ $("btnFecharGerenciar").onclick = fecharModalGerenciar;
 $("modalGerenciar").onclick = function (e) { if (e.target === $("modalGerenciar")) fecharModalGerenciar(); };
 
 $("btnAdmin").onclick = function () {
+  fecharPopoversTopo();
   $("painelAdmin").classList.remove("hidden");
   msg($("msgAdm"), "");
   filtroAdmin = (notifAdmin && notifAdmin.total > 0) ? "pendente" : "todos";
@@ -631,6 +739,7 @@ $("btnFecharAdmin").onclick = fecharModalAdmin;
 $("painelAdmin").onclick = function (e) { if (e.target === $("painelAdmin")) fecharModalAdmin(); };
 
 $("btnSenha").onclick = function () {
+  fecharPopoversTopo();
   abrirModalSenha(false);
 };
 $("btnFecharSenha").onclick = fecharModalSenha;
@@ -657,11 +766,120 @@ function fecharMenusAdm() {
   var abertos = document.querySelectorAll(".menu-adm-wrap.aberto");
   for (var i = 0; i < abertos.length; i++) abertos[i].classList.remove("aberto");
 }
-document.addEventListener("click", function () { fecharMenusAdm(); });
+
+function fecharPopoversTopo() {
+  var mu = $("menuUsuario"), pb = $("popBuscaMapa");
+  if (mu) mu.classList.add("hidden");
+  if (pb) pb.classList.add("hidden");
+  var bp = $("btnPerfilUsuario"), bb = $("btnBuscaMapa");
+  if (bp) { bp.classList.remove("ativo"); bp.setAttribute("aria-expanded", "false"); }
+  if (bb) { bb.classList.remove("ativo"); bb.setAttribute("aria-expanded", "false"); }
+}
+
+function renderizarBuscaMapa(termo) {
+  var box = $("listaBuscaMapa");
+  var sm = $("selMapa");
+  if (!box || !sm) return;
+  box.innerHTML = "";
+  var q = String(termo || "").trim().toLowerCase();
+  var selAtual = sm.value;
+  var itens = [];
+  for (var i = 0; i < sm.options.length; i++) {
+    var opt = sm.options[i];
+    if (!opt.value) {
+      if (!q) itens.push({ val: "", label: "Todos os mapas (visão geral)", info: "", cor: "", ativo: selAtual === "" });
+      continue;
+    }
+    var m = (dados && dados.mapas) ? dados.mapas[Number(opt.value)] : null;
+    if (!m) continue;
+    var textoBusca = ("mapa " + m.n + " " + m.g).toLowerCase();
+    if (q && textoBusca.indexOf(q) < 0) continue;
+    var st = statusMapa(m);
+    itens.push({
+      val: opt.value,
+      label: "Mapa " + m.n + " · " + m.g,
+      info: st.total ? (st.feitasN + " de " + st.total) : "0",
+      cor: st.cor,
+      ativo: selAtual === opt.value
+    });
+  }
+  if (!itens.length) {
+    var vazio = document.createElement("div"); vazio.className = "st";
+    vazio.style.padding = "8px 4px";
+    vazio.textContent = "Nenhum mapa encontrado.";
+    box.appendChild(vazio);
+    return;
+  }
+  itens.forEach(function (it) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "item-busca-mapa" + (it.ativo ? " ativo" : "");
+    var esq = document.createElement("span"); esq.className = "busca-esq";
+    if (it.cor) {
+      var dot = document.createElement("span"); dot.className = "busca-dot"; dot.style.background = it.cor;
+      esq.appendChild(dot);
+    }
+    var lb = document.createElement("span"); lb.textContent = it.label;
+    esq.appendChild(lb);
+    b.appendChild(esq);
+    if (it.info) {
+      var dir = document.createElement("span"); dir.className = "busca-cont"; dir.textContent = it.info;
+      b.appendChild(dir);
+    }
+    b.onclick = function () {
+      if (it.val !== "" && painelRecolhido) atualizarPainelRecolhido(false);
+      sm.value = it.val;
+      if (typeof sm.onchange === "function") sm.onchange();
+      else { mapaAtual = null; desenhar(true); }
+      fecharPopoversTopo();
+    };
+    box.appendChild(b);
+  });
+}
+
+$("btnBuscaMapa").onclick = function (e) {
+  e.stopPropagation();
+  var estavaOculto = $("popBuscaMapa").classList.contains("hidden");
+  fecharPopoversTopo();
+  if (!estavaOculto) return;
+  $("popBuscaMapa").classList.remove("hidden");
+  $("btnBuscaMapa").classList.add("ativo");
+  $("btnBuscaMapa").setAttribute("aria-expanded", "true");
+  $("inpBuscaMapa").value = "";
+  renderizarBuscaMapa("");
+  setTimeout(function () { $("inpBuscaMapa").focus(); }, 20);
+};
+$("popBuscaMapa").onclick = function (e) { e.stopPropagation(); };
+$("inpBuscaMapa").oninput = function () { renderizarBuscaMapa($("inpBuscaMapa").value); };
+$("inpBuscaMapa").onkeydown = function (e) {
+  if (e.key === "Escape") { fecharPopoversTopo(); return; }
+  if (e.key === "Enter") {
+    e.preventDefault();
+    var primeiro = $("listaBuscaMapa").querySelector(".item-busca-mapa");
+    if (primeiro) primeiro.click();
+  }
+};
+
+$("btnPerfilUsuario").onclick = function (e) {
+  e.stopPropagation();
+  var estavaOculto = $("menuUsuario").classList.contains("hidden");
+  fecharPopoversTopo();
+  if (!estavaOculto) return;
+  $("menuUsuario").classList.remove("hidden");
+  $("btnPerfilUsuario").classList.add("ativo");
+  $("btnPerfilUsuario").setAttribute("aria-expanded", "true");
+};
+$("menuUsuario").onclick = function (e) { e.stopPropagation(); };
+
+document.addEventListener("click", function () {
+  fecharMenusAdm();
+  fecharPopoversTopo();
+});
 
 document.addEventListener("keydown", function (e) {
   if (e.key !== "Escape") return;
   fecharMenusAdm();
+  fecharPopoversTopo();
   if (!$("modalGerenciar").classList.contains("hidden")) fecharModalGerenciar();
   if (!$("painelAdmin").classList.contains("hidden")) fecharModalAdmin();
   if (!$("modalSenha").classList.contains("hidden")) fecharModalSenha();
@@ -682,7 +900,8 @@ function atualizarPainelRecolhido(recolher) {
   painelRecolhido = !!recolher;
   $("info").classList.toggle("recolhido", painelRecolhido);
   $("btnAbrirPainel").classList.toggle("hidden", !painelRecolhido);
-  $("btnPainel").textContent = painelRecolhido ? "Mostrar mapas" : "Recolher";
+  $("btnPainel").classList.toggle("ativo", !painelRecolhido);
+  $("btnPainel").title = painelRecolhido ? "Mostrar mapas" : "Recolher painel";
   setTimeout(function () { if (mapaLeaflet) mapaLeaflet.invalidateSize(); }, 50);
 }
 $("btnPainel").onclick = function () { atualizarPainelRecolhido(!painelRecolhido); };
@@ -728,6 +947,7 @@ async function atualizarProgressoSilencioso(forcar) {
     var r = await chamar({ acao: "progresso", token: sessao.token });
     ultimoProg = Date.now();
     if (!r || !r.ok || emVoo > 0) return;
+    pulsarSync();
     var novoHash = JSON.stringify({
       adm: !!r.admin, pg: !!r.podeGerenciar, f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente, uh: r.ultimoHistorico, nm: r.notasMapa, na: r.notificacoesAdmin
     });
@@ -755,7 +975,7 @@ async function atualizarProgressoSilencioso(forcar) {
 async function abrirApp() {
   $("wrapLogin").classList.add("hidden");
   $("telaApp").classList.remove("hidden");
-  $("ola").textContent = "Olá, " + sessao.nome;
+  fecharPopoversTopo();
   atualizarBotoesTopo();
   $("painelAdmin").classList.add("hidden");
   $("modalGerenciar").classList.add("hidden");
@@ -861,6 +1081,7 @@ function aplicarProgresso(r) {
 
   notifAdmin = r.notificacoesAdmin || { total: 0, contas: 0, senhas: 0 };
   atualizarBadgeAdmin();
+  pulsarSync();
 
   hashAcesso = JSON.stringify({ adm: !!r.admin, p: r.pode || {}, pm: r.podeMapa || {} });
   hashProg = JSON.stringify({
@@ -959,7 +1180,7 @@ function montarFiltros() {
   var sg = $("selGrupo"); sg.innerHTML = "";
   var op0 = document.createElement("option"); op0.value = ""; op0.textContent = "Todos os grupos"; sg.appendChild(op0);
   grupos.forEach(function (g) { var o = document.createElement("option"); o.value = g; o.textContent = g; sg.appendChild(o); });
-  sg.onchange = function () { mapaAtual = null; preencherMapas(); desenhar(true); };
+  sg.onchange = function () { fecharPopoversTopo(); mapaAtual = null; preencherMapas(); desenhar(true); };
   $("selMapa").onchange = function () { mapaAtual = null; desenhar(true); };
 
   var lf = $("lbFrente"); lf.innerHTML = "";
