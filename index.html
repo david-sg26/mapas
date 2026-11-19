@@ -202,6 +202,7 @@ button:disabled{opacity:.55;cursor:default}
     <input id="lSenha" type="password" autocomplete="current-password">
     <button id="btnEntrar">Entrar</button>
     <button class="sec" id="irRegistro">Solicitar acesso</button>
+    <button class="sec" id="irEsqueci">Esqueci minha senha</button>
     <div class="msg" id="msgLogin"></div>
   </div>
 
@@ -213,6 +214,16 @@ button:disabled{opacity:.55;cursor:default}
     <button id="btnRegistrar">Enviar pedido</button>
     <button class="sec" id="irLogin">Voltar</button>
     <div class="msg" id="msgReg"></div>
+  </div>
+
+  <div id="telaEsqueci" class="card hidden">
+    <label for="eNome">Seu nome cadastrado</label>
+    <input id="eNome" autocomplete="username">
+    <label for="eSenha">Nova senha desejada (mínimo 6 caracteres)</label>
+    <input id="eSenha" type="password" autocomplete="new-password">
+    <button id="btnPedirSenha">Solicitar nova senha</button>
+    <button class="sec" id="irLoginEsq">Voltar</button>
+    <div class="msg" id="msgEsq"></div>
   </div>
 </div>
 
@@ -342,8 +353,10 @@ button:disabled{opacity:.55;cursor:default}
         <button type="button" class="sec" id="btnFecharSenha">Fechar ✕</button>
       </div>
       <div class="adm-body">
-        <label for="snAtual">Senha atual</label>
-        <input id="snAtual" type="password" autocomplete="current-password">
+        <div id="wrapSnAtual">
+          <label for="snAtual">Senha atual</label>
+          <input id="snAtual" type="password" autocomplete="current-password">
+        </div>
         <label for="snNova">Nova senha (mínimo 6 caracteres)</label>
         <input id="snNova" type="password" autocomplete="new-password">
         <button type="button" id="btnSalvarSenha">Salvar nova senha</button>
@@ -457,17 +470,42 @@ function mostrarLogin(tela) {
   $("telaApp").classList.add("hidden");
   $("telaLogin").classList.toggle("hidden", tela !== "login");
   $("telaRegistro").classList.toggle("hidden", tela !== "registro");
+  $("telaEsqueci").classList.toggle("hidden", tela !== "esqueci");
 }
 
 $("irRegistro").onclick = function () { mostrarLogin("registro"); };
 $("irLogin").onclick = function () { mostrarLogin("login"); };
+$("irLoginEsq").onclick = function () { mostrarLogin("login"); };
+$("irEsqueci").onclick = function () {
+  if (!$("eNome").value.trim()) $("eNome").value = $("lNome").value.trim();
+  $("eSenha").value = "";
+  msg($("msgEsq"), "");
+  mostrarLogin("esqueci");
+  setTimeout(function () { ($("eNome").value.trim() ? $("eSenha") : $("eNome")).focus(); }, 30);
+};
+
+$("btnPedirSenha").onclick = async function () {
+  var b = $("btnPedirSenha"); b.disabled = true; msg($("msgEsq"), "Enviando pedido…", true);
+  var r = await chamar({ acao: "solicitarNovaSenha", nome: $("eNome").value, novaSenha: $("eSenha").value });
+  b.disabled = false;
+  if (!r.ok) { msg($("msgEsq"), r.erro); return; }
+  $("eSenha").value = "";
+  msg($("msgEsq"), r.mensagem, true);
+};
 
 $("btnEntrar").onclick = async function () {
   var b = $("btnEntrar"); b.disabled = true; msg($("msgLogin"), "Entrando…", true);
   var r = await chamar({ acao: "login", nome: $("lNome").value, senha: $("lSenha").value });
   b.disabled = false;
   if (!r.ok) { msg($("msgLogin"), r.erro); return; }
-  sessao = { token: r.token, nome: r.nome, admin: r.admin, podeGerenciar: !!r.podeGerenciar, tipo: r.tipo };
+  sessao = {
+    token: r.token,
+    nome: r.nome,
+    admin: r.admin,
+    podeGerenciar: !!r.podeGerenciar,
+    tipo: r.tipo,
+    trocarSenhaObrigatoria: !!r.trocarSenhaObrigatoria
+  };
   gravarSessao(sessao); $("lSenha").value = ""; msg($("msgLogin"), "");
   abrirApp();
 };
@@ -517,7 +555,24 @@ function fecharModalAdmin() {
 }
 
 function fecharModalSenha() {
+  if (sessao && sessao.trocarSenhaObrigatoria) return;
   $("modalSenha").classList.add("hidden");
+}
+
+function abrirModalSenha(obrigatoria) {
+  var ob = !!obrigatoria;
+  $("titSenha").textContent = ob ? "Crie sua nova senha" : "Trocar minha senha";
+  $("wrapSnAtual").classList.toggle("hidden", ob);
+  $("btnFecharSenha").classList.toggle("hidden", ob);
+  $("snAtual").value = "";
+  $("snNova").value = "";
+  if (ob) {
+    msg($("msgSenha"), "Você entrou com um código provisório. Escolha sua nova senha definitiva para continuar.", true);
+  } else {
+    msg($("msgSenha"), "");
+  }
+  $("modalSenha").classList.remove("hidden");
+  setTimeout(function () { (ob ? $("snNova") : $("snAtual")).focus(); }, 30);
 }
 
 function abrirAbaAdm(aba) {
@@ -549,11 +604,7 @@ $("btnFecharAdmin").onclick = fecharModalAdmin;
 $("painelAdmin").onclick = function (e) { if (e.target === $("painelAdmin")) fecharModalAdmin(); };
 
 $("btnSenha").onclick = function () {
-  $("modalSenha").classList.remove("hidden");
-  $("snAtual").value = "";
-  $("snNova").value = "";
-  msg($("msgSenha"), "");
-  $("snAtual").focus();
+  abrirModalSenha(false);
 };
 $("btnFecharSenha").onclick = fecharModalSenha;
 $("modalSenha").onclick = function (e) { if (e.target === $("modalSenha")) fecharModalSenha(); };
@@ -566,7 +617,13 @@ $("btnSalvarSenha").onclick = async function () {
   if (!r.ok) { msg($("msgSenha"), r.erro); return; }
   $("snAtual").value = "";
   $("snNova").value = "";
+  var eraObrig = !!(sessao && sessao.trocarSenhaObrigatoria);
+  if (eraObrig) {
+    sessao.trocarSenhaObrigatoria = false;
+    gravarSessao(sessao);
+  }
   msg($("msgSenha"), "Senha alterada com sucesso.", true);
+  if (eraObrig) setTimeout(fecharModalSenha, 600);
 };
 
 function fecharMenusAdm() {
@@ -666,12 +723,14 @@ async function abrirApp() {
   atualizarBotoesTopo();
   $("painelAdmin").classList.add("hidden");
   $("modalGerenciar").classList.add("hidden");
+  $("modalSenha").classList.add("hidden");
   $("lbAte").value = dataLocalYMD(0);
   atualizarPillsPerm();
   atualizarPillsDesignar();
   atualizarBtnPills();
   atualizarPainelRecolhido(false);
   iniciarMapa();
+  if (sessao && sessao.trocarSenhaObrigatoria) abrirModalSenha(true);
 
   var pDados = chamar({ acao: "dadosMapas", token: sessao.token });
   var pProg = chamar({ acao: "progresso", token: sessao.token });
@@ -1431,7 +1490,7 @@ function renderizarAdmin() {
   lista.forEach(function (u) {
     var st = String(u.status || "").toLowerCase();
     var tp = String(u.tipo || "temporario").toLowerCase();
-    if (st === "pendente") cont.pendente++;
+    if (st === "pendente" || u.pedidoSenha) cont.pendente++;
     if (st === "bloqueado") cont.bloqueado++;
     if (tp === "permanente") cont.permanente++;
     else cont.temporario++;
@@ -1457,7 +1516,8 @@ function renderizarAdmin() {
     var st = String(u.status || "").toLowerCase();
     var tp = String(u.tipo || "temporario").toLowerCase();
     if (filtroAdmin === "todos") return true;
-    if (filtroAdmin === "pendente" || filtroAdmin === "bloqueado") return st === filtroAdmin;
+    if (filtroAdmin === "pendente") return st === "pendente" || !!u.pedidoSenha;
+    if (filtroAdmin === "bloqueado") return st === "bloqueado";
     return tp === filtroAdmin;
   });
 
@@ -1491,6 +1551,18 @@ function renderizarAdmin() {
         n.appendChild(bAut);
       }
     }
+    if (u.pedidoSenha) {
+      var bPed = document.createElement("span");
+      bPed.className = "badge-aut";
+      bPed.textContent = "🔄 Nova senha pendente";
+      n.appendChild(bPed);
+    }
+    if (u.trocaObrigatoria) {
+      var bObr = document.createElement("span");
+      bObr.className = "badge-tipo";
+      bObr.textContent = "⏳ Código provisório ativo";
+      n.appendChild(bObr);
+    }
 
     var detalhes = [];
     if (u.frentes && u.frentes.length) detalhes.push("Resp: " + u.frentes.join(", "));
@@ -1511,6 +1583,11 @@ function renderizarAdmin() {
 
     if (!isAdm && st !== "aprovado") {
       bt.appendChild(acaoAdmBtn("Aprovar", "yes", { acao: "definirStatus", nome: u.nome, status: "aprovado" }, "Dirigente aprovado."));
+    }
+
+    if (u.pedidoSenha) {
+      bt.appendChild(acaoAdmBtn("Aprovar senha", "yes", { acao: "responderNovaSenha", nome: u.nome, aprovar: true }, "Nova senha aprovada."));
+      secBtns.push(acaoAdmBtn("Recusar pedido de senha", "no", { acao: "responderNovaSenha", nome: u.nome, aprovar: false }, "Pedido de senha recusado."));
     }
 
     if (st === "aprovado" || isAdm) {
@@ -1555,16 +1632,16 @@ function renderizarAdmin() {
       });
     }
 
-    var bPass = document.createElement("button"); bPass.type = "button"; bPass.className = "sec-btn"; bPass.textContent = "Redefinir senha";
+    var bPass = document.createElement("button"); bPass.type = "button"; bPass.className = "sec-btn"; bPass.textContent = "Gerar código de senha";
     bPass.onclick = async function () {
-      var nova = prompt("Digite a nova senha para " + u.nome + " (mínimo 6 caracteres):");
-      if (nova === null) return;
-      if (nova.length < 6) { msg($("msgAdm"), "A nova senha precisa ter pelo menos 6 caracteres."); return; }
+      if (!confirm("Gerar um código provisório de 6 dígitos para " + u.nome + "? No próximo login, a pessoa precisará criar uma nova senha.")) return;
       bPass.disabled = true;
-      var res = await chamar({ acao: "redefinirSenha", token: sessao.token, nome: u.nome, novaSenha: nova });
+      var res = await chamar({ acao: "redefinirSenha", token: sessao.token, nome: u.nome });
       bPass.disabled = false;
       if (!res.ok) { msg($("msgAdm"), res.erro); return; }
-      msg($("msgAdm"), "Senha de " + u.nome + " redefinida.", true);
+      msg($("msgAdm"), "Código provisório de " + u.nome + ": " + res.codigo, true);
+      prompt("Código provisório gerado para " + u.nome + " (copie e envie para a pessoa):", res.codigo);
+      carregarAdmin();
     };
     secBtns.push(bPass);
 
