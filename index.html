@@ -231,6 +231,12 @@ button:disabled{opacity:.55;cursor:default}
 .pill-resp.ativo{background:var(--pri);color:var(--on-pri);border-color:var(--pri)}
 .dica-login{font-size:.82rem;color:var(--mut);background:var(--soft);border:1px solid var(--bd);border-radius:16px;padding:9px 12px;margin-top:8px;line-height:1.35}
 .badge-notif{position:absolute;top:3px;right:3px;display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--notif);color:#fff;font-size:.68rem;font-weight:800;line-height:1}
+.banner-novo{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:1400;width:min(440px,calc(100vw - 24px));background:var(--modal);border:1.5px solid var(--pri);border-radius:16px;padding:12px 14px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:10px}
+.banner-novo-txt strong{display:block;font-size:.94rem;color:var(--tx)}
+.banner-novo-txt .st{margin-top:3px;color:var(--mut);font-size:.82rem;line-height:1.35}
+.banner-novo-acoes{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.banner-novo-acoes button{width:auto;margin:0;padding:8px 16px;font-size:.84rem;min-height:40px;border-radius:20px}
+.tag-novo{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;background:var(--pri);color:var(--on-pri);font-weight:800;font-size:.72rem}
 </style>
 </head>
 <body>
@@ -327,6 +333,17 @@ button:disabled{opacity:.55;cursor:default}
     </div>
     <button type="button" class="sec" id="btnSenha" title="Trocar minha senha">🔑 Trocar senha</button>
     <button type="button" class="sec" id="btnSair">Sair</button>
+  </div>
+
+  <div id="bannerNovoMapa" class="banner-novo hidden" role="status" aria-live="polite">
+    <div class="banner-novo-txt">
+      <strong id="titNovoMapa">🗺️ Novo mapa recebido</strong>
+      <div id="subNovoMapa" class="st"></div>
+    </div>
+    <div class="banner-novo-acoes">
+      <button type="button" id="btnIrNovoMapa">Abrir mapa</button>
+      <button type="button" class="sec" id="btnFecharNovoMapa">OK</button>
+    </div>
   </div>
 
   <div id="corpoApp">
@@ -464,6 +481,7 @@ var feitas = {}, pode = {}, podeMapa = {};
 var permissoesAte = {}, permissoesMapaAte = {}, designacoesAtivas = {}, minhasDesignacoes = {}, responsaveisFrente = {}, ultimoHistorico = {}, notasMapa = {};
 var notifAdmin = { total: 0, contas: 0, senhas: 0 }, hashAcesso = "", precisaAtualizarMapas = false;
 var mapaAtual = null, filtroStatus = "todos", filtroAdmin = "todos", adminListaCache = [], adminFrentesCache = [];
+var gerenciarCache = null, mapasNovosAtivos = {}, novosItensPendentes = [], preCarregandoAdm = false, preCarregandoGer = false;
 var painelRecolhido = false;
 var mostrarNumeros = (function () { try { return localStorage.getItem("mostrarNumerosMapa") !== "0"; } catch (e) { return true; } })();
 var progTimer = null, ultimoProg = 0, atualizandoProg = false, hashProg = "";
@@ -555,6 +573,7 @@ function mostrarLogin(tela) {
   pararAtualizacao();
   pararGps();
   fecharPopoversTopo();
+  if ($("bannerNovoMapa")) $("bannerNovoMapa").classList.add("hidden");
   $("wrapLogin").classList.remove("hidden");
   $("telaApp").classList.add("hidden");
   $("telaLogin").classList.toggle("hidden", tela !== "login");
@@ -611,6 +630,7 @@ $("btnSair").onclick = function () {
   fecharPopoversTopo();
   sessao = null; dados = null; mapaAtual = null; hashProg = ""; hashAcesso = ""; precisaAtualizarMapas = false;
   notifAdmin = { total: 0, contas: 0, senhas: 0 };
+  adminListaCache = []; adminFrentesCache = []; gerenciarCache = null; mapasNovosAtivos = {}; novosItensPendentes = [];
   gravarSessao(null); limparCache(); mostrarLogin("login");
 };
 
@@ -949,6 +969,7 @@ async function sincronizarMapasSeNecessario() {
   if (rd && rd.ok) {
     dados = rd;
     gravarCache(rd);
+    verificarNovosMapasRecebidos();
     refazerFiltros();
     return true;
   }
@@ -1039,13 +1060,16 @@ async function abrirApp() {
 
   if (precisaAtualizarMapas) {
     await sincronizarMapasSeNecessario();
+    verificarNovosMapasRecebidos();
   } else if (dados) {
     if (!cache) montarFiltros();
     else if (mudou) refazerFiltros();
     else desenhar(true);
+    verificarNovosMapasRecebidos();
   }
 
   iniciarAtualizacao();
+  preCarregarPainelTopo();
 }
 
 function refazerFiltros() {
@@ -1124,7 +1148,138 @@ function aplicarProgresso(r) {
   hashProg = JSON.stringify({
     adm: !!(sessao && sessao.admin), pg: !!(sessao && sessao.podeGerenciar), f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente, uh: r.ultimoHistorico, nm: r.notasMapa, na: r.notificacoesAdmin
   });
+  verificarNovosMapasRecebidos();
 }
+
+function chaveVistos() {
+  return sessao && sessao.nome ? ("mapasVistos_" + String(sessao.nome).trim().toLowerCase()) : "";
+}
+function lerVistos() {
+  try {
+    var ck = chaveVistos();
+    return ck ? JSON.parse(localStorage.getItem(ck) || "{}") : {};
+  } catch (e) { return {}; }
+}
+function gravarVistos(v) {
+  try {
+    var ck = chaveVistos();
+    if (ck) localStorage.setItem(ck, JSON.stringify(v || {}));
+  } catch (e) {}
+}
+function marcarComoVisto(chaves) {
+  var lista = chaves || [];
+  var v = lerVistos();
+  var mudou = false;
+  lista.forEach(function (c) {
+    if (!v[c]) { v[c] = 1; mudou = true; }
+    if (c.indexOf("D|") === 0 || c.indexOf("PM|") === 0) {
+      delete mapasNovosAtivos[c.replace(/^(D|PM)\|/, "")];
+    } else if (c.indexOf("PF|") === 0) {
+      var fr = c.slice(3);
+      Object.keys(mapasNovosAtivos).forEach(function (km) {
+        if (km.indexOf(fr + "|") === 0) delete mapasNovosAtivos[km];
+      });
+    }
+  });
+  if (mudou) gravarVistos(v);
+  novosItensPendentes = novosItensPendentes.filter(function (it) { return lista.indexOf(it.id) < 0; });
+  if (!novosItensPendentes.length && $("bannerNovoMapa")) $("bannerNovoMapa").classList.add("hidden");
+}
+function verificarNovosMapasRecebidos() {
+  if (!sessao || !sessao.nome) return;
+  var atuais = [];
+  Object.keys(minhasDesignacoes || {}).forEach(function (k) {
+    var idx = k.indexOf("|");
+    if (idx > 0) atuais.push({
+      id: "D|" + k, keyMapa: k, frente: k.slice(0, idx), mapa: k.slice(idx + 1),
+      tipo: "designado", val: minhasDesignacoes[k]
+    });
+  });
+  Object.keys(permissoesMapaAte || {}).forEach(function (k) {
+    var idx = k.indexOf("|");
+    if (idx > 0) atuais.push({
+      id: "PM|" + k, keyMapa: k, frente: k.slice(0, idx), mapa: k.slice(idx + 1),
+      tipo: "liberado temporariamente", val: permissoesMapaAte[k]
+    });
+  });
+  Object.keys(permissoesAte || {}).forEach(function (f) {
+    atuais.push({
+      id: "PF|" + f, keyMapa: "", frente: f, mapa: "",
+      tipo: "frente liberada temporariamente", val: permissoesAte[f]
+    });
+  });
+
+  var vistos = lerVistos();
+  var ativosIds = {};
+  atuais.forEach(function (a) { ativosIds[a.id] = 1; });
+  var mudouVistos = false;
+  Object.keys(vistos).forEach(function (vk) {
+    if (!ativosIds[vk]) { delete vistos[vk]; mudouVistos = true; }
+  });
+  if (mudouVistos) gravarVistos(vistos);
+
+  var novos = atuais.filter(function (a) { return !vistos[a.id]; });
+  mapasNovosAtivos = {};
+  novos.forEach(function (n) {
+    if (n.keyMapa) {
+      mapasNovosAtivos[n.keyMapa] = 1;
+    } else if (dados && dados.mapas) {
+      dados.mapas.forEach(function (m) {
+        if (m.g === n.frente) mapasNovosAtivos[chave(m)] = 1;
+      });
+    }
+  });
+  novosItensPendentes = novos;
+
+  var banner = $("bannerNovoMapa");
+  if (!banner) return;
+  if (!novos.length) {
+    banner.classList.add("hidden");
+    return;
+  }
+  var tit = $("titNovoMapa"), sub = $("subNovoMapa"), btnIr = $("btnIrNovoMapa");
+  if (novos.length === 1) {
+    var u = novos[0];
+    tit.textContent = u.mapa ? ("🗺️ Novo mapa recebido: Mapa " + u.mapa) : ("🗺️ Frente liberada: " + u.frente);
+    var prazo = (u.val && u.val !== "indeterminado") ? (" · até " + fmtData(u.val)) : (u.val === "indeterminado" ? " · sem prazo" : "");
+    sub.textContent = u.mapa ? (u.frente + " (" + u.tipo + prazo + ")") : ("Todos os mapas da frente" + prazo);
+    btnIr.textContent = u.mapa ? "Abrir mapa" : "Ver frente";
+  } else {
+    tit.textContent = "🗺️ " + novos.length + " novos mapas/permissões recebidos";
+    sub.textContent = novos.slice(0, 3).map(function (x) {
+      return x.mapa ? ("Mapa " + x.mapa + " (" + x.frente + ")") : x.frente;
+    }).join(", ") + (novos.length > 3 ? "…" : "");
+    btnIr.textContent = "Abrir primeiro";
+  }
+  banner.classList.remove("hidden");
+}
+
+$("btnIrNovoMapa").onclick = function () {
+  var alvo = novosItensPendentes[0];
+  marcarComoVisto(novosItensPendentes.map(function (x) { return x.id; }));
+  if (!alvo || !dados || !dados.mapas) return;
+  if (painelRecolhido) atualizarPainelRecolhido(false);
+  $("selGrupo").value = alvo.frente;
+  preencherMapas();
+  if (alvo.mapa) {
+    var idxAlvo = "";
+    for (var i = 0; i < dados.mapas.length; i++) {
+      if (dados.mapas[i].g === alvo.frente && mesmoMapa(dados.mapas[i].n, alvo.mapa)) {
+        idxAlvo = String(i);
+        break;
+      }
+    }
+    $("selMapa").value = idxAlvo;
+  } else {
+    $("selMapa").value = "";
+    mapaAtual = null;
+  }
+  desenhar(true);
+};
+$("btnFecharNovoMapa").onclick = function () {
+  marcarComoVisto(novosItensPendentes.map(function (x) { return x.id; }));
+  if (dados) desenhar(false);
+};
 
 async function carregarProgresso() {
   var r = await chamar({ acao: "progresso", token: sessao.token });
@@ -1272,10 +1427,9 @@ $("btnLiberar").onclick = async function () {
   b.disabled = false;
   if (!r.ok) { msg($("msgGer"), r.erro); return; }
   msg($("msgGer"), "Permissão temporária liberada para " + nome + ".", true);
-  await carregarProgresso();
+  await Promise.all([carregarProgresso(), carregarGerenciar()]);
   desenhar(false);
   if (mapaAtual) mostrarInfo(mapaAtual);
-  carregarGerenciar();
 };
 
 $("btnDesignar").onclick = async function () {
@@ -1293,10 +1447,9 @@ $("btnDesignar").onclick = async function () {
   b.disabled = false;
   if (!r.ok) { msg($("msgGer"), r.erro); return; }
   msg($("msgGer"), "Mapa designado para " + nome + ".", true);
-  await carregarProgresso();
+  await Promise.all([carregarProgresso(), carregarGerenciar()]);
   desenhar(false);
   if (mapaAtual) mostrarInfo(mapaAtual);
-  carregarGerenciar();
 };
 
 function preencherMapas() {
@@ -1450,6 +1603,7 @@ function mostrarListaMapas(lista) {
   filtrados.forEach(function (entry) {
     var item = entry.item, m = item.m, st = entry.st;
     var km = chave(m);
+    var ehNovo = !!mapasNovosAtivos[km];
     var desig = designacoesAtivas[km];
     var hist = ultimoHistorico[km];
     var nota = notasMapa[km];
@@ -1464,8 +1618,13 @@ function mostrarListaMapas(lista) {
     nm.textContent = "Mapa " + m.n + ($("selGrupo").value ? "" : " · " + m.g);
     meio.appendChild(nm);
 
-    if (desig || (hist && hist.data) || (nota && nota.texto)) {
+    if (ehNovo || desig || (hist && hist.data) || (nota && nota.texto)) {
       var sub = document.createElement("div"); sub.className = "item-sub";
+      if (ehNovo) {
+        var tnv = document.createElement("span"); tnv.className = "tag-novo";
+        tnv.textContent = "✨ Novo";
+        sub.appendChild(tnv);
+      }
       if (desig) {
         var tg = document.createElement("span"); tg.className = "tag-desig";
         tg.textContent = "👤 " + desig.nome + (desig.validade ? " (até " + fmtData(desig.validade) + ")" : "");
@@ -1507,6 +1666,10 @@ function mostrarListaMapas(lista) {
 function mostrarInfo(m) {
   mapaAtual = m;
   var box = $("info"); box.innerHTML = "";
+  var k = chave(m);
+  if (mapasNovosAtivos[k]) {
+    marcarComoVisto(["D|" + k, "PM|" + k, "PF|" + m.g]);
+  }
 
   var topo = document.createElement("div"); topo.className = "info-topo";
   var voltar = document.createElement("button"); voltar.type = "button"; voltar.className = "btn-voltar";
@@ -1522,7 +1685,6 @@ function mostrarInfo(m) {
 
   var t = document.createElement("div"); t.className = "tit"; t.textContent = "Mapa " + m.n + " · " + m.g; box.appendChild(t);
 
-  var k = chave(m);
   var podeEste = podeNoMapa(m);
   var podeGer = !!(sessao && (sessao.admin || sessao.podeGerenciar));
   var respFrente = responsaveisFrente[m.g];
@@ -1739,12 +1901,37 @@ function preencherSelectDirigentes(lista) {
   });
 }
 
-async function carregarGerenciar() {
-  var dBox = $("listaDesignacoesGer"); dBox.textContent = "Carregando…";
-  var pBox = $("listaPermissoes"); pBox.textContent = "Carregando…";
-  var r = await chamar({ acao: "listarGerenciar", token: sessao.token });
-  if (!r.ok) { dBox.textContent = ""; pBox.textContent = ""; msg($("msgGer"), r.erro); return; }
+function preCarregarPainelTopo() {
+  if (!sessao || !sessao.token) return;
+  if (sessao.admin && !preCarregandoAdm) {
+    preCarregandoAdm = true;
+    chamar({ acao: "listarPendentes", token: sessao.token }).then(function (r) {
+      preCarregandoAdm = false;
+      if (r && r.ok) {
+        adminListaCache = r.lista || [];
+        adminFrentesCache = r.frentesLista || [];
+        if (!$("painelAdmin").classList.contains("hidden")) {
+          renderizarAdmin();
+          renderizarFrentesAdmin();
+        }
+      }
+    });
+  }
+  if ((sessao.admin || sessao.podeGerenciar) && !preCarregandoGer) {
+    preCarregandoGer = true;
+    chamar({ acao: "listarGerenciar", token: sessao.token }).then(function (r) {
+      preCarregandoGer = false;
+      if (r && r.ok) {
+        gerenciarCache = r;
+        if (!$("modalGerenciar").classList.contains("hidden")) renderizarGerenciar(r);
+      }
+    });
+  }
+}
 
+function renderizarGerenciar(r) {
+  var dBox = $("listaDesignacoesGer");
+  var pBox = $("listaPermissoes");
   preencherSelectDirigentes(r.lista || []);
 
   dBox.textContent = "";
@@ -1765,10 +1952,9 @@ async function carregarGerenciar() {
         var res = await chamar({ acao: "removerDesignacao", token: sessao.token, nome: d.nome, frente: d.frente, mapa: d.mapa });
         if (!res.ok) { msg($("msgGer"), res.erro); bRem.disabled = false; return; }
         msg($("msgGer"), "Designação removida.", true);
-        await carregarProgresso();
+        await Promise.all([carregarProgresso(), carregarGerenciar()]);
         desenhar(false);
         if (mapaAtual) mostrarInfo(mapaAtual);
-        carregarGerenciar();
       };
       bt.appendChild(bRem); row.appendChild(bt);
       dBox.appendChild(row);
@@ -1793,10 +1979,9 @@ async function carregarGerenciar() {
         var res = await chamar({ acao: "removerPermissao", token: sessao.token, nome: pm.nome, frente: pm.frente, mapa: pm.mapa || "" });
         if (!res.ok) { msg($("msgGer"), res.erro); bRem.disabled = false; return; }
         msg($("msgGer"), "Permissão removida.", true);
-        await carregarProgresso();
+        await Promise.all([carregarProgresso(), carregarGerenciar()]);
         desenhar(false);
         if (mapaAtual) mostrarInfo(mapaAtual);
-        carregarGerenciar();
       };
       bt.appendChild(bRem); row.appendChild(bt);
       pBox.appendChild(row);
@@ -1804,12 +1989,46 @@ async function carregarGerenciar() {
   }
 }
 
+async function carregarGerenciar() {
+  var dBox = $("listaDesignacoesGer");
+  var pBox = $("listaPermissoes");
+  if (gerenciarCache) {
+    renderizarGerenciar(gerenciarCache);
+  } else {
+    dBox.textContent = "Carregando…";
+    pBox.textContent = "Carregando…";
+  }
+  var r = await chamar({ acao: "listarGerenciar", token: sessao.token });
+  if (!r.ok) {
+    if (!gerenciarCache) { dBox.textContent = ""; pBox.textContent = ""; }
+    msg($("msgGer"), r.erro);
+    return;
+  }
+  gerenciarCache = r;
+  renderizarGerenciar(r);
+}
+
 async function carregarAdmin() {
-  var box = $("listaAdmin"); box.textContent = "Carregando…";
-  var fBox = $("listaFrentesAdmin"); fBox.textContent = "Carregando…";
-  $("chipsAdmin").textContent = "";
+  var box = $("listaAdmin");
+  var fBox = $("listaFrentesAdmin");
+  if (adminListaCache.length) {
+    renderizarAdmin();
+  } else {
+    box.textContent = "Carregando…";
+    $("chipsAdmin").textContent = "";
+  }
+  if (adminFrentesCache.length || Object.keys(responsaveisFrente || {}).length) {
+    renderizarFrentesAdmin();
+  } else {
+    fBox.textContent = "Carregando…";
+  }
   var r = await chamar({ acao: "listarPendentes", token: sessao.token });
-  if (!r.ok) { box.textContent = ""; fBox.textContent = ""; msg($("msgAdm"), r.erro); return; }
+  if (!r.ok) {
+    if (!adminListaCache.length) box.textContent = "";
+    if (!adminFrentesCache.length && !Object.keys(responsaveisFrente || {}).length) fBox.textContent = "";
+    msg($("msgAdm"), r.erro);
+    return;
+  }
   adminListaCache = r.lista || [];
   adminFrentesCache = r.frentesLista || [];
   renderizarAdmin();
@@ -1955,10 +2174,9 @@ function renderizarAdmin() {
           var res = await chamar({ acao: "removerDesignacao", token: sessao.token, nome: u.nome, frente: d.frente, mapa: d.mapa });
           if (!res.ok) { msg($("msgAdm"), res.erro); br.disabled = false; return; }
           msg($("msgAdm"), "Designação removida.", true);
-          await carregarProgresso();
+          await Promise.all([carregarProgresso(), carregarAdmin()]);
           desenhar(false);
           if (mapaAtual) mostrarInfo(mapaAtual);
-          carregarAdmin();
         };
         secBtns.push(br);
       });
@@ -2019,6 +2237,10 @@ function renderizarFrentesAdmin() {
       if (frentesOrdem.indexOf(m.g) < 0) frentesOrdem.push(m.g);
     });
   }
+  Object.keys(responsaveisFrente || {}).forEach(function (fr) {
+    if (fr && frentesOrdem.indexOf(fr) < 0) frentesOrdem.push(fr);
+    if (fr && respAtual[fr] === undefined) respAtual[fr] = responsaveisFrente[fr] || "";
+  });
   (adminFrentesCache || []).forEach(function (f) {
     if (f.frente && frentesOrdem.indexOf(f.frente) < 0) frentesOrdem.push(f.frente);
     if (f.frente) respAtual[f.frente] = f.respTexto || "";
@@ -2051,10 +2273,9 @@ function renderizarFrentesAdmin() {
       bSal.disabled = false;
       if (!r.ok) { msg($("msgAdm"), r.erro); return; }
       msg($("msgAdm"), "Responsáveis de " + frente + " salvos.", true);
-      await carregarProgresso();
+      await Promise.all([carregarProgresso(), carregarAdmin()]);
       desenhar(false);
       if (mapaAtual) mostrarInfo(mapaAtual);
-      carregarAdmin();
     };
     edit.appendChild(inp);
     edit.appendChild(bSal);
@@ -2104,10 +2325,9 @@ function acaoAdmBtn(texto, cls, payload, msgOk, pergunta) {
     var r = await chamar(envio);
     if (!r.ok) { msg($("msgAdm"), r.erro); b.disabled = false; return; }
     msg($("msgAdm"), msgOk || "", true);
-    await carregarProgresso();
+    await Promise.all([carregarProgresso(), carregarAdmin()]);
     desenhar(false);
     if (mapaAtual) mostrarInfo(mapaAtual);
-    carregarAdmin();
   };
   return b;
 }
