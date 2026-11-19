@@ -188,6 +188,9 @@ button:disabled{opacity:.55;cursor:default}
 .pills-resp{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
 .pill-resp{width:auto;margin:0;padding:4px 11px;font-size:.75rem;border-radius:20px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);min-height:28px;font-weight:600}
 .pill-resp.ativo{background:var(--pri);color:var(--on-pri);border-color:var(--pri)}
+.dica-login{font-size:.82rem;color:var(--mut);background:var(--soft);border:1px solid var(--bd);border-radius:12px;padding:8px 11px;margin-top:8px;line-height:1.35}
+#btnAdmin{display:inline-flex;align-items:center;gap:6px}
+.badge-notif{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#ef4444;color:#fff;font-size:.72rem;font-weight:800;line-height:1;box-shadow:0 2px 6px rgba(239,68,68,.45)}
 </style>
 </head>
 <body>
@@ -198,8 +201,9 @@ button:disabled{opacity:.55;cursor:default}
   <div id="telaLogin" class="card">
     <label for="lNome">Nome</label>
     <input id="lNome" autocomplete="username">
-    <label for="lSenha">Senha</label>
-    <input id="lSenha" type="password" autocomplete="current-password">
+    <label for="lSenha">Senha ou código provisório</label>
+    <input id="lSenha" type="password" autocomplete="current-password" placeholder="Sua senha ou o código de 6 dígitos">
+    <div class="dica-login">🔑 Teve a senha redefinida pelo admin? Digite o <strong>código de 6 dígitos</strong> enviado no campo acima para criar uma nova senha.</div>
     <button id="btnEntrar">Entrar</button>
     <button class="sec" id="irRegistro">Solicitar acesso</button>
     <button class="sec" id="irEsqueci">Esqueci minha senha</button>
@@ -221,6 +225,7 @@ button:disabled{opacity:.55;cursor:default}
     <input id="eNome" autocomplete="username">
     <label for="eSenha">Nova senha desejada (mínimo 6 caracteres)</label>
     <input id="eSenha" type="password" autocomplete="new-password">
+    <div class="dica-login">Se o admin já te enviou um código de 6 dígitos, clique em <strong>Voltar</strong> e digite esse código no campo de senha.</div>
     <button id="btnPedirSenha">Solicitar nova senha</button>
     <button class="sec" id="irLoginEsq">Voltar</button>
     <div class="msg" id="msgEsq"></div>
@@ -232,7 +237,7 @@ button:disabled{opacity:.55;cursor:default}
     <strong id="ola"></strong>
     <button class="sec" id="btnPainel" title="Mostrar ou recolher lista de mapas">Recolher</button>
     <button class="sec hidden" id="btnGerenciar">Gerenciar</button>
-    <button class="sec hidden" id="btnAdmin">Admin</button>
+    <button class="sec hidden" id="btnAdmin">Admin<span id="badgeNotifAdmin" class="badge-notif hidden">0</span></button>
     <button class="sec" id="btnSenha" title="Trocar minha senha">🔑 Senha</button>
     <button class="sec" id="btnSair">Sair</button>
   </div>
@@ -375,6 +380,7 @@ var $ = function (id) { return document.getElementById(id); };
 var sessao = null, dados = null, mapaLeaflet = null, camada = null, gpsMarker = null, gpsWatchId = null, gpsPrimeiroFix = false;
 var feitas = {}, pode = {}, podeMapa = {};
 var permissoesAte = {}, permissoesMapaAte = {}, designacoesAtivas = {}, minhasDesignacoes = {}, responsaveisFrente = {}, ultimoHistorico = {}, notasMapa = {};
+var notifAdmin = { total: 0, contas: 0, senhas: 0 }, hashAcesso = "";
 var mapaAtual = null, filtroStatus = "todos", filtroAdmin = "todos", adminListaCache = [], adminFrentesCache = [];
 var painelRecolhido = false;
 var mostrarNumeros = (function () { try { return localStorage.getItem("mostrarNumerosMapa") !== "0"; } catch (e) { return true; } })();
@@ -519,15 +525,35 @@ $("btnRegistrar").onclick = async function () {
 };
 
 $("btnSair").onclick = function () {
-  sessao = null; dados = null; mapaAtual = null; hashProg = "";
+  sessao = null; dados = null; mapaAtual = null; hashProg = ""; hashAcesso = "";
+  notifAdmin = { total: 0, contas: 0, senhas: 0 };
   gravarSessao(null); limparCache(); mostrarLogin("login");
 };
+
+function atualizarBadgeAdmin() {
+  var b = $("badgeNotifAdmin");
+  var btn = $("btnAdmin");
+  if (!b || !btn) return;
+  var tot = (sessao && sessao.admin && notifAdmin && notifAdmin.total) ? Number(notifAdmin.total) : 0;
+  b.classList.toggle("hidden", tot <= 0);
+  if (tot > 0) {
+    b.textContent = tot > 99 ? "99+" : String(tot);
+    var partes = [];
+    if (notifAdmin.contas) partes.push(notifAdmin.contas + (notifAdmin.contas === 1 ? " conta" : " contas"));
+    if (notifAdmin.senhas) partes.push(notifAdmin.senhas + (notifAdmin.senhas === 1 ? " senha" : " senhas"));
+    btn.title = tot + (tot === 1 ? " pendência" : " pendências") + (partes.length ? " (" + partes.join(", ") + ")" : "");
+  } else {
+    b.textContent = "0";
+    btn.title = "Administração";
+  }
+}
 
 function atualizarBotoesTopo() {
   var podeGer = !!(sessao && (sessao.admin || sessao.podeGerenciar));
   var ehAdm = !!(sessao && sessao.admin);
   $("btnGerenciar").classList.toggle("hidden", !podeGer);
   $("btnAdmin").classList.toggle("hidden", !ehAdm);
+  atualizarBadgeAdmin();
   if (!podeGer && !$("modalGerenciar").classList.contains("hidden")) fecharModalGerenciar();
   if (!ehAdm && !$("painelAdmin").classList.contains("hidden")) fecharModalAdmin();
 }
@@ -597,6 +623,7 @@ $("modalGerenciar").onclick = function (e) { if (e.target === $("modalGerenciar"
 $("btnAdmin").onclick = function () {
   $("painelAdmin").classList.remove("hidden");
   msg($("msgAdm"), "");
+  filtroAdmin = (notifAdmin && notifAdmin.total > 0) ? "pendente" : "todos";
   abrirAbaAdm("dir");
   carregarAdmin();
 };
@@ -702,11 +729,20 @@ async function atualizarProgressoSilencioso(forcar) {
     ultimoProg = Date.now();
     if (!r || !r.ok || emVoo > 0) return;
     var novoHash = JSON.stringify({
-      adm: !!r.admin, pg: !!r.podeGerenciar, f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente, uh: r.ultimoHistorico, nm: r.notasMapa
+      adm: !!r.admin, pg: !!r.podeGerenciar, f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente, uh: r.ultimoHistorico, nm: r.notasMapa, na: r.notificacoesAdmin
     });
-    if (novoHash !== hashProg) {
+    var novoHashAcesso = JSON.stringify({ adm: !!r.admin, p: r.pode || {}, pm: r.podeMapa || {} });
+    var acessoMudou = !!(hashAcesso && novoHashAcesso !== hashAcesso);
+    if (novoHash !== hashProg || acessoMudou) {
       aplicarProgresso(r);
-      if (dados) {
+      if (acessoMudou) {
+        var rd = await chamar({ acao: "dadosMapas", token: sessao.token });
+        if (rd && rd.ok) {
+          dados = rd;
+          gravarCache(rd);
+          refazerFiltros();
+        }
+      } else if (dados) {
         desenhar(false);
         if (mapaAtual && (!document.activeElement || document.activeElement.id !== "inpNotaMapa")) mostrarInfo(mapaAtual);
       }
@@ -758,10 +794,31 @@ async function abrirApp() {
 }
 
 function refazerFiltros() {
-  var g = $("selGrupo").value, m = $("selMapa").value;
+  var gAnt = $("selGrupo").value;
+  var mapaAnt = mapaAtual ? { g: mapaAtual.g, n: mapaAtual.n } : null;
   montarFiltros();
-  $("selGrupo").value = g; preencherMapas();
-  $("selMapa").value = m; desenhar(true);
+  var sg = $("selGrupo");
+  var temGrupo = false;
+  for (var i = 0; i < sg.options.length; i++) {
+    if (sg.options[i].value === gAnt) { temGrupo = true; break; }
+  }
+  sg.value = temGrupo ? gAnt : "";
+  preencherMapas();
+  var idxNovo = "";
+  if (mapaAnt && dados && dados.mapas) {
+    for (var j = 0; j < dados.mapas.length; j++) {
+      if (dados.mapas[j].g === mapaAnt.g && mesmoMapa(dados.mapas[j].n, mapaAnt.n)) {
+        var sm = $("selMapa");
+        for (var k = 0; k < sm.options.length; k++) {
+          if (sm.options[k].value === String(j)) { idxNovo = String(j); break; }
+        }
+        break;
+      }
+    }
+  }
+  $("selMapa").value = idxNovo;
+  if (!idxNovo) mapaAtual = null;
+  desenhar(true);
 }
 
 function aplicarProgresso(r) {
@@ -802,8 +859,12 @@ function aplicarProgresso(r) {
   notasMapa = {};
   Object.keys(r.notasMapa || {}).forEach(function (k) { notasMapa[normKey(k)] = r.notasMapa[k]; });
 
+  notifAdmin = r.notificacoesAdmin || { total: 0, contas: 0, senhas: 0 };
+  atualizarBadgeAdmin();
+
+  hashAcesso = JSON.stringify({ adm: !!r.admin, p: r.pode || {}, pm: r.podeMapa || {} });
   hashProg = JSON.stringify({
-    adm: !!(sessao && sessao.admin), pg: !!(sessao && sessao.podeGerenciar), f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente, uh: r.ultimoHistorico, nm: r.notasMapa
+    adm: !!(sessao && sessao.admin), pg: !!(sessao && sessao.podeGerenciar), f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente, uh: r.ultimoHistorico, nm: r.notasMapa, na: r.notificacoesAdmin
   });
 }
 
@@ -1066,14 +1127,22 @@ function criarBtnRecolher() {
 
 function mostrarListaMapas(lista) {
   var box = $("info"); box.innerHTML = "";
+  var semNenhumAcesso = !dados || !dados.mapas || !dados.mapas.length;
   var topo = document.createElement("div"); topo.className = "info-topo";
   var tit = document.createElement("div"); tit.className = "tit"; tit.style.marginBottom = "0";
-  tit.textContent = lista.length ? "Mapas (" + lista.length + ")" : "Nenhum mapa encontrado";
+  tit.textContent = lista.length ? "Mapas (" + lista.length + ")" : (semNenhumAcesso ? "Nenhum mapa disponível" : "Nenhum mapa encontrado");
   topo.appendChild(tit);
   topo.appendChild(criarBtnRecolher());
   box.appendChild(topo);
 
-  if (!lista.length) return;
+  if (!lista.length) {
+    if (semNenhumAcesso) {
+      var av = document.createElement("div"); av.className = "st";
+      av.textContent = "Você ainda não tem mapas ou frentes liberadas no momento. Quando um responsável designar um mapa para você, ele aparecerá aqui automaticamente.";
+      box.appendChild(av);
+    }
+    return;
+  }
 
   var cont = { todos: lista.length, completo: 0, andamento: 0, pendente: 0, meus: 0 };
   var itens = lista.map(function (item) {
@@ -1084,14 +1153,18 @@ function mostrarListaMapas(lista) {
     return { item: item, st: st, meu: meu };
   });
 
-  var chips = document.createElement("div"); chips.className = "chips-filtro";
-  [
+  if (cont.meus === cont.todos && filtroStatus === "meus") filtroStatus = "todos";
+  var listaChips = [
     { id: "todos", label: "Todos (" + cont.todos + ")" },
     { id: "completo", label: "✓ Concluídos (" + cont.completo + ")" },
     { id: "andamento", label: "◐ Em andamento (" + cont.andamento + ")" },
-    { id: "pendente", label: "○ Pendentes (" + cont.pendente + ")" },
-    { id: "meus", label: "★ Meus (" + cont.meus + ")" }
-  ].forEach(function (cf) {
+    { id: "pendente", label: "○ Pendentes (" + cont.pendente + ")" }
+  ];
+  if (cont.meus !== cont.todos) {
+    listaChips.push({ id: "meus", label: "★ Meus (" + cont.meus + ")" });
+  }
+  var chips = document.createElement("div"); chips.className = "chips-filtro";
+  listaChips.forEach(function (cf) {
     var c = document.createElement("button");
     c.type = "button";
     c.className = "chip" + (filtroStatus === cf.id ? " ativo" : "");
