@@ -462,7 +462,7 @@ var $ = function (id) { return document.getElementById(id); };
 var sessao = null, dados = null, mapaLeaflet = null, camada = null, gpsMarker = null, gpsWatchId = null, gpsPrimeiroFix = false;
 var feitas = {}, pode = {}, podeMapa = {};
 var permissoesAte = {}, permissoesMapaAte = {}, designacoesAtivas = {}, minhasDesignacoes = {}, responsaveisFrente = {}, ultimoHistorico = {}, notasMapa = {};
-var notifAdmin = { total: 0, contas: 0, senhas: 0 }, hashAcesso = "";
+var notifAdmin = { total: 0, contas: 0, senhas: 0 }, hashAcesso = "", precisaAtualizarMapas = false;
 var mapaAtual = null, filtroStatus = "todos", filtroAdmin = "todos", adminListaCache = [], adminFrentesCache = [];
 var painelRecolhido = false;
 var mostrarNumeros = (function () { try { return localStorage.getItem("mostrarNumerosMapa") !== "0"; } catch (e) { return true; } })();
@@ -609,7 +609,7 @@ $("btnRegistrar").onclick = async function () {
 
 $("btnSair").onclick = function () {
   fecharPopoversTopo();
-  sessao = null; dados = null; mapaAtual = null; hashProg = ""; hashAcesso = "";
+  sessao = null; dados = null; mapaAtual = null; hashProg = ""; hashAcesso = ""; precisaAtualizarMapas = false;
   notifAdmin = { total: 0, contas: 0, senhas: 0 };
   gravarSessao(null); limparCache(); mostrarLogin("login");
 };
@@ -930,42 +930,57 @@ $("lbAte").onchange = atualizarPillsPerm;
 
 function iniciarAtualizacao() {
   pararAtualizacao();
-  progTimer = setInterval(function () { atualizarProgressoSilencioso(false); }, 30000);
+  progTimer = setInterval(function () { atualizarProgressoSilencioso(false); }, 12000);
 }
 function pararAtualizacao() {
   if (progTimer) { clearInterval(progTimer); progTimer = null; }
 }
 document.addEventListener("visibilitychange", function () {
-  if (!document.hidden && sessao && sessao.token) atualizarProgressoSilencioso(false);
+  if (!document.hidden && sessao && sessao.token) atualizarProgressoSilencioso(true);
 });
+window.addEventListener("focus", function () {
+  if (sessao && sessao.token) atualizarProgressoSilencioso(true);
+});
+
+async function sincronizarMapasSeNecessario() {
+  if (!precisaAtualizarMapas || !sessao || !sessao.token) return false;
+  precisaAtualizarMapas = false;
+  var rd = await chamar({ acao: "dadosMapas", token: sessao.token });
+  if (rd && rd.ok) {
+    dados = rd;
+    gravarCache(rd);
+    refazerFiltros();
+    return true;
+  }
+  precisaAtualizarMapas = true;
+  return false;
+}
 
 async function atualizarProgressoSilencioso(forcar) {
   if (!sessao || !sessao.token || document.hidden || atualizandoProg || emVoo > 0) return;
-  if (!forcar && Date.now() - ultimoProg < 5000) return;
+  if (!forcar && Date.now() - ultimoProg < 2500) return;
   atualizandoProg = true;
   try {
     var r = await chamar({ acao: "progresso", token: sessao.token });
     ultimoProg = Date.now();
-    if (!r || !r.ok || emVoo > 0) return;
+    if (!r || !r.ok) {
+      if (r && r.sessaoExpirada) {
+        sessao = null; dados = null; gravarSessao(null); limparCache();
+        mostrarLogin("login"); msg($("msgLogin"), r.erro || "Sessão expirada. Entre de novo.");
+      }
+      return;
+    }
+    if (emVoo > 0) return;
     pulsarSync();
     var novoHash = JSON.stringify({
       adm: !!r.admin, pg: !!r.podeGerenciar, f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente, uh: r.ultimoHistorico, nm: r.notasMapa, na: r.notificacoesAdmin
     });
-    var novoHashAcesso = JSON.stringify({ adm: !!r.admin, p: r.pode || {}, pm: r.podeMapa || {} });
-    var acessoMudou = !!(hashAcesso && novoHashAcesso !== hashAcesso);
-    if (novoHash !== hashProg || acessoMudou) {
-      aplicarProgresso(r);
-      if (acessoMudou) {
-        var rd = await chamar({ acao: "dadosMapas", token: sessao.token });
-        if (rd && rd.ok) {
-          dados = rd;
-          gravarCache(rd);
-          refazerFiltros();
-        }
-      } else if (dados) {
-        desenhar(false);
-        if (mapaAtual && (!document.activeElement || document.activeElement.id !== "inpNotaMapa")) mostrarInfo(mapaAtual);
-      }
+    var mudou = (novoHash !== hashProg);
+    if (mudou) aplicarProgresso(r);
+    var atualizouMapas = await sincronizarMapasSeNecessario();
+    if (mudou && !atualizouMapas && dados) {
+      desenhar(false);
+      if (mapaAtual && (!document.activeElement || document.activeElement.id !== "inpNotaMapa")) mostrarInfo(mapaAtual);
     }
   } finally {
     atualizandoProg = false;
@@ -995,20 +1010,40 @@ async function abrirApp() {
   if (cache) { dados = cache; montarFiltros(); }
 
   var r = await pDados;
+  if (!r.ok && !r.sessaoExpirada) {
+    r = await chamar({ acao: "dadosMapas", token: sessao.token });
+  }
   if (!r.ok) {
+    if (r.sessaoExpirada) {
+      sessao = null; dados = null; gravarSessao(null); limparCache();
+      mostrarLogin("login"); msg($("msgLogin"), r.erro || "Sessão expirada. Entre de novo.");
+      return;
+    }
+    if (!cache) {
+      $("info").innerHTML = '<div class="tit">Sem conexão</div><div class="st">Não foi possível carregar os mapas agora. Tente atualizar em instantes.</div>';
+    }
+  }
+
+  var rProg = await pProg;
+  if (rProg && rProg.sessaoExpirada) {
     sessao = null; dados = null; gravarSessao(null); limparCache();
-    mostrarLogin("login"); msg($("msgLogin"), r.erro || "Sessão expirada. Entre de novo.");
+    mostrarLogin("login"); msg($("msgLogin"), rProg.erro || "Sessão expirada. Entre de novo.");
     return;
   }
-  var mudou = !cache || JSON.stringify(cache) !== JSON.stringify(r);
+
+  var mudou = !!(r && r.ok && (!cache || JSON.stringify(cache) !== JSON.stringify(r)));
   if (mudou) { dados = r; gravarCache(r); }
 
-  aplicarProgresso(await pProg);
+  if (rProg && rProg.ok) aplicarProgresso(rProg);
   ultimoProg = Date.now();
 
-  if (!cache) montarFiltros();
-  else if (mudou) refazerFiltros();
-  else desenhar(true);
+  if (precisaAtualizarMapas) {
+    await sincronizarMapasSeNecessario();
+  } else if (dados) {
+    if (!cache) montarFiltros();
+    else if (mudou) refazerFiltros();
+    else desenhar(true);
+  }
 
   iniciarAtualizacao();
 }
@@ -1083,7 +1118,9 @@ function aplicarProgresso(r) {
   atualizarBadgeAdmin();
   pulsarSync();
 
-  hashAcesso = JSON.stringify({ adm: !!r.admin, p: r.pode || {}, pm: r.podeMapa || {} });
+  var novoHashAcesso = JSON.stringify({ adm: !!r.admin, p: r.pode || {}, pm: r.podeMapa || {} });
+  if (hashAcesso && novoHashAcesso !== hashAcesso) precisaAtualizarMapas = true;
+  hashAcesso = novoHashAcesso;
   hashProg = JSON.stringify({
     adm: !!(sessao && sessao.admin), pg: !!(sessao && sessao.podeGerenciar), f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente, uh: r.ultimoHistorico, nm: r.notasMapa, na: r.notificacoesAdmin
   });
@@ -1093,6 +1130,7 @@ async function carregarProgresso() {
   var r = await chamar({ acao: "progresso", token: sessao.token });
   ultimoProg = Date.now();
   aplicarProgresso(r);
+  await sincronizarMapasSeNecessario();
 }
 
 function chave(m) { return m.g + "|" + m.n; }
