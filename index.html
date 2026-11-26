@@ -22,19 +22,19 @@
 <style>
 :root{
   color-scheme:dark;
-  --bg:#111318;--card:#1D2026;--modal:#282C34;--hover:#303540;--tx:#E3E2E6;--mut:#9EA3AE;--bd:rgba(255,255,255,.08);
-  --pri:#A8C7FA;--on-pri:#062E6F;--sec-bg:#2B3445;--sec-tx:#D3E3FD;
+  --bg:#111318;--card:#1D2026;--modal:#282C34;--hover:#323742;--tx:#E3E2E6;--mut:#9EA3AE;--bd:rgba(255,255,255,.06);
+  --pri:#A8C7FA;--on-pri:#062E6F;--sec-bg:#262B35;--sec-tx:#D3E3FD;
   --ok:#22c55e;--on-ok:#052e16;--warn:#f59e0b;--warn-bg:rgba(245,158,11,.16);--bad:#F2B8B5;--on-bad:#601410;--notif:#EF4444;
   --soft:rgba(168,199,250,.14);--sh:0 12px 32px rgba(0,0,0,.48)
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx)}
+body{margin:0;font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);overscroll-behavior:none}
 button,input,select{font-family:inherit}
 :focus-visible{outline:2px solid var(--pri);outline-offset:2px}
 .wrap{width:100%;max-width:440px;margin:0 auto;padding:16px}
 h1{font-size:1.35rem;font-weight:700;letter-spacing:-.01em;margin:8px 0 16px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:18px;margin-bottom:12px;box-shadow:var(--sh)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:18px;margin-bottom:12px;box-shadow:var(--sh)}
 label{display:block;font-size:.85rem;color:var(--mut);margin:10px 0 4px;font-weight:500}
 input,select{width:100%;padding:12px 14px;font-size:1rem;border:1px solid var(--bd);border-radius:20px;background:var(--bg);color:var(--tx);transition:border-color .15s}
 input:focus,select:focus{border-color:var(--pri)}
@@ -46,75 +46,132 @@ button:disabled{opacity:.55;cursor:default}
 .err{color:var(--bad)}.okc{color:var(--ok)}
 .hidden{display:none!important}
 
-/* Layout principal e Navbar Unificada */
-#telaApp{display:flex;flex-direction:column;height:100vh;height:100dvh;padding-top:56px;overflow:hidden}
-.barra{position:fixed;top:0;left:0;width:100%;height:56px;z-index:1000;display:flex;align-items:center;justify-content:space-between;gap:4px;padding:0 10px;background:var(--card);border-bottom:1px solid var(--bd);flex-wrap:nowrap}
-.nav-esq,.nav-dir{display:flex;align-items:center;gap:4px;min-width:0}
-.nav-dir{flex:1;justify-content:flex-end}
-.nav-icon-btn{width:40px;min-width:40px;height:40px;min-height:40px;padding:0;margin:0;border-radius:20px;background:transparent;color:var(--tx);border:1px solid transparent;display:inline-flex;align-items:center;justify-content:center;position:relative;flex-shrink:0}
-.nav-icon-btn:hover,.nav-icon-btn.ativo{background:var(--hover);color:var(--pri)}
-#btnBuscaMapa{width:auto;padding:0 12px;gap:6px;background:var(--bg);border-color:var(--bd);font-size:.84rem;font-weight:600}
-.nav-brand{display:inline-flex;align-items:center;gap:7px;padding:0 4px;font-weight:700;font-size:.96rem;color:var(--tx);white-space:nowrap;flex-shrink:0}
-.nav-brand-ico{color:var(--pri);flex-shrink:0}
-.sync-dot{width:6px;height:6px;border-radius:999px;background:var(--ok);opacity:.35;transition:opacity .35s ease;flex-shrink:0}
-.sync-dot.pulso{opacity:1}
-.nav-div{width:1px;height:24px;background:var(--bd);margin:0 2px;flex-shrink:0}
-#selGrupo{width:auto;min-width:68px;max-width:210px;height:40px;padding:0 26px 0 10px;font-size:.85rem;font-weight:600;border-radius:20px;background:transparent url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239EA3AE' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 8px center;color:var(--tx);border:1px solid transparent;appearance:none;-webkit-appearance:none;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;cursor:pointer;flex:0 1 auto}
-#selGrupo:hover{background-color:var(--hover)}
-#selGrupo:focus{background-color:var(--bg);border-color:var(--pri)}
-.nav-user-wrap{position:relative;flex-shrink:0}
-.nav-user-btn{width:auto;height:40px;min-height:40px;min-width:40px;margin:0;padding:3px 8px 3px 3px;border-radius:20px;background:transparent;color:var(--tx);border:1px solid transparent;display:inline-flex;align-items:center;gap:8px}
-.nav-user-btn:hover,.nav-user-btn.ativo{background:var(--hover)}
-.avatar-circ{width:34px;height:34px;border-radius:999px;background:var(--sec-bg);color:var(--sec-tx);font-weight:700;font-size:.88rem;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--bd);flex-shrink:0}
-.nav-user-meta{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15;min-width:0}
-#navUserNome{font-size:.82rem;font-weight:700;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.nav-user-tag{font-size:.68rem;color:var(--mut);font-weight:600}
-@media (max-width:639px){
-  .barra{padding:0 6px;gap:2px}
-  .nav-esq,.nav-dir{gap:2px}
-  .nav-div{margin:0 1px}
-  .nav-brand-txt,.nav-busca-txt,.nav-user-meta{display:none}
-  #btnBuscaMapa{width:40px;padding:0;background:transparent;border-color:transparent}
-  #selGrupo{max-width:122px;padding:0 22px 0 8px;font-size:.8rem}
-  .nav-user-btn{padding:3px}
-}
-
-/* Popovers da Navbar (Busca e Menu Usuário) */
-#popBuscaMapa{position:fixed;top:62px;right:12px;width:min(360px,calc(100vw - 24px));max-height:min(420px,calc(100dvh - 80px));background:var(--modal);border:1px solid var(--bd);border-radius:16px;padding:12px;box-shadow:var(--sh);z-index:1500;display:flex;flex-direction:column;gap:8px}
-#inpBuscaMapa{padding:10px 14px;font-size:.92rem;border-radius:20px;background:var(--bg);border:1px solid var(--bd)}
-#listaBuscaMapa{overflow-y:auto;display:flex;flex-direction:column;gap:5px;max-height:310px}
-.item-busca-mapa{width:100%;margin:0;padding:10px 12px;min-height:42px;border-radius:14px;background:var(--card);color:var(--tx);border:1px solid var(--bd);text-align:left;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.86rem;font-weight:600}
-.item-busca-mapa:hover,.item-busca-mapa.ativo{background:var(--hover);border-color:var(--pri)}
-.busca-esq{display:inline-flex;align-items:center;gap:8px;min-width:0}
-.busca-esq span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.busca-dot{width:9px;height:9px;border-radius:999px;flex-shrink:0}
-.busca-cont{font-size:.76rem;color:var(--mut);font-weight:600;white-space:nowrap}
-#menuUsuario{position:fixed;top:62px;right:10px;width:236px;background:var(--modal);border:1px solid var(--bd);border-radius:16px;padding:12px;box-shadow:var(--sh);z-index:1500;display:flex;flex-direction:column;gap:8px}
-.menu-user-head{padding-bottom:8px;border-bottom:1px solid var(--bd)}
-.menu-user-head strong{display:block;font-size:.92rem;word-break:break-word}
-#menuUsuario button{width:100%;margin:0;min-height:40px;padding:8px 14px;font-size:.85rem;text-align:left}
-
-#corpoApp{display:flex;flex-direction:column;flex:1;height:calc(100vh - 56px);height:calc(100dvh - 56px);min-height:0;overflow:hidden}
-#wrapMapa{position:relative;flex:1;min-height:200px}
+/* Mapa Edge-to-Edge e Barra Flutuante MD3 */
+#telaApp{position:relative;width:100%;height:100vh;height:100dvh;overflow:hidden}
+#corpoApp{position:relative;width:100%;height:100vh;height:100dvh;overflow:hidden}
+#wrapMapa{position:absolute;inset:0;width:100%;height:100%}
 #mapa{width:100%;height:100%}
-#info{background:var(--bg);border-top:1px solid var(--bd);padding:12px;max-height:44%;overflow:auto}
+.leaflet-control-zoom{display:none!important}
+
+.barra{position:fixed;top:14px;left:14px;right:14px;z-index:1000;display:flex;align-items:center;justify-content:space-between;gap:10px;pointer-events:none}
+.nav-esq,.nav-dir{pointer-events:auto;display:inline-flex;align-items:center;gap:6px;background:var(--card);padding:5px 8px;border-radius:999px;box-shadow:var(--sh);border:1px solid var(--bd);min-width:0}
+.nav-icon-btn{width:40px;min-width:40px;height:40px;min-height:40px;padding:0;margin:0;border-radius:999px;background:transparent;color:var(--tx);border:1px solid transparent;display:inline-flex;align-items:center;justify-content:center;position:relative;flex-shrink:0}
+.nav-icon-btn:hover,.nav-icon-btn.ativo{background:var(--hover);color:var(--pri)}
+#btnBuscaMapa{width:auto;padding:0 13px;gap:6px;background:var(--bg);border:1px solid var(--bd);font-size:.84rem;font-weight:600}
+.nav-brand{display:inline-flex;align-items:center;gap:7px;padding:0 8px 0 4px;font-weight:700;font-size:.95rem;color:var(--tx);white-space:nowrap;flex-shrink:0}
+.nav-brand-ico{color:var(--pri);flex-shrink:0}
+.sync-dot{width:7px;height:7px;border-radius:999px;background:var(--ok);opacity:.38;transition:opacity .35s ease;flex-shrink:0}
+.sync-dot.pulso{opacity:1}
+.nav-div{width:1px;height:22px;background:var(--bd);margin:0 2px;flex-shrink:0}
+
+/* Seletor de Frente Customizado (escuro) */
+.grupo-dd-wrap{position:relative;display:inline-flex;align-items:center;min-width:0}
+.btn-grupo-custom{width:auto;max-width:205px;height:38px;min-height:38px;margin:0;padding:0 12px;border-radius:20px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);font-size:.83rem;font-weight:600;display:inline-flex;align-items:center;justify-content:space-between;gap:6px;white-space:nowrap}
+.btn-grupo-custom:hover,.btn-grupo-custom.ativo{background:var(--hover);border-color:var(--pri)}
+#txtGrupoCustom{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.menu-grupo-custom{position:fixed;top:68px;z-index:1560;min-width:220px;max-width:min(310px,calc(100vw - 24px));max-height:min(340px,calc(100dvh - 90px));overflow-y:auto;background:var(--modal);border:1px solid var(--bd);border-radius:18px;padding:6px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:3px}
+.item-grupo-custom{width:100%;margin:0;padding:10px 12px;min-height:40px;border-radius:14px;background:transparent;color:var(--tx);font-size:.85rem;font-weight:600;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.item-grupo-custom:hover{background:var(--hover)}
+.item-grupo-custom.ativo{background:var(--pri);color:var(--on-pri)}
+
+/* Avatar do usuário */
+.nav-user-wrap{position:relative;flex-shrink:0}
+.nav-user-btn{width:auto;height:40px;min-height:40px;min-width:40px;margin:0;padding:3px 9px 3px 3px;border-radius:999px;background:transparent;color:var(--tx);border:1px solid transparent;display:inline-flex;align-items:center;gap:8px}
+.nav-user-btn:hover,.nav-user-btn.ativo{background:var(--hover)}
+.avatar-circ{width:34px;height:34px;border-radius:999px;background:var(--pri);color:var(--on-pri);font-weight:800;font-size:.88rem;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.nav-user-meta{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15;min-width:0}
+#navUserNome{font-size:.82rem;font-weight:700;max-width:118px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-user-tag{font-size:.68rem;color:var(--mut);font-weight:600}
+
+/* Painel Lateral Flutuante (Desktop) / Bottom Sheet (Mobile) */
+#info{position:absolute;top:72px;left:14px;bottom:14px;width:392px;max-height:calc(100dvh - 86px);background:var(--card);border:1px solid var(--bd);border-radius:20px;box-shadow:var(--sh);z-index:850;padding:16px;overflow-y:auto}
 #info.recolhido{display:none!important}
+.sheet-handle{display:none}
 .so-desk{display:none}
 @media (min-width:860px){
-  #corpoApp{flex-direction:row}
-  #info{width:400px;flex-shrink:0;max-height:none;height:100%;border-top:0;border-left:1px solid var(--bd);padding:14px}
   .so-mob{display:none}
   .so-desk{display:inline}
 }
 
-/* Controles sobre o mapa */
-.controles-mapa{position:absolute;top:10px;right:10px;z-index:800;display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;max-width:calc(100% - 56px)}
-.btn-mapa-ctrl{width:auto;margin:0;padding:8px 14px;font-size:.8rem;border-radius:20px;background:var(--card);color:var(--tx);border:1px solid var(--bd);box-shadow:var(--sh);min-height:40px;display:inline-flex;align-items:center;gap:5px}
-.btn-mapa-ctrl.off{opacity:.8}
-.btn-mapa-ctrl.ativo-gps{background:var(--pri);color:var(--on-pri);border-color:var(--pri)}
-.btn-abrir-painel{position:absolute;bottom:10px;right:10px;z-index:800;width:auto;margin:0;padding:8px 16px;font-size:.84rem;border-radius:20px;background:var(--pri);color:var(--on-pri);box-shadow:var(--sh);min-height:40px}
-.legenda-mapa{position:absolute;bottom:10px;left:10px;z-index:800;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:7px 12px;font-size:.76rem;display:flex;flex-wrap:wrap;gap:10px;box-shadow:var(--sh);pointer-events:none}
-.leg-item{display:inline-flex;align-items:center;gap:4px;font-weight:600}
+/* Mobile / PWA Campo Limpo */
+@media (max-width:859px){
+  .barra{top:10px;left:10px;right:10px;height:52px;padding:0 8px;gap:4px;background:var(--card);border-radius:999px;box-shadow:var(--sh);border:1px solid var(--bd);pointer-events:auto;justify-content:flex-start}
+  .nav-esq,.nav-dir{display:contents}
+  .nav-brand,.nav-div,.nav-busca-txt,.nav-user-meta{display:none}
+  #btnPainel{order:1}
+  #btnBuscaMapa{order:2;width:40px;padding:0;background:transparent;border-color:transparent}
+  #wrapGrupoCustom{order:3;flex:1;min-width:0}
+  .btn-grupo-custom{width:100%;max-width:none;height:38px;padding:0 10px;font-size:.81rem}
+  #btnNotif{order:4}
+  .nav-user-wrap{order:5}
+  .nav-user-btn{padding:3px}
+
+  #info{top:auto;left:0;right:0;bottom:0;width:100%;max-height:44dvh;border-radius:24px 24px 0 0;border:0;border-top:1px solid var(--bd);box-shadow:0 -10px 30px rgba(0,0,0,.52);padding:8px 14px 18px}
+  .sheet-handle{display:block;width:40px;height:4px;border-radius:999px;background:rgba(255,255,255,.24);margin:2px auto 10px;cursor:pointer}
+  .chips-filtro{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+  .chips-filtro::-webkit-scrollbar{display:none}
+  .chip{flex-shrink:0;white-space:nowrap}
+}
+
+/* Popovers Flutuantes: Busca, Notificações e Menu do Avatar */
+#popBuscaMapa{position:fixed;top:72px;right:14px;width:min(390px,calc(100vw - 24px));max-height:min(480px,calc(100dvh - 88px));background:var(--modal);border:1px solid var(--bd);border-radius:20px;padding:12px;box-shadow:var(--sh);z-index:1550;display:flex;flex-direction:column;gap:8px}
+#inpBuscaMapa{padding:10px 14px;font-size:.92rem;border-radius:20px;background:var(--bg);border:1px solid var(--bd)}
+#listaBuscaMapa{overflow-y:auto;display:flex;flex-direction:column;gap:6px;max-height:380px}
+.busca-sec-tit{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);padding:6px 4px 2px}
+.item-busca-mapa{width:100%;margin:0;padding:10px 12px;min-height:44px;border-radius:16px;background:var(--card);color:var(--tx);border:1px solid var(--bd);text-align:left;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.86rem;font-weight:600}
+.item-busca-mapa:hover,.item-busca-mapa.ativo{background:var(--hover);border-color:var(--pri)}
+.item-busca-outro{width:100%;padding:10px 12px;border-radius:16px;background:var(--card);border:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.busca-esq{display:inline-flex;align-items:center;gap:8px;min-width:0;flex:1}
+.busca-texto{display:flex;flex-direction:column;min-width:0}
+.busca-texto strong{font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.busca-texto span{font-size:.74rem;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.busca-dot{width:9px;height:9px;border-radius:999px;flex-shrink:0}
+.busca-cont{font-size:.76rem;color:var(--mut);font-weight:600;white-space:nowrap}
+.btn-solicitar-item{width:auto;margin:0;padding:6px 12px;min-height:32px;border-radius:20px;font-size:.76rem;font-weight:700;background:var(--pri);color:var(--on-pri);flex-shrink:0}
+.btn-solicitar-item.enviado{background:var(--sec-bg);color:var(--mut);border:1px solid var(--bd)}
+
+#menuUsuario{position:fixed;top:72px;right:14px;width:252px;background:var(--modal);border:1px solid var(--bd);border-radius:20px;padding:12px;box-shadow:var(--sh);z-index:1560;display:flex;flex-direction:column;gap:6px}
+.menu-user-head{padding:2px 4px 8px;border-bottom:1px solid var(--bd)}
+.menu-user-head strong{display:block;font-size:.94rem;word-break:break-word}
+#menuUsuario button{width:100%;margin:0;min-height:40px;padding:8px 14px;font-size:.86rem;text-align:left;border-radius:16px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.menu-div{height:1px;background:var(--bd);margin:2px 0}
+.menu-sair{color:var(--bad)!important}
+.badge-notif-inline{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--notif);color:#fff;font-size:.72rem;font-weight:800}
+
+#painelNotif{position:fixed;top:72px;right:14px;width:min(420px,calc(100vw - 24px));max-height:min(540px,calc(100dvh - 88px));background:var(--modal);border:1px solid var(--bd);border-radius:20px;box-shadow:var(--sh);z-index:1550;display:flex;flex-direction:column;overflow:hidden}
+.notif-tab-cnt{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:5px;border-radius:999px;background:var(--notif);color:#fff;font-size:.7rem;font-weight:800}
+.adm-tab.ativo .notif-tab-cnt{background:var(--on-pri);color:var(--pri)}
+.notif-card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:11px 12px;margin-bottom:8px;display:flex;flex-direction:column;gap:7px}
+.notif-card:last-child{margin-bottom:0}
+.notif-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.notif-card-tit{font-size:.86rem;font-weight:700;line-height:1.3}
+.notif-card-sub{font-size:.77rem;color:var(--mut);line-height:1.35}
+.notif-acoes{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.notif-acoes button{width:auto;margin:0;padding:6px 12px;min-height:34px;font-size:.78rem;border-radius:20px}
+.notif-acoes .yes{background:var(--ok);color:var(--on-ok)}
+.notif-acoes .no{background:var(--bad);color:var(--on-bad)}
+.notif-prazo-sel{width:auto;padding:6px 10px;min-height:34px;font-size:.78rem;border-radius:20px;background:var(--bg);color:var(--tx);border:1px solid var(--bd)}
+@media (max-width:639px){
+  #popBuscaMapa,#painelNotif{top:68px;left:10px;right:10px;width:auto}
+  #menuUsuario{top:68px;right:10px}
+}
+
+/* Controles Circulares Unificados e Legenda do Mapa */
+.controles-mapa{position:absolute;right:14px;bottom:18px;z-index:820;display:flex;flex-direction:column;gap:8px;align-items:center}
+.btn-mapa-ctrl{width:44px;min-width:44px;height:44px;min-height:44px;margin:0;padding:0;border-radius:999px;background:var(--card);color:var(--tx);border:1px solid var(--bd);box-shadow:var(--sh);display:inline-flex;align-items:center;justify-content:center;font-size:1.05rem;font-weight:700}
+.btn-mapa-ctrl:hover{background:var(--hover)}
+.btn-mapa-ctrl.off{opacity:.58;color:var(--mut)}
+.btn-mapa-ctrl.ativo-ctrl,.btn-mapa-ctrl.ativo-gps{background:var(--pri);color:var(--on-pri);border-color:var(--pri)}
+.so-desk-ctrl{display:inline-flex}
+.legenda-mapa{position:absolute;right:68px;bottom:18px;z-index:820;background:var(--modal);border:1px solid var(--bd);border-radius:16px;padding:10px 14px;font-size:.78rem;display:flex;flex-direction:column;gap:6px;box-shadow:var(--sh);min-width:158px}
+.btn-abrir-painel{position:absolute;bottom:18px;left:14px;z-index:820;width:auto;margin:0;padding:9px 16px;font-size:.84rem;border-radius:20px;background:var(--pri);color:var(--on-pri);box-shadow:var(--sh);min-height:42px}
+@media (max-width:859px){
+  .so-desk-ctrl{display:none!important}
+  .controles-mapa{right:12px;bottom:calc(44dvh + 12px)}
+  .legenda-mapa{right:64px;bottom:calc(44dvh + 12px)}
+  #corpoApp.painel-fechado .controles-mapa,#corpoApp.painel-fechado .legenda-mapa{bottom:18px}
+}
+.leg-item{display:inline-flex;align-items:center;gap:6px;font-weight:600}
 .leg-dot{width:10px;height:10px;border-radius:999px;display:inline-block}
 .leg-dot.completo{background:#16a34a}
 .leg-dot.andamento{background:#eab308}
@@ -134,14 +191,16 @@ button:disabled{opacity:.55;cursor:default}
 
 /* Lista e detalhes em #info */
 .info-topo{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap}
-.btn-voltar{width:auto;margin:0;padding:7px 14px;font-size:.84rem;border-radius:20px;background:var(--sec-bg);color:var(--sec-tx);border:1px solid var(--bd);min-height:40px}
-#info .tit{font-weight:700;font-size:1.05rem;margin-bottom:4px}
+.btn-voltar{width:auto;margin:0;padding:7px 14px;font-size:.84rem;border-radius:20px;background:var(--sec-bg);color:var(--sec-tx);border:1px solid var(--bd);min-height:38px}
+.btn-solicitar-mapa{width:100%;margin:4px 0 10px;padding:10px 14px;min-height:42px;border-radius:16px;background:var(--sec-bg);color:var(--pri);border:1px dashed rgba(168,199,250,.38);font-size:.86rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn-solicitar-mapa.destaque{background:var(--pri);color:var(--on-pri);border:0;margin-top:12px}
+#info .tit{font-weight:700;font-size:1.05rem;margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .chips-filtro{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
-.chip{width:auto;margin:0;padding:6px 12px;font-size:.78rem;border-radius:20px;background:var(--card);color:var(--tx);border:1px solid var(--bd);font-weight:600;min-height:36px}
+.chip{width:auto;margin:0;padding:6px 12px;font-size:.78rem;border-radius:20px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);font-weight:600;min-height:36px}
 .chip.ativo{background:var(--pri);color:var(--on-pri);border-color:var(--pri)}
 
 .lista-mapas{display:flex;flex-direction:column;gap:10px}
-.item-mapa{display:flex;flex-direction:column;gap:8px;width:100%;margin:0;padding:14px 16px;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:16px;text-align:left;font-weight:500;font-size:.92rem;transition:border-color .15s,background-color .15s}
+.item-mapa{display:flex;flex-direction:column;gap:8px;width:100%;margin:0;padding:14px 16px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:16px;text-align:left;font-weight:500;font-size:.92rem;transition:border-color .15s,background-color .15s}
 .item-mapa:hover{background:var(--hover);border-color:var(--pri)}
 .item-linha{display:flex;align-items:center;gap:8px;width:100%}
 .item-icone{width:22px;height:22px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;color:#fff;flex-shrink:0}
@@ -149,10 +208,11 @@ button:disabled{opacity:.55;cursor:default}
 .item-icone.andamento{background:#d97706}
 .item-icone.pendente{background:#2563eb}
 .item-nome{flex:1;font-weight:700;min-width:0}
-.item-sub{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.76rem;color:var(--mut);margin-top:2px}
+.item-sub{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.76rem;color:var(--mut);margin-top:3px}
 .tag-desig{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;background:var(--sec-bg);color:var(--sec-tx);font-weight:600;font-size:.74rem}
 .tag-hist{color:var(--mut);font-size:.73rem}
 .tag-nota{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;background:var(--warn-bg);color:var(--warn);font-weight:600;font-size:.72rem}
+.tag-leitura,.badge-leitura{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:999px;background:rgba(255,255,255,.08);color:var(--mut);font-size:.72rem;font-weight:700}
 .item-cont{font-size:.84rem;color:var(--tx);font-weight:700;white-space:nowrap}
 .barra-prog{width:100%;height:6px;background:var(--bd);border-radius:999px;overflow:hidden}
 .barra-prog > span{display:block;height:100%;border-radius:999px;transition:width .25s ease}
@@ -164,7 +224,7 @@ button:disabled{opacity:.55;cursor:default}
 .quadra-pin{background:#2563eb;color:#fff;border-radius:999px;font-size:11px;font-weight:700;width:24px;height:24px;line-height:24px;text-align:center;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45)}
 .quadra-pin.feita{background:#16a34a}
 .qs{display:flex;flex-wrap:wrap;gap:8px}
-.qs a,.qs button.qb{display:inline-flex;align-items:center;justify-content:center;width:auto;margin:0;min-height:44px;min-width:56px;padding:8px 14px;border-radius:20px;font-size:.95rem;font-weight:700;text-decoration:none;border:1.5px solid var(--bd);background:var(--card);color:var(--pri)}
+.qs a,.qs button.qb{display:inline-flex;align-items:center;justify-content:center;width:auto;margin:0;min-height:44px;min-width:56px;padding:8px 14px;border-radius:20px;font-size:.95rem;font-weight:700;text-decoration:none;border:1.5px solid var(--bd);background:var(--bg);color:var(--pri)}
 .qs a.feita,.qs button.qb.feita{background:var(--ok);color:var(--on-ok);border-color:var(--ok)}
 .prog{font-size:.88rem;color:var(--mut);margin:4px 0 8px;font-weight:600}
 .st{font-size:.82rem;color:var(--mut)}
@@ -176,12 +236,12 @@ button:disabled{opacity:.55;cursor:default}
 
 /* Modais Gerenciar, Admin e Senha */
 #painelAdmin,#modalGerenciar,#modalSenha{position:fixed;inset:0;z-index:2000;background:rgba(10,12,16,.72);display:flex;align-items:center;justify-content:center;padding:12px}
-.adm-card{width:100%;max-width:600px;max-height:90vh;background:var(--modal);border:1px solid var(--bd);border-radius:16px;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--sh)}
+.adm-card{width:100%;max-width:600px;max-height:90vh;background:var(--modal);border:1px solid var(--bd);border-radius:20px;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--sh)}
 .adm-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px;border-bottom:1px solid var(--bd)}
 .adm-head strong{font-size:1.02rem}
-.adm-head button{width:auto;margin:0;padding:6px 14px;font-size:.84rem;min-height:40px;border-radius:20px}
+.adm-head button{width:auto;margin:0;padding:6px 14px;font-size:.84rem;min-height:38px;border-radius:20px}
 .adm-tabs{display:flex;gap:6px;padding:8px 12px;background:var(--card);border-bottom:1px solid var(--bd);overflow-x:auto}
-.adm-tab{width:auto;margin:0;flex:1;padding:8px 12px;font-size:.82rem;background:transparent;color:var(--mut);border:1px solid transparent;border-radius:20px;white-space:nowrap;min-height:40px}
+.adm-tab{width:auto;margin:0;flex:1;padding:8px 12px;font-size:.82rem;background:transparent;color:var(--mut);border:1px solid transparent;border-radius:20px;white-space:nowrap;min-height:40px;display:inline-flex;align-items:center;justify-content:center}
 .adm-tab.ativo{background:var(--pri);color:var(--on-pri);border-color:var(--pri);font-weight:700}
 .adm-body{padding:16px;overflow:auto;flex:1}
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--bd);flex-wrap:wrap}
@@ -202,7 +262,7 @@ button:disabled{opacity:.55;cursor:default}
 .menu-adm-wrap{position:relative;display:inline-block}
 .row .btn-menu-adm{width:40px;height:40px;min-height:40px;padding:0;margin:0;border-radius:999px;background:var(--card);color:var(--tx);border:1px solid var(--bd);font-size:1.15rem;line-height:1;display:inline-flex;align-items:center;justify-content:center}
 .row .btn-menu-adm:hover,.menu-adm-wrap.aberto .btn-menu-adm{background:var(--hover);color:var(--pri);border-color:var(--pri)}
-.menu-adm-lista{position:absolute;right:0;top:calc(100% + 6px);min-width:200px;background:var(--modal);border:1px solid var(--bd);border-radius:16px;padding:6px;box-shadow:var(--sh);z-index:2100;display:none;flex-direction:column;gap:3px}
+.menu-adm-lista{position:absolute;right:0;top:calc(100% + 6px);min-width:205px;background:var(--modal);border:1px solid var(--bd);border-radius:16px;padding:6px;box-shadow:var(--sh);z-index:2100;display:none;flex-direction:column;gap:3px}
 .menu-adm-wrap.aberto .menu-adm-lista{display:flex}
 .menu-adm-lista button{width:100%;margin:0;padding:9px 12px;font-size:.82rem;border-radius:12px;text-align:left;background:transparent;color:var(--tx);border:0;font-weight:600;min-height:38px}
 .menu-adm-lista button:hover{background:var(--hover)}
@@ -215,7 +275,7 @@ button:disabled{opacity:.55;cursor:default}
 .sec-adm{margin-top:14px;padding-top:12px;border-top:1px solid var(--bd)}
 .adm-foot{padding:0 16px 14px}
 .adm-foot .msg{margin-top:6px}
-.nota-box{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:12px;margin:8px 0}
+.nota-box{background:var(--bg);border:1px solid var(--bd);border-radius:16px;padding:12px;margin:8px 0}
 .nota-txt{font-size:.86rem;line-height:1.35;margin-top:4px;white-space:pre-wrap;word-break:break-word}
 .nota-meta{font-size:.74rem;color:var(--mut);margin-top:3px}
 .nota-form{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
@@ -230,8 +290,8 @@ button:disabled{opacity:.55;cursor:default}
 .pill-resp{width:auto;margin:0;padding:5px 11px;font-size:.75rem;border-radius:20px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);min-height:32px;font-weight:600}
 .pill-resp.ativo{background:var(--pri);color:var(--on-pri);border-color:var(--pri)}
 .dica-login{font-size:.82rem;color:var(--mut);background:var(--soft);border:1px solid var(--bd);border-radius:16px;padding:9px 12px;margin-top:8px;line-height:1.35}
-.badge-notif{position:absolute;top:3px;right:3px;display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--notif);color:#fff;font-size:.68rem;font-weight:800;line-height:1}
-.banner-novo{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:1400;width:min(440px,calc(100vw - 24px));background:var(--modal);border:1.5px solid var(--pri);border-radius:16px;padding:12px 14px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:10px}
+.badge-notif{position:absolute;top:2px;right:2px;display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--notif);color:#fff;font-size:.68rem;font-weight:800;line-height:1}
+.banner-novo{position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:1400;width:min(440px,calc(100vw - 24px));background:var(--modal);border:1.5px solid var(--pri);border-radius:20px;padding:12px 14px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:10px}
 .banner-novo-txt strong{display:block;font-size:.94rem;color:var(--tx)}
 .banner-novo-txt .st{margin-top:3px;color:var(--mut);font-size:.82rem;line-height:1.35}
 .banner-novo-acoes{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
@@ -292,21 +352,24 @@ button:disabled{opacity:.55;cursor:default}
     </div>
 
     <div class="nav-dir">
-      <button type="button" class="nav-icon-btn hidden" id="btnAdmin" title="Administração" aria-label="Administração">
+      <button type="button" class="nav-icon-btn" id="btnNotif" title="Notificações" aria-label="Notificações" aria-haspopup="true" aria-expanded="false">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-        <span id="badgeNotifAdmin" class="badge-notif hidden">0</span>
+        <span id="badgeNotif" class="badge-notif hidden">0</span>
       </button>
-      <button type="button" class="nav-icon-btn hidden" id="btnGerenciar" title="Gerenciar mapas e permissões" aria-label="Gerenciar mapas e permissões">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
-      </button>
-      <button type="button" class="nav-icon-btn" id="btnBuscaMapa" title="Buscar mapa" aria-label="Buscar mapa" aria-haspopup="true" aria-expanded="false">
+      <button type="button" class="nav-icon-btn" id="btnBuscaMapa" title="Buscar ou solicitar mapa" aria-label="Buscar ou solicitar mapa" aria-haspopup="true" aria-expanded="false">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.65" y2="16.65"></line></svg>
         <span class="nav-busca-txt">Buscar</span>
       </button>
 
-      <span class="nav-div" aria-hidden="true"></span>
-      <select id="selGrupo" aria-label="Filtrar por frente ou grupo"></select>
-      <select id="selMapa" class="hidden" aria-label="Selecionar mapa"></select>
+      <div class="grupo-dd-wrap" id="wrapGrupoCustom">
+        <button type="button" id="btnGrupoCustom" class="btn-grupo-custom" title="Filtrar por frente ou grupo" aria-haspopup="listbox" aria-expanded="false">
+          <span id="txtGrupoCustom">Todos os grupos</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+        </button>
+        <select id="selGrupo" class="hidden" aria-label="Filtrar por frente ou grupo"></select>
+        <select id="selMapa" class="hidden" aria-label="Selecionar mapa"></select>
+      </div>
+
       <span class="nav-div" aria-hidden="true"></span>
 
       <div class="nav-user-wrap">
@@ -321,7 +384,21 @@ button:disabled{opacity:.55;cursor:default}
     </div>
   </header>
 
-  <div id="popBuscaMapa" class="hidden" role="dialog" aria-label="Busca rápida de mapa">
+  <div id="menuGrupoCustom" class="menu-grupo-custom hidden" role="listbox" aria-label="Selecionar frente ou grupo"></div>
+
+  <div id="painelNotif" class="hidden" role="dialog" aria-label="Central de notificações">
+    <div class="adm-head">
+      <strong>Notificações</strong>
+      <button type="button" class="sec" id="btnFecharNotif">Fechar ✕</button>
+    </div>
+    <div class="adm-tabs" role="tablist">
+      <button type="button" class="adm-tab ativo" id="tabNotifPend" role="tab" aria-selected="true">Pendências <span id="cntNotifPend" class="notif-tab-cnt hidden">0</span></button>
+      <button type="button" class="adm-tab" id="tabNotifAtiv" role="tab" aria-selected="false">Atividades</button>
+    </div>
+    <div class="adm-body" id="listaNotif"></div>
+  </div>
+
+  <div id="popBuscaMapa" class="hidden" role="dialog" aria-label="Busca rápida e solicitação de mapas">
     <input id="inpBuscaMapa" type="search" placeholder="Buscar mapa (ex: 17, Terça)..." autocomplete="off">
     <div id="listaBuscaMapa"></div>
   </div>
@@ -331,8 +408,11 @@ button:disabled{opacity:.55;cursor:default}
       <strong id="ola"></strong>
       <div id="menuPerfilTag" class="st"></div>
     </div>
-    <button type="button" class="sec" id="btnSenha" title="Trocar minha senha">🔑 Trocar senha</button>
-    <button type="button" class="sec" id="btnSair">Sair</button>
+    <button type="button" class="sec hidden" id="btnAdmin" title="Administração"><span>🛡️ Admin</span><span id="badgeNotifAdmin" class="badge-notif-inline hidden">0</span></button>
+    <button type="button" class="sec hidden" id="btnGerenciar" title="Gerenciar mapas e permissões">🔑 Gerenciar</button>
+    <div id="divMenuGestao" class="menu-div hidden" aria-hidden="true"></div>
+    <button type="button" class="sec" id="btnSenha" title="Trocar minha senha">🔒 Trocar senha</button>
+    <button type="button" class="sec menu-sair" id="btnSair">🚪 Sair</button>
   </div>
 
   <div id="bannerNovoMapa" class="banner-novo hidden" role="status" aria-live="polite">
@@ -350,11 +430,14 @@ button:disabled{opacity:.55;cursor:default}
     <div id="wrapMapa">
       <div id="mapa"></div>
       <div class="controles-mapa">
-        <button type="button" class="btn-mapa-ctrl" id="btnTogglePills" title="Ativar ou desativar números sobre o mapa">🏷️ Números no mapa: ON</button>
-        <button type="button" class="btn-mapa-ctrl" id="btnGps" title="Centralizar na minha posição atual">📍 Minha posição</button>
+        <button type="button" class="btn-mapa-ctrl so-desk-ctrl" id="btnZoomIn" title="Aproximar mapa" aria-label="Aproximar mapa">+</button>
+        <button type="button" class="btn-mapa-ctrl so-desk-ctrl" id="btnZoomOut" title="Afastar mapa" aria-label="Afastar mapa">−</button>
+        <button type="button" class="btn-mapa-ctrl" id="btnGps" title="Minha posição" aria-label="Minha posição">📍</button>
+        <button type="button" class="btn-mapa-ctrl" id="btnTogglePills" title="Números no mapa: ON" aria-label="Números no mapa">#</button>
+        <button type="button" class="btn-mapa-ctrl" id="btnLegenda" title="Mostrar ou ocultar legenda" aria-label="Legenda do mapa">?</button>
       </div>
       <button type="button" class="btn-abrir-painel hidden" id="btnAbrirPainel">📋 Mostrar mapas</button>
-      <div class="legenda-mapa" aria-hidden="true">
+      <div id="boxLegendaMapa" class="legenda-mapa hidden" aria-hidden="true">
         <span class="leg-item"><span class="leg-dot completo"></span>✓ Completo</span>
         <span class="leg-item"><span class="leg-dot andamento"></span>◐ Em andamento</span>
         <span class="leg-item"><span class="leg-dot pendente"></span>○ Pendente</span>
@@ -390,6 +473,11 @@ button:disabled{opacity:.55;cursor:default}
           <label for="dgAte">Ou defina uma data limite (opcional)</label>
           <input id="dgAte" type="date">
           <button type="button" id="btnDesignar">Designar mapa</button>
+
+          <div class="sec-adm" id="wrapSolicitacoesGer">
+            <strong>Solicitações de mapa pendentes</strong>
+            <div id="listaSolicitacoesGer" style="margin-top:8px"></div>
+          </div>
 
           <div class="sec-adm">
             <strong>Designações ativas</strong>
@@ -479,7 +567,10 @@ var $ = function (id) { return document.getElementById(id); };
 var sessao = null, dados = null, mapaLeaflet = null, camada = null, gpsMarker = null, gpsWatchId = null, gpsPrimeiroFix = false;
 var feitas = {}, pode = {}, podeMapa = {}, somenteLeituraMapa = {};
 var permissoesAte = {}, permissoesMapaAte = {}, designacoesAtivas = {}, minhasDesignacoes = {}, responsaveisFrente = {}, ultimoHistorico = {}, notasMapa = {};
-var notifAdmin = { total: 0, contas: 0, senhas: 0 }, hashAcesso = "", precisaAtualizarMapas = false;
+var catalogoMapas = [], minhasSolicitacoesPend = {};
+var notificacoesData = { pendencias: { total: 0, contas: 0, senhas: 0, solicitacoes: 0, mapasDesignados: 0, itens: [] }, atividades: [] };
+var abaNotif = "pendencias";
+var notifAdmin = { total: 0, contas: 0, senhas: 0, solicitacoes: 0 }, hashAcesso = "", precisaAtualizarMapas = false;
 var mapaAtual = null, filtroStatus = "todos", filtroAdmin = "todos", adminListaCache = [], adminFrentesCache = [];
 var gerenciarCache = null, mapasNovosAtivos = {}, novosItensPendentes = [], preCarregandoAdm = false, preCarregandoGer = false;
 var painelRecolhido = false;
@@ -631,7 +722,9 @@ $("btnRegistrar").onclick = async function () {
 $("btnSair").onclick = function () {
   fecharPopoversTopo();
   sessao = null; dados = null; mapaAtual = null; hashProg = ""; hashAcesso = ""; precisaAtualizarMapas = false;
-  notifAdmin = { total: 0, contas: 0, senhas: 0 };
+  catalogoMapas = []; minhasSolicitacoesPend = {};
+  notificacoesData = { pendencias: { total: 0, contas: 0, senhas: 0, solicitacoes: 0, mapasDesignados: 0, itens: [] }, atividades: [] };
+  notifAdmin = { total: 0, contas: 0, senhas: 0, solicitacoes: 0 };
   adminListaCache = []; adminFrentesCache = []; gerenciarCache = null; mapasNovosAtivos = {}; novosItensPendentes = [];
   gravarSessao(null); limparCache(); mostrarLogin("login");
 };
@@ -641,7 +734,7 @@ function atualizarIdentidadeTopo() {
   var inicial = nome ? nome.charAt(0).toUpperCase() : "U";
   var ehSup = !!(sessao && !sessao.admin && (sessao.ehSup || sessao.cargo === "Dirigente Sup." || sessao.tipo === "Dirigente Sup."));
   var curta = !sessao ? "" : (sessao.admin ? "Admin" : (ehSup ? "Sup." : "Dirig."));
-  var completa = !sessao ? "" : (sessao.admin ? "Administrador" : (ehSup ? "Dirigente Sup." : "Dirigente"));
+  var completa = !sessao ? "" : (sessao.admin ? "Admin" : (ehSup ? "Dirigente Sup." : "Dirigente"));
   $("ola").textContent = nome ? ("Olá, " + nome) : "";
   $("navUserNome").textContent = nome;
   $("avatarInicial").textContent = inicial;
@@ -661,19 +754,35 @@ function pulsarSync() {
 function atualizarBadgeAdmin() {
   var b = $("badgeNotifAdmin");
   var btn = $("btnAdmin");
-  if (!b || !btn) return;
-  var tot = (sessao && sessao.admin && notifAdmin && notifAdmin.total) ? Number(notifAdmin.total) : 0;
-  b.classList.toggle("hidden", tot <= 0);
-  if (tot > 0) {
-    b.textContent = tot > 99 ? "99+" : String(tot);
-    var partes = [];
-    if (notifAdmin.contas) partes.push(notifAdmin.contas + (notifAdmin.contas === 1 ? " conta" : " contas"));
-    if (notifAdmin.senhas) partes.push(notifAdmin.senhas + (notifAdmin.senhas === 1 ? " senha" : " senhas"));
-    if (notifAdmin.solicitacoes) partes.push(notifAdmin.solicitacoes + (notifAdmin.solicitacoes === 1 ? " solicitação" : " solicitações"));
-    btn.title = tot + (tot === 1 ? " pendência" : " pendências") + (partes.length ? " (" + partes.join(", ") + ")" : "");
-  } else {
-    b.textContent = "0";
-    btn.title = "Administração";
+  if (b && btn) {
+    var totAdm = (sessao && sessao.admin && notifAdmin && notifAdmin.total) ? Number(notifAdmin.total) : 0;
+    b.classList.toggle("hidden", totAdm <= 0);
+    if (totAdm > 0) {
+      b.textContent = totAdm > 99 ? "99+" : String(totAdm);
+      var partesAdm = [];
+      if (notifAdmin.contas) partesAdm.push(notifAdmin.contas + (notifAdmin.contas === 1 ? " conta" : " contas"));
+      if (notifAdmin.senhas) partesAdm.push(notifAdmin.senhas + (notifAdmin.senhas === 1 ? " senha" : " senhas"));
+      if (notifAdmin.solicitacoes) partesAdm.push(notifAdmin.solicitacoes + (notifAdmin.solicitacoes === 1 ? " solicitação" : " solicitações"));
+      btn.title = totAdm + (totAdm === 1 ? " pendência" : " pendências") + (partesAdm.length ? " (" + partesAdm.join(", ") + ")" : "");
+    } else {
+      b.textContent = "0";
+      btn.title = "Administração";
+    }
+  }
+  var bNotif = $("badgeNotif");
+  var btnNotif = $("btnNotif");
+  var cntTab = $("cntNotifPend");
+  var totPend = (notificacoesData && notificacoesData.pendencias && notificacoesData.pendencias.total) ? Number(notificacoesData.pendencias.total) : 0;
+  if (bNotif) {
+    bNotif.classList.toggle("hidden", totPend <= 0);
+    bNotif.textContent = totPend > 99 ? "99+" : String(totPend);
+  }
+  if (cntTab) {
+    cntTab.classList.toggle("hidden", totPend <= 0);
+    cntTab.textContent = totPend > 99 ? "99+" : String(totPend);
+  }
+  if (btnNotif) {
+    btnNotif.title = totPend > 0 ? (totPend + (totPend === 1 ? " pendência" : " pendências")) : "Notificações";
   }
 }
 
@@ -682,6 +791,7 @@ function atualizarBotoesTopo() {
   var ehAdm = !!(sessao && sessao.admin);
   $("btnGerenciar").classList.toggle("hidden", !podeGer);
   $("btnAdmin").classList.toggle("hidden", !ehAdm);
+  if ($("divMenuGestao")) $("divMenuGestao").classList.toggle("hidden", !podeGer && !ehAdm);
   atualizarIdentidadeTopo();
   atualizarBadgeAdmin();
   if (!podeGer && !$("modalGerenciar").classList.contains("hidden")) fecharModalGerenciar();
@@ -792,73 +902,274 @@ function fecharMenusAdm() {
 }
 
 function fecharPopoversTopo() {
-  var mu = $("menuUsuario"), pb = $("popBuscaMapa");
+  var mu = $("menuUsuario"), pb = $("popBuscaMapa"), pn = $("painelNotif"), mg = $("menuGrupoCustom");
   if (mu) mu.classList.add("hidden");
   if (pb) pb.classList.add("hidden");
-  var bp = $("btnPerfilUsuario"), bb = $("btnBuscaMapa");
+  if (pn) pn.classList.add("hidden");
+  if (mg) mg.classList.add("hidden");
+  var bp = $("btnPerfilUsuario"), bb = $("btnBuscaMapa"), bn = $("btnNotif"), bg = $("btnGrupoCustom");
   if (bp) { bp.classList.remove("ativo"); bp.setAttribute("aria-expanded", "false"); }
   if (bb) { bb.classList.remove("ativo"); bb.setAttribute("aria-expanded", "false"); }
+  if (bn) { bn.classList.remove("ativo"); bn.setAttribute("aria-expanded", "false"); }
+  if (bg) { bg.classList.remove("ativo"); bg.setAttribute("aria-expanded", "false"); }
+}
+
+function sincronizarDropdownGrupo() {
+  var sg = $("selGrupo");
+  var txt = $("txtGrupoCustom");
+  var menu = $("menuGrupoCustom");
+  if (!sg || !txt || !menu) return;
+  var optSel = sg.options[sg.selectedIndex];
+  txt.textContent = optSel ? optSel.textContent : "Todos os grupos";
+  menu.innerHTML = "";
+  for (var i = 0; i < sg.options.length; i++) {
+    (function (op) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "item-grupo-custom" + (op.value === sg.value ? " ativo" : "");
+      b.setAttribute("role", "option");
+      b.setAttribute("aria-selected", op.value === sg.value ? "true" : "false");
+      var sp = document.createElement("span");
+      sp.textContent = op.textContent;
+      b.appendChild(sp);
+      if (op.value === sg.value) {
+        var ck = document.createElement("span");
+        ck.textContent = "✓";
+        b.appendChild(ck);
+      }
+      b.onclick = function () {
+        sg.value = op.value;
+        sincronizarDropdownGrupo();
+        fecharPopoversTopo();
+        if (typeof sg.onchange === "function") sg.onchange();
+      };
+      menu.appendChild(b);
+    })(sg.options[i]);
+  }
+}
+
+$("btnGrupoCustom").onclick = function (e) {
+  e.stopPropagation();
+  var menu = $("menuGrupoCustom");
+  if (!menu) return;
+  var estavaOculto = menu.classList.contains("hidden");
+  fecharPopoversTopo();
+  if (!estavaOculto) return;
+  sincronizarDropdownGrupo();
+  var rect = $("btnGrupoCustom").getBoundingClientRect();
+  var topPos = Math.round(rect.bottom + 8);
+  var rightPos = Math.max(10, Math.round(window.innerWidth - rect.right));
+  menu.style.top = topPos + "px";
+  menu.style.right = rightPos + "px";
+  menu.style.left = "auto";
+  menu.classList.remove("hidden");
+  $("btnGrupoCustom").classList.add("ativo");
+  $("btnGrupoCustom").setAttribute("aria-expanded", "true");
+};
+$("menuGrupoCustom").onclick = function (e) { e.stopPropagation(); };
+
+async function carregarSolicitacoesUsuario() {
+  if (!sessao || !sessao.token) return;
+  var r = await chamar({ acao: "listarSolicitacoes", token: sessao.token });
+  if (r && r.ok) {
+    var mapPend = {};
+    (r.minhasSolicitacoes || []).forEach(function (sol) {
+      if (String(sol.status || "").toLowerCase() === "pendente") {
+        mapPend[normKey(sol.frente + "|" + sol.mapa)] = true;
+      }
+    });
+    minhasSolicitacoesPend = mapPend;
+    if (!$("popBuscaMapa").classList.contains("hidden")) {
+      renderizarBuscaMapa($("inpBuscaMapa").value);
+    }
+  }
+}
+
+async function solicitarMapaCatalogo(frente, mapa, btnEl) {
+  if (!sessao || !sessao.token) return;
+  if (btnEl) {
+    btnEl.disabled = true;
+    btnEl.textContent = "Enviando…";
+  }
+  var r = await chamar({ acao: "solicitarMapa", token: sessao.token, frente: frente, mapa: mapa });
+  if (!r || !r.ok) {
+    alert((r && r.erro) || "Não foi possível enviar a solicitação.");
+    if (btnEl) {
+      btnEl.disabled = false;
+      btnEl.textContent = "Solicitar";
+    }
+    return;
+  }
+  minhasSolicitacoesPend[normKey(frente + "|" + mapa)] = true;
+  if (!$("popBuscaMapa").classList.contains("hidden")) {
+    renderizarBuscaMapa($("inpBuscaMapa").value);
+  }
+  atualizarProgressoSilencioso(true);
+}
+
+function abrirBuscaParaSolicitar() {
+  fecharPopoversTopo();
+  $("popBuscaMapa").classList.remove("hidden");
+  $("btnBuscaMapa").classList.add("ativo");
+  $("btnBuscaMapa").setAttribute("aria-expanded", "true");
+  $("inpBuscaMapa").value = "";
+  renderizarBuscaMapa("");
+  carregarSolicitacoesUsuario();
+  setTimeout(function () {
+    $("inpBuscaMapa").focus();
+    var sec = $("listaBuscaMapa").querySelector(".sec-outros-mapas");
+    if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 40);
+}
+
+function corStatusCatalogo(status) {
+  var st = String(status || "").toLowerCase();
+  if (st === "completo") return "#16a34a";
+  if (st === "andamento") return "#eab308";
+  return "#2563eb";
 }
 
 function renderizarBuscaMapa(termo) {
   var box = $("listaBuscaMapa");
   var sm = $("selMapa");
+  var sg = $("selGrupo");
   if (!box || !sm) return;
   box.innerHTML = "";
   var q = String(termo || "").trim().toLowerCase();
   var selAtual = sm.value;
-  var itens = [];
-  for (var i = 0; i < sm.options.length; i++) {
-    var opt = sm.options[i];
-    if (!opt.value) {
-      if (!q) itens.push({ val: "", label: "Todos os mapas (visão geral)", info: "", cor: "", ativo: selAtual === "" });
-      continue;
-    }
-    var m = (dados && dados.mapas) ? dados.mapas[Number(opt.value)] : null;
-    if (!m) continue;
-    var textoBusca = ("mapa " + m.n + " " + m.g).toLowerCase();
-    if (q && textoBusca.indexOf(q) < 0) continue;
-    var st = statusMapa(m);
-    itens.push({
-      val: opt.value,
-      label: "Mapa " + m.n + " · " + m.g,
-      info: st.total ? (st.feitasN + " de " + st.total) : "0",
-      cor: st.cor,
-      ativo: selAtual === opt.value
+
+  var acessiveis = [];
+  var chavesAcessiveis = {};
+  var chavesEditaveis = {};
+  var listaMapas = (dados && dados.mapas) ? dados.mapas : [];
+
+  if (!q && listaMapas.length) {
+    acessiveis.push({
+      val: "", frente: "", mapa: null,
+      label: "Todos os mapas (visão geral)", info: "", cor: "",
+      ativo: selAtual === "", leitura: false
     });
   }
-  if (!itens.length) {
+
+  for (var i = 0; i < listaMapas.length; i++) {
+    var m = listaMapas[i];
+    var km = chave(m);
+    chavesAcessiveis[normKey(km)] = true;
+    var ehLeitura = mapaEhSomenteLeitura(m);
+    if (!ehLeitura) chavesEditaveis[normKey(km)] = true;
+    var textoBusca = ("mapa " + m.n + " " + (m.nome || "") + " " + m.g).toLowerCase();
+    if (q && textoBusca.indexOf(q) < 0) continue;
+    var st = statusMapa(m);
+    acessiveis.push({
+      val: String(i),
+      frente: m.g,
+      mapa: m,
+      label: "Mapa " + m.n + " · " + m.g,
+      info: (ehLeitura ? "🔒 " : "") + (st.total ? (st.feitasN + " de " + st.total) : "0"),
+      cor: st.cor,
+      ativo: selAtual === String(i),
+      leitura: ehLeitura
+    });
+  }
+
+  var outros = [];
+  (catalogoMapas || []).forEach(function (cm) {
+    var kmCat = normKey(cm.frente + "|" + cm.numero);
+    if (chavesEditaveis[kmCat]) return;
+    var txt = ("mapa " + cm.numero + " " + (cm.nome || "") + " " + cm.frente).toLowerCase();
+    if (q && txt.indexOf(q) < 0) return;
+    outros.push(cm);
+  });
+
+  if (acessiveis.length) {
+    var tit1 = document.createElement("div");
+    tit1.className = "busca-sec-tit";
+    tit1.textContent = "Meus mapas / Acessíveis";
+    box.appendChild(tit1);
+
+    acessiveis.forEach(function (it) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "item-busca-mapa" + (it.ativo ? " ativo" : "");
+      var esq = document.createElement("span"); esq.className = "busca-esq";
+      if (it.cor) {
+        var dot = document.createElement("span"); dot.className = "busca-dot"; dot.style.background = it.cor;
+        esq.appendChild(dot);
+      }
+      var lb = document.createElement("span"); lb.textContent = it.label;
+      esq.appendChild(lb);
+      b.appendChild(esq);
+      if (it.info) {
+        var dir = document.createElement("span"); dir.className = "busca-cont"; dir.textContent = it.info;
+        b.appendChild(dir);
+      }
+      b.onclick = function () {
+        if (it.val !== "" && painelRecolhido) atualizarPainelRecolhido(false);
+        if (it.val === "") {
+          if (sg) sg.value = "";
+          preencherMapas();
+          sincronizarDropdownGrupo();
+          sm.value = "";
+        } else {
+          if (sg && sg.value && sg.value !== it.frente) {
+            sg.value = "";
+            preencherMapas();
+            sincronizarDropdownGrupo();
+          }
+          sm.value = it.val;
+        }
+        if (typeof sm.onchange === "function") sm.onchange();
+        else { mapaAtual = null; desenhar(true); }
+        fecharPopoversTopo();
+      };
+      box.appendChild(b);
+    });
+  }
+
+  if (outros.length) {
+    var tit2 = document.createElement("div");
+    tit2.className = "busca-sec-tit sec-outros-mapas";
+    tit2.textContent = "Outros mapas (solicitar acesso)";
+    box.appendChild(tit2);
+
+    outros.forEach(function (cm) {
+      var kmPend = normKey(cm.frente + "|" + cm.numero);
+      var jaSolicitado = !!minhasSolicitacoesPend[kmPend];
+      var row = document.createElement("div");
+      row.className = "item-busca-outro";
+
+      var esq = document.createElement("div"); esq.className = "busca-esq";
+      var dot = document.createElement("span"); dot.className = "busca-dot"; dot.style.background = corStatusCatalogo(cm.status);
+      esq.appendChild(dot);
+
+      var txtWrap = document.createElement("div"); txtWrap.className = "busca-texto";
+      var stNome = document.createElement("strong");
+      stNome.textContent = (cm.nome || ("Mapa " + cm.numero)) + (chavesAcessiveis[kmPend] ? " (🔒 Visualização)" : "");
+      var spFrente = document.createElement("span");
+      spFrente.textContent = cm.frente + " · " + (cm.status === "completo" ? "Concluído" : (cm.status === "andamento" ? "Em andamento" : "Pendente"));
+      txtWrap.appendChild(stNome);
+      txtWrap.appendChild(spFrente);
+      esq.appendChild(txtWrap);
+
+      var bSol = document.createElement("button");
+      bSol.type = "button";
+      bSol.className = "btn-solicitar-item" + (jaSolicitado ? " enviado" : "");
+      bSol.textContent = jaSolicitado ? "⏳ Solicitado" : "Solicitar";
+      bSol.disabled = jaSolicitado;
+      bSol.onclick = function () { solicitarMapaCatalogo(cm.frente, cm.numero, bSol); };
+
+      row.appendChild(esq);
+      row.appendChild(bSol);
+      box.appendChild(row);
+    });
+  }
+
+  if (!acessiveis.length && !outros.length) {
     var vazio = document.createElement("div"); vazio.className = "st";
     vazio.style.padding = "8px 4px";
     vazio.textContent = "Nenhum mapa encontrado.";
     box.appendChild(vazio);
-    return;
   }
-  itens.forEach(function (it) {
-    var b = document.createElement("button");
-    b.type = "button";
-    b.className = "item-busca-mapa" + (it.ativo ? " ativo" : "");
-    var esq = document.createElement("span"); esq.className = "busca-esq";
-    if (it.cor) {
-      var dot = document.createElement("span"); dot.className = "busca-dot"; dot.style.background = it.cor;
-      esq.appendChild(dot);
-    }
-    var lb = document.createElement("span"); lb.textContent = it.label;
-    esq.appendChild(lb);
-    b.appendChild(esq);
-    if (it.info) {
-      var dir = document.createElement("span"); dir.className = "busca-cont"; dir.textContent = it.info;
-      b.appendChild(dir);
-    }
-    b.onclick = function () {
-      if (it.val !== "" && painelRecolhido) atualizarPainelRecolhido(false);
-      sm.value = it.val;
-      if (typeof sm.onchange === "function") sm.onchange();
-      else { mapaAtual = null; desenhar(true); }
-      fecharPopoversTopo();
-    };
-    box.appendChild(b);
-  });
 }
 
 $("btnBuscaMapa").onclick = function (e) {
@@ -871,6 +1182,7 @@ $("btnBuscaMapa").onclick = function (e) {
   $("btnBuscaMapa").setAttribute("aria-expanded", "true");
   $("inpBuscaMapa").value = "";
   renderizarBuscaMapa("");
+  carregarSolicitacoesUsuario();
   setTimeout(function () { $("inpBuscaMapa").focus(); }, 20);
 };
 $("popBuscaMapa").onclick = function (e) { e.stopPropagation(); };
@@ -883,6 +1195,242 @@ $("inpBuscaMapa").onkeydown = function (e) {
     if (primeiro) primeiro.click();
   }
 };
+
+function abrirMapaPorChave(frente, mapa) {
+  if (!dados || !dados.mapas) return;
+  if (painelRecolhido) atualizarPainelRecolhido(false);
+  $("selGrupo").value = "";
+  preencherMapas();
+  sincronizarDropdownGrupo();
+  var idxAlvo = "";
+  for (var i = 0; i < dados.mapas.length; i++) {
+    if (dados.mapas[i].g === frente && mesmoMapa(dados.mapas[i].n, mapa)) {
+      idxAlvo = String(i);
+      break;
+    }
+  }
+  $("selMapa").value = idxAlvo;
+  desenhar(true);
+  fecharPopoversTopo();
+}
+
+function abrirAbaNotif(aba) {
+  abaNotif = aba === "atividades" ? "atividades" : "pendencias";
+  $("tabNotifPend").classList.toggle("ativo", abaNotif === "pendencias");
+  $("tabNotifAtiv").classList.toggle("ativo", abaNotif === "atividades");
+  $("tabNotifPend").setAttribute("aria-selected", abaNotif === "pendencias");
+  $("tabNotifAtiv").setAttribute("aria-selected", abaNotif === "atividades");
+  renderizarNotificacoes();
+}
+$("tabNotifPend").onclick = function () { abrirAbaNotif("pendencias"); };
+$("tabNotifAtiv").onclick = function () { abrirAbaNotif("atividades"); };
+$("btnFecharNotif").onclick = fecharPopoversTopo;
+$("painelNotif").onclick = function (e) { e.stopPropagation(); };
+
+$("btnNotif").onclick = function (e) {
+  e.stopPropagation();
+  var estavaOculto = $("painelNotif").classList.contains("hidden");
+  fecharPopoversTopo();
+  if (!estavaOculto) return;
+  $("painelNotif").classList.remove("hidden");
+  $("btnNotif").classList.add("ativo");
+  $("btnNotif").setAttribute("aria-expanded", "true");
+  renderizarNotificacoes();
+};
+
+function iconeAtividade(tipo) {
+  if (tipo === "mapa_iniciado") return "🚀";
+  if (tipo === "mapa_concluido") return "✅";
+  if (tipo === "designacao_feita") return "👤";
+  if (tipo === "designacao_removida") return "🗑️";
+  if (tipo === "designacao_expirada") return "⏱️";
+  if (tipo === "solicitacao_aprovada") return "👍";
+  if (tipo === "solicitacao_recusada") return "✖️";
+  return "🔔";
+}
+
+function renderizarNotificacoes() {
+  var box = $("listaNotif");
+  if (!box) return;
+  box.innerHTML = "";
+  var dadosNotif = notificacoesData || { pendencias: { itens: [] }, atividades: [] };
+
+  if (abaNotif === "pendencias") {
+    var itens = (dadosNotif.pendencias && dadosNotif.pendencias.itens) ? dadosNotif.pendencias.itens : [];
+    if (!itens.length) {
+      var v1 = document.createElement("div"); v1.className = "st";
+      v1.textContent = "Nenhuma pendência no momento.";
+      box.appendChild(v1);
+      return;
+    }
+
+    itens.forEach(function (it) {
+      var card = document.createElement("div");
+      card.className = "notif-card";
+      var top = document.createElement("div");
+      top.className = "notif-card-top";
+      var tit = document.createElement("div");
+      tit.className = "notif-card-tit";
+      tit.textContent = it.titulo || "";
+      top.appendChild(tit);
+      card.appendChild(top);
+
+      var acoes = document.createElement("div");
+      acoes.className = "notif-acoes";
+
+      if (it.tipo === "solicitacao_mapa") {
+        var subSol = document.createElement("div");
+        subSol.className = "notif-card-sub";
+        subSol.textContent = (it.data ? ("Pedido em " + fmtData(it.data) + " · ") : "") + "Frente " + it.frente;
+        card.appendChild(subSol);
+
+        var selP = document.createElement("select");
+        selP.className = "notif-prazo-sel";
+        selP.setAttribute("aria-label", "Prazo da designação");
+        [
+          { v: "", l: "Sem prazo" },
+          { v: dataLocalYMD(0), l: "Hoje" },
+          { v: dataLocalYMD(7), l: "+7 dias" },
+          { v: dataLocalYMD(15), l: "+15 dias" },
+          { v: dataLocalYMD(30), l: "+30 dias" }
+        ].forEach(function (op) {
+          var o = document.createElement("option");
+          o.value = op.v;
+          o.textContent = op.l;
+          selP.appendChild(o);
+        });
+
+        var bAprov = document.createElement("button");
+        bAprov.type = "button";
+        bAprov.className = "yes";
+        bAprov.textContent = "Aprovar";
+        bAprov.onclick = async function () {
+          bAprov.disabled = true; bRec.disabled = true;
+          var r = await chamar({ acao: "responderSolicitacao", token: sessao.token, id: it.id, aprovar: true, validade: selP.value });
+          if (!r || !r.ok) {
+            alert((r && r.erro) || "Erro ao aprovar solicitação.");
+            bAprov.disabled = false; bRec.disabled = false;
+            return;
+          }
+          gerenciarCache = null;
+          await atualizarProgressoSilencioso(true);
+          renderizarNotificacoes();
+        };
+
+        var bRec = document.createElement("button");
+        bRec.type = "button";
+        bRec.className = "no";
+        bRec.textContent = "Recusar";
+        bRec.onclick = async function () {
+          bAprov.disabled = true; bRec.disabled = true;
+          var r = await chamar({ acao: "responderSolicitacao", token: sessao.token, id: it.id, aprovar: false });
+          if (!r || !r.ok) {
+            alert((r && r.erro) || "Erro ao recusar solicitação.");
+            bAprov.disabled = false; bRec.disabled = false;
+            return;
+          }
+          gerenciarCache = null;
+          await atualizarProgressoSilencioso(true);
+          renderizarNotificacoes();
+        };
+
+        acoes.appendChild(selP);
+        acoes.appendChild(bAprov);
+        acoes.appendChild(bRec);
+      } else if (it.tipo === "conta_pendente") {
+        if (it.data) {
+          var subC = document.createElement("div");
+          subC.className = "notif-card-sub";
+          subC.textContent = "Solicitada em " + fmtData(it.data);
+          card.appendChild(subC);
+        }
+        var bAprovC = document.createElement("button");
+        bAprovC.type = "button";
+        bAprovC.className = "yes";
+        bAprovC.textContent = "Aprovar conta";
+        bAprovC.onclick = async function () {
+          bAprovC.disabled = true;
+          var r = await chamar({ acao: "definirStatus", token: sessao.token, nome: it.nome, status: "aprovado" });
+          if (!r || !r.ok) { alert((r && r.erro) || "Erro ao aprovar."); bAprovC.disabled = false; return; }
+          await atualizarProgressoSilencioso(true);
+          renderizarNotificacoes();
+        };
+        var bAdmC = document.createElement("button");
+        bAdmC.type = "button";
+        bAdmC.className = "sec";
+        bAdmC.textContent = "Abrir Admin";
+        bAdmC.onclick = function () {
+          fecharPopoversTopo();
+          if ($("btnAdmin")) $("btnAdmin").click();
+        };
+        acoes.appendChild(bAprovC);
+        acoes.appendChild(bAdmC);
+      } else if (it.tipo === "pedido_senha") {
+        var bAprovS = document.createElement("button");
+        bAprovS.type = "button";
+        bAprovS.className = "yes";
+        bAprovS.textContent = "Aprovar senha";
+        bAprovS.onclick = async function () {
+          bAprovS.disabled = true; bRecS.disabled = true;
+          var r = await chamar({ acao: "responderNovaSenha", token: sessao.token, nome: it.nome, aprovar: true });
+          if (!r || !r.ok) { alert((r && r.erro) || "Erro."); bAprovS.disabled = false; bRecS.disabled = false; return; }
+          await atualizarProgressoSilencioso(true);
+          renderizarNotificacoes();
+        };
+        var bRecS = document.createElement("button");
+        bRecS.type = "button";
+        bRecS.className = "no";
+        bRecS.textContent = "Recusar";
+        bRecS.onclick = async function () {
+          bAprovS.disabled = true; bRecS.disabled = true;
+          var r = await chamar({ acao: "responderNovaSenha", token: sessao.token, nome: it.nome, aprovar: false });
+          if (!r || !r.ok) { alert((r && r.erro) || "Erro."); bAprovS.disabled = false; bRecS.disabled = false; return; }
+          await atualizarProgressoSilencioso(true);
+          renderizarNotificacoes();
+        };
+        acoes.appendChild(bAprovS);
+        acoes.appendChild(bRecS);
+      } else if (it.tipo === "mapa_designado") {
+        var subD = document.createElement("div");
+        subD.className = "notif-card-sub";
+        subD.textContent = it.temPrazo ? ("⏱️ Prazo até " + fmtData(it.validade)) : "Sem prazo definido (até concluir)";
+        card.appendChild(subD);
+        var bAbrir = document.createElement("button");
+        bAbrir.type = "button";
+        bAbrir.textContent = "Abrir mapa";
+        bAbrir.onclick = function () { abrirMapaPorChave(it.frente, it.mapa); };
+        acoes.appendChild(bAbrir);
+      }
+
+      if (acoes.childNodes.length) card.appendChild(acoes);
+      box.appendChild(card);
+    });
+    return;
+  }
+
+  var ativs = dadosNotif.atividades || [];
+  if (!ativs.length) {
+    var v2 = document.createElement("div"); v2.className = "st";
+    v2.textContent = "Nenhuma atividade recente nos seus mapas.";
+    box.appendChild(v2);
+    return;
+  }
+
+  ativs.forEach(function (ev) {
+    var card = document.createElement("div");
+    card.className = "notif-card";
+    var tit = document.createElement("div");
+    tit.className = "notif-card-tit";
+    tit.textContent = iconeAtividade(ev.tipo) + " " + (ev.descricao || ev.tipo);
+    var sub = document.createElement("div");
+    sub.className = "notif-card-sub";
+    var dtTxt = ev.dataHora || fmtData(ev.data);
+    sub.textContent = (dtTxt ? dtTxt : "") + (ev.frente ? ((dtTxt ? " · " : "") + ev.frente + (ev.mapa ? " · Mapa " + ev.mapa : "")) : "");
+    card.appendChild(tit);
+    card.appendChild(sub);
+    box.appendChild(card);
+  });
+}
 
 $("btnPerfilUsuario").onclick = function (e) {
   e.stopPropagation();
@@ -923,6 +1471,7 @@ $("dgAte").onchange = atualizarPillsDesignar;
 function atualizarPainelRecolhido(recolher) {
   painelRecolhido = !!recolher;
   $("info").classList.toggle("recolhido", painelRecolhido);
+  $("corpoApp").classList.toggle("painel-fechado", painelRecolhido);
   $("btnAbrirPainel").classList.toggle("hidden", !painelRecolhido);
   $("btnPainel").classList.toggle("ativo", !painelRecolhido);
   $("btnPainel").title = painelRecolhido ? "Mostrar mapas" : "Recolher painel";
@@ -933,7 +1482,9 @@ $("btnAbrirPainel").onclick = function () { atualizarPainelRecolhido(false); };
 
 function atualizarBtnPills() {
   var b = $("btnTogglePills");
-  b.textContent = mostrarNumeros ? "🏷️ Números no mapa: ON" : "🏷️ Números no mapa: OFF";
+  b.textContent = "#";
+  b.title = mostrarNumeros ? "Números no mapa: ON (clique para ocultar)" : "Números no mapa: OFF (clique para exibir)";
+  b.classList.toggle("ativo-ctrl", mostrarNumeros);
   b.classList.toggle("off", !mostrarNumeros);
 }
 $("btnTogglePills").onclick = function () {
@@ -941,6 +1492,17 @@ $("btnTogglePills").onclick = function () {
   try { localStorage.setItem("mostrarNumerosMapa", mostrarNumeros ? "1" : "0"); } catch (e) {}
   atualizarBtnPills();
   if (dados) desenhar(false);
+};
+
+$("btnZoomIn").onclick = function () { if (mapaLeaflet) mapaLeaflet.zoomIn(); };
+$("btnZoomOut").onclick = function () { if (mapaLeaflet) mapaLeaflet.zoomOut(); };
+$("btnLegenda").onclick = function (e) {
+  e.stopPropagation();
+  var box = $("boxLegendaMapa");
+  if (!box) return;
+  var visivel = box.classList.contains("hidden");
+  box.classList.toggle("hidden", !visivel);
+  $("btnLegenda").classList.toggle("ativo-ctrl", visivel);
 };
 
 function atualizarPillsPerm() {
@@ -972,6 +1534,7 @@ async function sincronizarMapasSeNecessario() {
   var rd = await chamar({ acao: "dadosMapas", token: sessao.token });
   if (rd && rd.ok) {
     dados = rd;
+    if (Array.isArray(rd.catalogoMapas)) catalogoMapas = rd.catalogoMapas;
     gravarCache(rd);
     verificarNovosMapasRecebidos();
     refazerFiltros();
@@ -998,7 +1561,7 @@ async function atualizarProgressoSilencioso(forcar) {
     if (emVoo > 0) return;
     pulsarSync();
     var novoHash = JSON.stringify({
-      adm: !!r.admin, pg: !!r.podeGerenciar, f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente, uh: r.ultimoHistorico, nm: r.notasMapa, na: r.notificacoesAdmin
+      adm: !!r.admin, pg: !!r.podeGerenciar, sl: r.somenteLeituraMapa || {}, f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente, uh: r.ultimoHistorico, nm: r.notasMapa, na: r.notificacoesAdmin, nt: r.notificacoes, cm: r.catalogoMapas
     });
     var mudou = (novoHash !== hashProg);
     if (mudou) aplicarProgresso(r);
@@ -1032,7 +1595,11 @@ async function abrirApp() {
   var pProg = chamar({ acao: "progresso", token: sessao.token });
 
   var cache = lerCache();
-  if (cache) { dados = cache; montarFiltros(); }
+  if (cache) {
+    dados = cache;
+    if (Array.isArray(cache.catalogoMapas)) catalogoMapas = cache.catalogoMapas;
+    montarFiltros();
+  }
 
   var r = await pDados;
   if (!r.ok && !r.sessaoExpirada) {
@@ -1057,7 +1624,11 @@ async function abrirApp() {
   }
 
   var mudou = !!(r && r.ok && (!cache || JSON.stringify(cache) !== JSON.stringify(r)));
-  if (mudou) { dados = r; gravarCache(r); }
+  if (mudou) {
+    dados = r;
+    if (Array.isArray(r.catalogoMapas)) catalogoMapas = r.catalogoMapas;
+    gravarCache(r);
+  }
 
   if (rProg && rProg.ok) aplicarProgresso(rProg);
   ultimoProg = Date.now();
@@ -1074,6 +1645,7 @@ async function abrirApp() {
 
   iniciarAtualizacao();
   preCarregarPainelTopo();
+  carregarSolicitacoesUsuario();
 }
 
 function refazerFiltros() {
@@ -1086,6 +1658,7 @@ function refazerFiltros() {
     if (sg.options[i].value === gAnt) { temGrupo = true; break; }
   }
   sg.value = temGrupo ? gAnt : "";
+  sincronizarDropdownGrupo();
   preencherMapas();
   var idxNovo = "";
   if (mapaAnt && dados && dados.mapas) {
@@ -1146,15 +1719,19 @@ function aplicarProgresso(r) {
   notasMapa = {};
   Object.keys(r.notasMapa || {}).forEach(function (k) { notasMapa[normKey(k)] = r.notasMapa[k]; });
 
-  notifAdmin = r.notificacoesAdmin || { total: 0, contas: 0, senhas: 0 };
+  if (Array.isArray(r.catalogoMapas)) catalogoMapas = r.catalogoMapas;
+  notificacoesData = r.notificacoes || { pendencias: { total: 0, contas: 0, senhas: 0, solicitacoes: 0, mapasDesignados: 0, itens: [] }, atividades: [] };
+  notifAdmin = r.notificacoesAdmin || { total: 0, contas: 0, senhas: 0, solicitacoes: 0 };
   atualizarBadgeAdmin();
+  if (!$("painelNotif").classList.contains("hidden")) renderizarNotificacoes();
+  if (!$("popBuscaMapa").classList.contains("hidden")) renderizarBuscaMapa($("inpBuscaMapa").value);
   pulsarSync();
 
   var novoHashAcesso = JSON.stringify({ adm: !!r.admin, p: r.pode || {}, pm: r.podeMapa || {}, sl: r.somenteLeituraMapa || {} });
   if (hashAcesso && novoHashAcesso !== hashAcesso) precisaAtualizarMapas = true;
   hashAcesso = novoHashAcesso;
   hashProg = JSON.stringify({
-    adm: !!(sessao && sessao.admin), pg: !!(sessao && sessao.podeGerenciar), sl: r.somenteLeituraMapa || {}, f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente, uh: r.ultimoHistorico, nm: r.notasMapa, na: r.notificacoesAdmin
+    adm: !!(sessao && sessao.admin), pg: !!(sessao && sessao.podeGerenciar), sl: r.somenteLeituraMapa || {}, f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente, uh: r.ultimoHistorico, nm: r.notasMapa, na: r.notificacoesAdmin, nt: r.notificacoes, cm: r.catalogoMapas
   });
   verificarNovosMapasRecebidos();
 }
@@ -1268,6 +1845,7 @@ $("btnIrNovoMapa").onclick = function () {
   if (!alvo || !dados || !dados.mapas) return;
   if (painelRecolhido) atualizarPainelRecolhido(false);
   $("selGrupo").value = alvo.frente;
+  sincronizarDropdownGrupo();
   preencherMapas();
   if (alvo.mapa) {
     var idxAlvo = "";
@@ -1329,7 +1907,7 @@ function atualizarClasseZoomMapa() {
 
 function iniciarMapa() {
   if (mapaLeaflet) { setTimeout(function () { mapaLeaflet.invalidateSize(); }, 50); return; }
-  mapaLeaflet = L.map("mapa", { zoomControl: true, preferCanvas: true }).setView([-5.13, -42.83], 15);
+  mapaLeaflet = L.map("mapa", { zoomControl: false, preferCanvas: true }).setView([-5.13, -42.83], 15);
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19, attribution: "© OpenStreetMap"
   }).addTo(mapaLeaflet);
@@ -1360,7 +1938,8 @@ function pararGps() {
   if (btn) {
     btn.disabled = false;
     btn.classList.remove("ativo-gps");
-    btn.textContent = "📍 Minha posição";
+    btn.textContent = "📍";
+    btn.title = "Minha posição";
   }
 }
 
@@ -1371,11 +1950,13 @@ $("btnGps").onclick = function () {
   }
   if (!navigator.geolocation) { alert("Geolocalização não suportada neste navegador."); return; }
   var btn = $("btnGps");
-  btn.textContent = "📍 Localizando…";
+  btn.textContent = "◎";
+  btn.title = "Localizando sua posição…";
   btn.classList.add("ativo-gps");
   gpsPrimeiroFix = true;
   gpsWatchId = navigator.geolocation.watchPosition(function (pos) {
-    btn.textContent = "📍 GPS ativo (parar)";
+    btn.textContent = "📍";
+    btn.title = "GPS ativo (clique para parar)";
     atualizarPinGps(pos.coords.latitude, pos.coords.longitude, gpsPrimeiroFix);
     gpsPrimeiroFix = false;
   }, function (err) {
@@ -1390,8 +1971,9 @@ function montarFiltros() {
   var sg = $("selGrupo"); sg.innerHTML = "";
   var op0 = document.createElement("option"); op0.value = ""; op0.textContent = "Todos os grupos"; sg.appendChild(op0);
   grupos.forEach(function (g) { var o = document.createElement("option"); o.value = g; o.textContent = g; sg.appendChild(o); });
-  sg.onchange = function () { fecharPopoversTopo(); mapaAtual = null; preencherMapas(); desenhar(true); };
+  sg.onchange = function () { fecharPopoversTopo(); mapaAtual = null; preencherMapas(); sincronizarDropdownGrupo(); desenhar(true); };
   $("selMapa").onchange = function () { mapaAtual = null; desenhar(true); };
+  sincronizarDropdownGrupo();
 
   var lf = $("lbFrente"); lf.innerHTML = "";
   var df = $("dgFrente"); df.innerHTML = "";
@@ -1547,31 +2129,40 @@ function desenhar(ajustarZoom) {
   setTimeout(function () { mapaLeaflet.invalidateSize(); }, 50);
 }
 
-function criarBtnRecolher() {
+function criarAlcaSheet() {
+  var h = document.createElement("div");
+  h.className = "sheet-handle";
+  h.title = "Recolher painel";
+  h.onclick = function () { atualizarPainelRecolhido(true); };
+  return h;
+}
+
+function criarBtnSolicitarMapa(destaque) {
   var b = document.createElement("button");
   b.type = "button";
-  b.className = "btn-voltar";
-  b.innerHTML = '<span class="so-mob">Recolher painel ▾</span><span class="so-desk">Recolher ▸</span>';
-  b.onclick = function () { atualizarPainelRecolhido(true); };
+  b.className = "btn-solicitar-mapa" + (destaque ? " destaque" : "");
+  b.textContent = "+ Solicitar um mapa";
+  b.onclick = abrirBuscaParaSolicitar;
   return b;
 }
 
 function mostrarListaMapas(lista) {
   var box = $("info"); box.innerHTML = "";
+  box.appendChild(criarAlcaSheet());
   var semNenhumAcesso = !dados || !dados.mapas || !dados.mapas.length;
   var topo = document.createElement("div"); topo.className = "info-topo";
   var tit = document.createElement("div"); tit.className = "tit"; tit.style.marginBottom = "0";
   tit.textContent = lista.length ? "Mapas (" + lista.length + ")" : (semNenhumAcesso ? "Nenhum mapa disponível" : "Nenhum mapa encontrado");
   topo.appendChild(tit);
-  topo.appendChild(criarBtnRecolher());
   box.appendChild(topo);
 
   if (!lista.length) {
     if (semNenhumAcesso) {
       var av = document.createElement("div"); av.className = "st";
-      av.textContent = "Você ainda não tem mapas ou frentes liberadas no momento. Quando um responsável designar um mapa para você, ele aparecerá aqui automaticamente.";
+      av.textContent = "Você ainda não tem mapas liberados no momento. Você pode solicitar acesso a um mapa abaixo ou aguardar uma designação.";
       box.appendChild(av);
     }
+    box.appendChild(criarBtnSolicitarMapa(semNenhumAcesso));
     return;
   }
 
@@ -1623,6 +2214,7 @@ function mostrarListaMapas(lista) {
     var item = entry.item, m = item.m, st = entry.st;
     var km = chave(m);
     var ehNovo = !!mapasNovosAtivos[km];
+    var ehLeitura = mapaEhSomenteLeitura(m);
     var desig = designacoesAtivas[km];
     var hist = ultimoHistorico[km];
     var nota = notasMapa[km];
@@ -1634,15 +2226,20 @@ function mostrarListaMapas(lista) {
     var ico = document.createElement("span"); ico.className = "item-icone " + st.estado; ico.textContent = st.icone;
     var meio = document.createElement("div"); meio.className = "item-nome";
     var nm = document.createElement("div");
-    nm.textContent = "Mapa " + m.n + ($("selGrupo").value ? "" : " · " + m.g);
+    nm.textContent = (ehLeitura ? "🔒 " : "") + "Mapa " + m.n + ($("selGrupo").value ? "" : " · " + m.g);
     meio.appendChild(nm);
 
-    if (ehNovo || desig || (hist && hist.data) || (nota && nota.texto)) {
+    if (ehNovo || ehLeitura || desig || (hist && hist.data) || (nota && nota.texto)) {
       var sub = document.createElement("div"); sub.className = "item-sub";
       if (ehNovo) {
         var tnv = document.createElement("span"); tnv.className = "tag-novo";
         tnv.textContent = "✨ Novo";
         sub.appendChild(tnv);
+      }
+      if (ehLeitura) {
+        var tl = document.createElement("span"); tl.className = "tag-leitura";
+        tl.textContent = "🔒 Somente leitura";
+        sub.appendChild(tl);
       }
       if (desig) {
         var tg = document.createElement("span"); tg.className = "tag-desig";
@@ -1680,11 +2277,13 @@ function mostrarListaMapas(lista) {
     wrap.appendChild(b);
   });
   box.appendChild(wrap);
+  box.appendChild(criarBtnSolicitarMapa(false));
 }
 
 function mostrarInfo(m) {
   mapaAtual = m;
   var box = $("info"); box.innerHTML = "";
+  box.appendChild(criarAlcaSheet());
   var k = chave(m);
   if (mapasNovosAtivos[k]) {
     marcarComoVisto(["D|" + k, "PM|" + k, "PF|" + m.g]);
@@ -1699,13 +2298,18 @@ function mostrarInfo(m) {
     desenhar(true);
   };
   topo.appendChild(voltar);
-  topo.appendChild(criarBtnRecolher());
   box.appendChild(topo);
-
-  var t = document.createElement("div"); t.className = "tit"; t.textContent = "Mapa " + m.n + " · " + m.g; box.appendChild(t);
 
   var podeEste = podeNoMapa(m);
   var somenteLeitura = mapaEhSomenteLeitura(m);
+  var t = document.createElement("div"); t.className = "tit";
+  var tTxt = document.createElement("span"); tTxt.textContent = "Mapa " + m.n + " · " + m.g;
+  t.appendChild(tTxt);
+  if (somenteLeitura) {
+    var bl = document.createElement("span"); bl.className = "badge-leitura"; bl.textContent = "🔒 Visualização";
+    t.appendChild(bl);
+  }
+  box.appendChild(t);
   var podeGer = !!(sessao && (sessao.admin || sessao.podeGerenciar));
   var podeNota = !!(podeEste || (sessao && sessao.admin));
   var respFrente = responsaveisFrente[m.g];
@@ -1957,9 +2561,52 @@ function preCarregarPainelTopo() {
 }
 
 function renderizarGerenciar(r) {
+  var sBox = $("listaSolicitacoesGer");
+  var sWrap = $("wrapSolicitacoesGer");
   var dBox = $("listaDesignacoesGer");
   var pBox = $("listaPermissoes");
   preencherSelectDirigentes(r.lista || []);
+
+  if (sBox && sWrap) {
+    sBox.textContent = "";
+    var sols = r.solicitacoes || [];
+    if (!sols.length) {
+      sBox.textContent = "Nenhuma solicitação pendente.";
+    } else {
+      sols.forEach(function (sol) {
+        var row = document.createElement("div"); row.className = "row";
+        var info = document.createElement("div");
+        var n = document.createElement("div"); n.className = "nm";
+        n.textContent = sol.solicitante + " · " + sol.frente + " · Mapa " + sol.mapa;
+        var st = document.createElement("div"); st.className = "st";
+        st.textContent = sol.data ? ("Pedido em " + fmtData(sol.data)) : "Solicitação pendente";
+        info.appendChild(n); info.appendChild(st); row.appendChild(info);
+
+        var bt = document.createElement("div"); bt.className = "bt";
+        var bAp = document.createElement("button"); bAp.type = "button"; bAp.className = "yes"; bAp.textContent = "Aprovar";
+        bAp.onclick = async function () {
+          bAp.disabled = true; bRec.disabled = true;
+          var validade = ($("dgAte") && $("dgAte").value) ? $("dgAte").value : "";
+          var res = await chamar({ acao: "responderSolicitacao", token: sessao.token, id: sol.id, aprovar: true, validade: validade });
+          if (!res.ok) { msg($("msgGer"), res.erro); bAp.disabled = false; bRec.disabled = false; return; }
+          msg($("msgGer"), "Solicitação aprovada e mapa designado" + (validade ? " até " + fmtData(validade) : "") + ".", true);
+          await Promise.all([carregarProgresso(), carregarGerenciar()]);
+          desenhar(false);
+          if (mapaAtual) mostrarInfo(mapaAtual);
+        };
+        var bRec = document.createElement("button"); bRec.type = "button"; bRec.className = "no"; bRec.textContent = "Recusar";
+        bRec.onclick = async function () {
+          bAp.disabled = true; bRec.disabled = true;
+          var res = await chamar({ acao: "responderSolicitacao", token: sessao.token, id: sol.id, aprovar: false });
+          if (!res.ok) { msg($("msgGer"), res.erro); bAp.disabled = false; bRec.disabled = false; return; }
+          msg($("msgGer"), "Solicitação recusada.", true);
+          await Promise.all([carregarProgresso(), carregarGerenciar()]);
+        };
+        bt.appendChild(bAp); bt.appendChild(bRec); row.appendChild(bt);
+        sBox.appendChild(row);
+      });
+    }
+  }
 
   dBox.textContent = "";
   var desigs = r.designacoes || [];
