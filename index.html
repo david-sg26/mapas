@@ -142,6 +142,7 @@ button:disabled{opacity:.55;cursor:default}
 .notif-tab-cnt{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:5px;border-radius:999px;background:var(--notif);color:#fff;font-size:.7rem;font-weight:800}
 .adm-tab.ativo .notif-tab-cnt{background:var(--on-pri);color:var(--pri)}
 .notif-card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:11px 12px;margin-bottom:8px;display:flex;flex-direction:column;gap:7px}
+.notif-card.lida{opacity:.76}
 .notif-card:last-child{margin-bottom:0}
 .notif-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .notif-card-tit{font-size:.86rem;font-weight:700;line-height:1.3}
@@ -198,6 +199,11 @@ button:disabled{opacity:.55;cursor:default}
 .chips-filtro{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
 .chip{width:auto;margin:0;padding:6px 12px;font-size:.78rem;border-radius:20px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);font-weight:600;min-height:36px}
 .chip.ativo{background:var(--pri);color:var(--on-pri);border-color:var(--pri)}
+@media (max-width:859px){
+  #info .chips-filtro{display:flex;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:4px;gap:6px}
+  #info .chips-filtro::-webkit-scrollbar{display:none}
+  #info .chips-filtro .chip{flex-shrink:0;white-space:nowrap}
+}
 
 .lista-mapas{display:flex;flex-direction:column;gap:10px}
 .item-mapa{display:flex;flex-direction:column;gap:8px;width:100%;margin:0;padding:14px 16px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:16px;text-align:left;font-weight:500;font-size:.92rem;transition:border-color .15s,background-color .15s}
@@ -256,19 +262,34 @@ button:disabled{opacity:.55;cursor:default}
 .badge-tipo.perm{border-color:var(--ok);color:var(--ok)}
 .badge-aut{font-size:.7rem;padding:2px 8px;border-radius:999px;font-weight:700;background:var(--warn-bg);color:var(--warn)}
 #listaAdmin{padding-bottom:140px}
-.row .bt{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
-.row button{width:auto;margin:0;padding:7px 14px;font-size:.8rem;min-height:38px;border-radius:20px}
-.row .no{background:var(--bad);color:var(--on-bad)}.row .yes{background:var(--ok);color:var(--on-ok)}.row .sec-btn{background:var(--sec-bg);color:var(--sec-tx);border:1px solid var(--bd)}
+.inp-busca-adm{width:100%;padding:10px 14px;font-size:.9rem;border-radius:20px;background:var(--bg);border:1px solid var(--bd);margin-bottom:8px}
+.adm-dir-card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.adm-dir-card.is-admin{background:linear-gradient(135deg,rgba(168,199,250,.14),var(--card));border-color:rgba(168,199,250,.32)}
+.adm-dir-info{flex:1;min-width:180px}
+.adm-dir-det{margin-top:4px}
+.row .bt,.adm-dir-card .bt{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+.row button,.adm-dir-card button{width:auto;margin:0;padding:7px 14px;font-size:.8rem;min-height:38px;border-radius:20px}
+.row .no,.adm-dir-card .no{background:var(--bad);color:var(--on-bad)}.row .yes,.adm-dir-card .yes{background:var(--ok);color:var(--on-ok)}.row .sec-btn,.adm-dir-card .sec-btn{background:var(--sec-bg);color:var(--sec-tx);border:1px solid var(--bd)}
 .menu-adm-wrap{position:relative;display:inline-block}
-.row .btn-menu-adm{width:40px;height:40px;min-height:40px;padding:0;margin:0;border-radius:999px;background:var(--card);color:var(--tx);border:1px solid var(--bd);font-size:1.15rem;line-height:1;display:inline-flex;align-items:center;justify-content:center}
-.row .btn-menu-adm:hover,.menu-adm-wrap.aberto .btn-menu-adm{background:var(--hover);color:var(--pri);border-color:var(--pri)}
-.menu-adm-lista{position:absolute;right:0;top:calc(100% + 6px);min-width:205px;background:var(--modal);border:1px solid var(--bd);border-radius:16px;padding:6px;box-shadow:var(--sh);z-index:2100;display:none;flex-direction:column;gap:3px}
+.row .btn-menu-adm,.adm-dir-card .btn-menu-adm{width:40px;height:40px;min-height:40px;padding:0;margin:0;border-radius:999px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);font-size:1.15rem;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+.row .btn-menu-adm:hover,.adm-dir-card .btn-menu-adm:hover,.menu-adm-wrap.aberto .btn-menu-adm{background:var(--hover);color:var(--pri);border-color:var(--pri)}
+.backdrop-menu-adm{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2400}
+.menu-adm-head{display:none}
+.menu-adm-lista{position:absolute;right:0;top:calc(100% + 6px);min-width:215px;background:var(--modal);border:1px solid var(--bd);border-radius:16px;padding:6px;box-shadow:var(--sh);z-index:2100;display:none;flex-direction:column;gap:3px}
 .menu-adm-wrap.aberto .menu-adm-lista{display:flex}
 .menu-adm-lista button{width:100%;margin:0;padding:9px 12px;font-size:.82rem;border-radius:12px;text-align:left;background:transparent;color:var(--tx);border:0;font-weight:600;min-height:38px}
 .menu-adm-lista button:hover{background:var(--hover)}
 .menu-adm-lista button.no{background:transparent;color:var(--bad)}
 .menu-adm-lista button.no:hover{background:rgba(242,184,181,.14)}
 .menu-adm-lista button.yes{background:transparent;color:var(--ok)}
+@media (max-width:639px){
+  .menu-adm-lista{position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;min-width:0;background:var(--modal);border:0;border-top:1px solid var(--bd);border-radius:24px 24px 0 0;padding:10px 16px 22px;box-shadow:0 -12px 36px rgba(0,0,0,.68);z-index:2500;gap:6px}
+  .menu-adm-head{display:flex;flex-direction:column;gap:6px;padding-bottom:10px;margin-bottom:4px;border-bottom:1px solid var(--bd);font-size:.95rem;font-weight:700;color:var(--tx)}
+  .menu-adm-head .sheet-handle{margin:0 auto 2px}
+  .menu-adm-lista button{min-height:46px;font-size:.9rem;padding:10px 14px;border-radius:14px;background:var(--card)}
+}
+.grid-2col-ger{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+@media (max-width:380px){.grid-2col-ger{grid-template-columns:1fr}}
 .pills-data{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
 .pill-data{width:auto;margin:0;padding:7px 13px;font-size:.82rem;border-radius:20px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);min-height:38px}
 .pill-data.ativo{background:var(--pri);color:var(--on-pri);border-color:var(--pri)}
@@ -281,11 +302,13 @@ button:disabled{opacity:.55;cursor:default}
 .nota-form{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
 .nota-form input{flex:1;min-width:160px;padding:9px 14px;font-size:.86rem}
 .nota-form button{width:auto;margin:0;padding:8px 14px;font-size:.8rem;min-height:40px;border-radius:20px}
-.frente-card{padding:10px 0;border-bottom:1px solid var(--bd)}
-.frente-card:last-child{border-bottom:0}
-.frente-edit{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
-.frente-edit input{flex:1;min-width:180px;padding:9px 14px;font-size:.88rem}
-.frente-edit button{width:auto;margin:0;padding:8px 14px;font-size:.82rem;min-height:40px;border-radius:20px}
+.frente-card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:12px 14px;margin-bottom:10px}
+.frente-card:last-child{margin-bottom:0}
+.frente-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.frente-count{font-size:.73rem;color:var(--mut);font-weight:600;padding:2px 8px;border-radius:999px;background:var(--bg);border:1px solid var(--bd)}
+.frente-edit{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.frente-edit input{flex:1;min-width:160px;padding:8px 13px;font-size:.86rem}
+.frente-edit button{width:auto;margin:0;padding:8px 14px;font-size:.82rem;min-height:38px;border-radius:20px}
 .pills-resp{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
 .pill-resp{width:auto;margin:0;padding:5px 11px;font-size:.75rem;border-radius:20px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);min-height:32px;font-weight:600}
 .pill-resp.ativo{background:var(--pri);color:var(--on-pri);border-color:var(--pri)}
@@ -449,21 +472,28 @@ button:disabled{opacity:.55;cursor:default}
   <div id="modalGerenciar" class="hidden" role="dialog" aria-modal="true" aria-labelledby="titGer">
     <div class="adm-card">
       <div class="adm-head">
-        <strong id="titGer">Gerenciar Mapas e Permissões</strong>
+        <strong id="titGer">Gerenciar Mapas</strong>
         <button type="button" class="sec" id="btnFecharGerenciar">Fechar ✕</button>
       </div>
       <div class="adm-tabs" role="tablist">
-        <button type="button" class="adm-tab ativo" id="tabGerDesig" role="tab" aria-selected="true">Designar Mapa</button>
-        <button type="button" class="adm-tab" id="tabGerPerm" role="tab" aria-selected="false">Permissão Temporária</button>
+        <button type="button" class="adm-tab ativo" id="tabGerDesig" role="tab" aria-selected="true">Nova Designação</button>
+        <button type="button" class="adm-tab" id="tabGerAtivos" role="tab" aria-selected="false">Ativos e Pedidos <span id="cntGerSolic" class="notif-tab-cnt hidden">0</span></button>
+        <button type="button" class="adm-tab hidden" id="tabGerPerm" role="tab" aria-selected="false">Permissão Temporária</button>
       </div>
       <div class="adm-body">
         <div id="secGerDesig">
           <label for="dgNome">Dirigente</label>
           <select id="dgNome"></select>
-          <label for="dgFrente">Frente</label>
-          <select id="dgFrente"></select>
-          <label for="dgMapa">Mapa</label>
-          <select id="dgMapa"></select>
+          <div class="grid-2col-ger">
+            <div>
+              <label for="dgFrente">Frente</label>
+              <select id="dgFrente"></select>
+            </div>
+            <div>
+              <label for="dgMapa">Mapa</label>
+              <select id="dgMapa"></select>
+            </div>
+          </div>
           <label>Validade da designação</label>
           <div class="pills-data">
             <button type="button" class="pill-data ativo" id="dgSemPrazo">Sem prazo (até concluir)</button>
@@ -473,8 +503,10 @@ button:disabled{opacity:.55;cursor:default}
           <label for="dgAte">Ou defina uma data limite (opcional)</label>
           <input id="dgAte" type="date">
           <button type="button" id="btnDesignar">Designar mapa</button>
+        </div>
 
-          <div class="sec-adm" id="wrapSolicitacoesGer">
+        <div id="secGerAtivos" class="hidden">
+          <div id="wrapSolicitacoesGer">
             <strong>Solicitações de mapa pendentes</strong>
             <div id="listaSolicitacoesGer" style="margin-top:8px"></div>
           </div>
@@ -513,6 +545,7 @@ button:disabled{opacity:.55;cursor:default}
   </div>
 
   <div id="painelAdmin" class="hidden" role="dialog" aria-modal="true" aria-labelledby="titAdmin">
+    <div id="backdropMenuAdm" class="backdrop-menu-adm hidden"></div>
     <div class="adm-card">
       <div class="adm-head">
         <strong id="titAdmin">Administração</strong>
@@ -524,11 +557,12 @@ button:disabled{opacity:.55;cursor:default}
       </div>
       <div class="adm-body">
         <div id="secAdmDir">
+          <input id="inpBuscaAdmin" type="search" class="inp-busca-adm" placeholder="🔍 Buscar dirigente por nome..." autocomplete="off">
           <div class="chips-filtro" id="chipsAdmin"></div>
           <div id="listaAdmin"></div>
         </div>
         <div id="secAdmFrentes" class="hidden">
-          <div class="st" style="margin-bottom:8px">Defina os dirigentes responsáveis fixos de cada frente (toque nos nomes ou edite separado por vírgula).</div>
+          <div class="st" style="margin-bottom:10px">Defina apenas os responsáveis fixos (<strong>Dirigentes Sup.</strong>) de cada frente. Toque nos nomes para vincular ou desvincular rapidamente.</div>
           <div id="listaFrentesAdmin"></div>
         </div>
       </div>
@@ -751,6 +785,70 @@ function pulsarSync() {
   syncTimer = setTimeout(function () { dot.classList.remove("pulso"); }, 900);
 }
 
+function ehPendenciaAcao(it) {
+  return !!(it && (it.tipo === "conta_pendente" || it.tipo === "pedido_senha" || it.tipo === "solicitacao_mapa"));
+}
+function chaveNotifInfo(it) {
+  if (!it) return "";
+  return String(it.tipo || "info") + "|" + String(it.frente || "") + "|" + String(it.mapa || "") + "|" + String(it.validade || "");
+}
+function chaveStorageNotifLidas() {
+  return sessao && sessao.nome ? ("notifInfoLidas_" + String(sessao.nome).trim().toLowerCase()) : "";
+}
+function lerNotifInfoLidas() {
+  try {
+    var ck = chaveStorageNotifLidas();
+    return ck ? JSON.parse(localStorage.getItem(ck) || "{}") : {};
+  } catch (e) { return {}; }
+}
+function gravarNotifInfoLidas(obj) {
+  try {
+    var ck = chaveStorageNotifLidas();
+    if (ck) localStorage.setItem(ck, JSON.stringify(obj || {}));
+  } catch (e) {}
+}
+function sincronizarNotifInfoLidas() {
+  if (!sessao || !sessao.nome) return;
+  var itens = (notificacoesData && notificacoesData.pendencias && notificacoesData.pendencias.itens) ? notificacoesData.pendencias.itens : [];
+  var ativas = {};
+  itens.forEach(function (it) {
+    if (!ehPendenciaAcao(it)) ativas[chaveNotifInfo(it)] = 1;
+  });
+  var lidas = lerNotifInfoLidas();
+  var mudou = false;
+  Object.keys(lidas).forEach(function (k) {
+    if (!ativas[k]) { delete lidas[k]; mudou = true; }
+  });
+  if (mudou) gravarNotifInfoLidas(lidas);
+}
+function marcarNotifInformativasComoLidas(chaveEspecifica) {
+  if (!sessao || !sessao.nome) return;
+  var lidas = lerNotifInfoLidas();
+  var mudou = false;
+  if (chaveEspecifica) {
+    if (!lidas[chaveEspecifica]) { lidas[chaveEspecifica] = 1; mudou = true; }
+  } else {
+    var itens = (notificacoesData && notificacoesData.pendencias && notificacoesData.pendencias.itens) ? notificacoesData.pendencias.itens : [];
+    itens.forEach(function (it) {
+      if (!ehPendenciaAcao(it)) {
+        var k = chaveNotifInfo(it);
+        if (k && !lidas[k]) { lidas[k] = 1; mudou = true; }
+      }
+    });
+  }
+  if (mudou) gravarNotifInfoLidas(lidas);
+  atualizarBadgeAdmin();
+}
+function contarPendenciasParaBadge() {
+  var itens = (notificacoesData && notificacoesData.pendencias && notificacoesData.pendencias.itens) ? notificacoesData.pendencias.itens : [];
+  var lidas = lerNotifInfoLidas();
+  var count = 0;
+  itens.forEach(function (it) {
+    if (ehPendenciaAcao(it) || !lidas[chaveNotifInfo(it)]) count++;
+  });
+  return count;
+}
+
 function atualizarBadgeAdmin() {
   var b = $("badgeNotifAdmin");
   var btn = $("btnAdmin");
@@ -772,7 +870,7 @@ function atualizarBadgeAdmin() {
   var bNotif = $("badgeNotif");
   var btnNotif = $("btnNotif");
   var cntTab = $("cntNotifPend");
-  var totPend = (notificacoesData && notificacoesData.pendencias && notificacoesData.pendencias.total) ? Number(notificacoesData.pendencias.total) : 0;
+  var totPend = contarPendenciasParaBadge();
   if (bNotif) {
     bNotif.classList.toggle("hidden", totPend <= 0);
     bNotif.textContent = totPend > 99 ? "99+" : String(totPend);
@@ -799,15 +897,20 @@ function atualizarBotoesTopo() {
 }
 
 function abrirAbaGer(aba) {
+  if (aba !== "ativos" && aba !== "perm") aba = "desig";
   $("tabGerDesig").classList.toggle("ativo", aba === "desig");
+  if ($("tabGerAtivos")) $("tabGerAtivos").classList.toggle("ativo", aba === "ativos");
   $("tabGerPerm").classList.toggle("ativo", aba === "perm");
   $("tabGerDesig").setAttribute("aria-selected", aba === "desig");
+  if ($("tabGerAtivos")) $("tabGerAtivos").setAttribute("aria-selected", aba === "ativos");
   $("tabGerPerm").setAttribute("aria-selected", aba === "perm");
   $("secGerDesig").classList.toggle("hidden", aba !== "desig");
+  if ($("secGerAtivos")) $("secGerAtivos").classList.toggle("hidden", aba !== "ativos");
   $("secGerPerm").classList.toggle("hidden", aba !== "perm");
 }
 
 $("tabGerDesig").onclick = function () { abrirAbaGer("desig"); };
+if ($("tabGerAtivos")) $("tabGerAtivos").onclick = function () { abrirAbaGer("ativos"); };
 $("tabGerPerm").onclick = function () { abrirAbaGer("perm"); };
 
 function fecharModalGerenciar() {
@@ -816,6 +919,7 @@ function fecharModalGerenciar() {
 }
 
 function fecharModalAdmin() {
+  fecharMenusAdm();
   $("painelAdmin").classList.add("hidden");
   setTimeout(function () { if (mapaLeaflet) mapaLeaflet.invalidateSize(); }, 50);
 }
@@ -851,11 +955,13 @@ function abrirAbaAdm(aba) {
 }
 $("tabAdmDir").onclick = function () { abrirAbaAdm("dir"); };
 $("tabAdmFrentes").onclick = function () { abrirAbaAdm("frentes"); };
+if ($("inpBuscaAdmin")) $("inpBuscaAdmin").oninput = function () { renderizarAdmin(); };
 
 $("btnGerenciar").onclick = function () {
   fecharPopoversTopo();
   $("modalGerenciar").classList.remove("hidden");
   msg($("msgGer"), "");
+  abrirAbaGer("desig");
   carregarGerenciar();
 };
 $("btnFecharGerenciar").onclick = fecharModalGerenciar;
@@ -865,6 +971,7 @@ $("btnAdmin").onclick = function () {
   fecharPopoversTopo();
   $("painelAdmin").classList.remove("hidden");
   msg($("msgAdm"), "");
+  if ($("inpBuscaAdmin")) $("inpBuscaAdmin").value = "";
   filtroAdmin = (notifAdmin && notifAdmin.total > 0) ? "pendente" : "todos";
   abrirAbaAdm("dir");
   carregarAdmin();
@@ -899,6 +1006,13 @@ $("btnSalvarSenha").onclick = async function () {
 function fecharMenusAdm() {
   var abertos = document.querySelectorAll(".menu-adm-wrap.aberto");
   for (var i = 0; i < abertos.length; i++) abertos[i].classList.remove("aberto");
+  if ($("backdropMenuAdm")) $("backdropMenuAdm").classList.add("hidden");
+}
+if ($("backdropMenuAdm")) {
+  $("backdropMenuAdm").onclick = function (e) {
+    if (e && e.stopPropagation) e.stopPropagation();
+    fecharMenusAdm();
+  };
 }
 
 function fecharPopoversTopo() {
@@ -1007,7 +1121,8 @@ async function solicitarMapaCatalogo(frente, mapa, btnEl) {
   atualizarProgressoSilencioso(true);
 }
 
-function abrirBuscaParaSolicitar() {
+function abrirBuscaParaSolicitar(e) {
+  if (e && e.stopPropagation) e.stopPropagation();
   fecharPopoversTopo();
   $("popBuscaMapa").classList.remove("hidden");
   $("btnBuscaMapa").classList.add("ativo");
@@ -1015,6 +1130,7 @@ function abrirBuscaParaSolicitar() {
   $("inpBuscaMapa").value = "";
   renderizarBuscaMapa("");
   carregarSolicitacoesUsuario();
+  if (!catalogoMapas || !catalogoMapas.length) atualizarProgressoSilencioso(true);
   setTimeout(function () {
     $("inpBuscaMapa").focus();
     var sec = $("listaBuscaMapa").querySelector(".sec-outros-mapas");
@@ -1236,6 +1352,7 @@ $("btnNotif").onclick = function (e) {
   $("btnNotif").classList.add("ativo");
   $("btnNotif").setAttribute("aria-expanded", "true");
   renderizarNotificacoes();
+  marcarNotifInformativasComoLidas();
 };
 
 function iconeAtividade(tipo) {
@@ -1254,6 +1371,7 @@ function renderizarNotificacoes() {
   if (!box) return;
   box.innerHTML = "";
   var dadosNotif = notificacoesData || { pendencias: { itens: [] }, atividades: [] };
+  var lidasInfo = lerNotifInfoLidas();
 
   if (abaNotif === "pendencias") {
     var itens = (dadosNotif.pendencias && dadosNotif.pendencias.itens) ? dadosNotif.pendencias.itens : [];
@@ -1265,8 +1383,9 @@ function renderizarNotificacoes() {
     }
 
     itens.forEach(function (it) {
+      var infoLida = !ehPendenciaAcao(it) && !!lidasInfo[chaveNotifInfo(it)];
       var card = document.createElement("div");
-      card.className = "notif-card";
+      card.className = "notif-card" + (infoLida ? " lida" : "");
       var top = document.createElement("div");
       top.className = "notif-card-top";
       var tit = document.createElement("div");
@@ -1398,7 +1517,10 @@ function renderizarNotificacoes() {
         var bAbrir = document.createElement("button");
         bAbrir.type = "button";
         bAbrir.textContent = "Abrir mapa";
-        bAbrir.onclick = function () { abrirMapaPorChave(it.frente, it.mapa); };
+        bAbrir.onclick = function () {
+          marcarNotifInformativasComoLidas(chaveNotifInfo(it));
+          abrirMapaPorChave(it.frente, it.mapa);
+        };
         acoes.appendChild(bAbrir);
       }
 
@@ -1722,6 +1844,7 @@ function aplicarProgresso(r) {
   if (Array.isArray(r.catalogoMapas)) catalogoMapas = r.catalogoMapas;
   notificacoesData = r.notificacoes || { pendencias: { total: 0, contas: 0, senhas: 0, solicitacoes: 0, mapasDesignados: 0, itens: [] }, atividades: [] };
   notifAdmin = r.notificacoesAdmin || { total: 0, contas: 0, senhas: 0, solicitacoes: 0 };
+  sincronizarNotifInfoLidas();
   atualizarBadgeAdmin();
   if (!$("painelNotif").classList.contains("hidden")) renderizarNotificacoes();
   if (!$("popBuscaMapa").classList.contains("hidden")) renderizarBuscaMapa($("inpBuscaMapa").value);
@@ -2142,7 +2265,10 @@ function criarBtnSolicitarMapa(destaque) {
   b.type = "button";
   b.className = "btn-solicitar-mapa" + (destaque ? " destaque" : "");
   b.textContent = "+ Solicitar um mapa";
-  b.onclick = abrirBuscaParaSolicitar;
+  b.onclick = function (e) {
+    if (e && e.stopPropagation) e.stopPropagation();
+    abrirBuscaParaSolicitar(e);
+  };
   return b;
 }
 
@@ -2563,13 +2689,19 @@ function preCarregarPainelTopo() {
 function renderizarGerenciar(r) {
   var sBox = $("listaSolicitacoesGer");
   var sWrap = $("wrapSolicitacoesGer");
+  var cntSolic = $("cntGerSolic");
   var dBox = $("listaDesignacoesGer");
   var pBox = $("listaPermissoes");
   preencherSelectDirigentes(r.lista || []);
 
+  var sols = r.solicitacoes || [];
+  if (cntSolic) {
+    cntSolic.classList.toggle("hidden", sols.length <= 0);
+    cntSolic.textContent = sols.length > 99 ? "99+" : String(sols.length);
+  }
+
   if (sBox && sWrap) {
     sBox.textContent = "";
-    var sols = r.solicitacoes || [];
     if (!sols.length) {
       sBox.textContent = "Nenhuma solicitação pendente.";
     } else {
@@ -2583,10 +2715,25 @@ function renderizarGerenciar(r) {
         info.appendChild(n); info.appendChild(st); row.appendChild(info);
 
         var bt = document.createElement("div"); bt.className = "bt";
+        var selP = document.createElement("select");
+        selP.className = "notif-prazo-sel";
+        selP.setAttribute("aria-label", "Prazo da designação");
+        [
+          { v: "", l: "Sem prazo" },
+          { v: dataLocalYMD(0), l: "Hoje" },
+          { v: dataLocalYMD(7), l: "+7 dias" },
+          { v: dataLocalYMD(15), l: "+15 dias" },
+          { v: dataLocalYMD(30), l: "+30 dias" }
+        ].forEach(function (op) {
+          var o = document.createElement("option");
+          o.value = op.v;
+          o.textContent = op.l;
+          selP.appendChild(o);
+        });
         var bAp = document.createElement("button"); bAp.type = "button"; bAp.className = "yes"; bAp.textContent = "Aprovar";
         bAp.onclick = async function () {
           bAp.disabled = true; bRec.disabled = true;
-          var validade = ($("dgAte") && $("dgAte").value) ? $("dgAte").value : "";
+          var validade = selP.value || "";
           var res = await chamar({ acao: "responderSolicitacao", token: sessao.token, id: sol.id, aprovar: true, validade: validade });
           if (!res.ok) { msg($("msgGer"), res.erro); bAp.disabled = false; bRec.disabled = false; return; }
           msg($("msgGer"), "Solicitação aprovada e mapa designado" + (validade ? " até " + fmtData(validade) : "") + ".", true);
@@ -2602,7 +2749,7 @@ function renderizarGerenciar(r) {
           msg($("msgGer"), "Solicitação recusada.", true);
           await Promise.all([carregarProgresso(), carregarGerenciar()]);
         };
-        bt.appendChild(bAp); bt.appendChild(bRec); row.appendChild(bt);
+        bt.appendChild(selP); bt.appendChild(bAp); bt.appendChild(bRec); row.appendChild(bt);
         sBox.appendChild(row);
       });
     }
@@ -2744,7 +2891,9 @@ function renderizarAdmin() {
     chips.appendChild(c);
   });
 
+  var buscaNome = String($("inpBuscaAdmin") ? $("inpBuscaAdmin").value : "").trim().toLowerCase();
   var filtrados = lista.filter(function (u) {
+    if (buscaNome && String(u.nome || "").toLowerCase().indexOf(buscaNome) < 0) return false;
     var st = String(u.status || "").toLowerCase();
     if (filtroAdmin === "todos") return true;
     if (filtroAdmin === "pendente") return st === "pendente" || !!u.pedidoSenha;
@@ -2753,12 +2902,16 @@ function renderizarAdmin() {
     if (filtroAdmin === "sup") return ehUsuarioSup(u);
     if (filtroAdmin === "dirigente") return !ehUsuarioSup(u);
     return true;
+  }).sort(function (a, b) {
+    var aAdm = String(a.status || "").toLowerCase() === "admin" ? 0 : 1;
+    var bAdm = String(b.status || "").toLowerCase() === "admin" ? 0 : 1;
+    return aAdm - bAdm;
   });
 
   var box = $("listaAdmin");
   box.textContent = "";
   if (!filtrados.length) {
-    box.textContent = lista.length ? "Nenhum dirigente neste filtro." : "Nenhum dirigente ainda.";
+    box.textContent = lista.length ? "Nenhum dirigente encontrado." : "Nenhum dirigente ainda.";
     return;
   }
 
@@ -2766,12 +2919,16 @@ function renderizarAdmin() {
     var st = String(u.status || "").toLowerCase();
     var isAdm = st === "admin";
     var ehSup = ehUsuarioSup(u);
-    var row = document.createElement("div"); row.className = "row";
-    var info = document.createElement("div");
+    var row = document.createElement("div"); row.className = "adm-dir-card" + (isAdm ? " is-admin" : "");
+    var info = document.createElement("div"); info.className = "adm-dir-info";
     var n = document.createElement("div"); n.className = "nm";
     var nmTxt = document.createElement("span"); nmTxt.textContent = u.nome;
-    var badge = document.createElement("span"); badge.className = "badge-st " + st; badge.textContent = st;
+    var badge = document.createElement("span"); badge.className = "badge-st " + st; badge.textContent = isAdm ? "ADMIN" : st;
     n.appendChild(nmTxt); n.appendChild(badge);
+    if (sessao && sessao.nome && String(u.nome || "").trim().toLowerCase() === String(sessao.nome || "").trim().toLowerCase()) {
+      var bVc = document.createElement("span"); bVc.className = "badge-tipo"; bVc.textContent = "Você";
+      n.appendChild(bVc);
+    }
 
     if (!isAdm) {
       var bTipo = document.createElement("span");
@@ -2801,7 +2958,7 @@ function renderizarAdmin() {
     }
     info.appendChild(n);
     if (detalhes.length) {
-      var s = document.createElement("div"); s.className = "st"; s.textContent = detalhes.join(" · ");
+      var s = document.createElement("div"); s.className = "st adm-dir-det"; s.textContent = detalhes.join(" · ");
       info.appendChild(s);
     }
     row.appendChild(info);
@@ -2841,7 +2998,7 @@ function renderizarAdmin() {
       }
     }
 
-    if ((st === "aprovado" || isAdm) && u.designacoes && u.designacoes.length) {
+    if (!isAdm && st === "aprovado" && u.designacoes && u.designacoes.length) {
       u.designacoes.forEach(function (d) {
         var br = document.createElement("button"); br.type = "button"; br.className = "no";
         br.textContent = "Remover M" + d.mapa;
@@ -2858,38 +3015,48 @@ function renderizarAdmin() {
       });
     }
 
-    var bPass = document.createElement("button"); bPass.type = "button"; bPass.className = "sec-btn"; bPass.textContent = "Gerar código de senha";
-    bPass.onclick = async function () {
-      if (!confirm("Gerar um código provisório de 6 dígitos para " + u.nome + "? No próximo login, a pessoa precisará criar uma nova senha.")) return;
-      bPass.disabled = true;
-      var res = await chamar({ acao: "redefinirSenha", token: sessao.token, nome: u.nome });
-      bPass.disabled = false;
-      if (!res.ok) { msg($("msgAdm"), res.erro); return; }
-      msg($("msgAdm"), "Código provisório de " + u.nome + ": " + res.codigo, true);
-      prompt("Código provisório gerado para " + u.nome + " (copie e envie para a pessoa):", res.codigo);
-      carregarAdmin();
-    };
-    secBtns.push(bPass);
-
     if (!isAdm) {
+      var bPass = document.createElement("button"); bPass.type = "button"; bPass.className = "sec-btn"; bPass.textContent = "Gerar código de senha";
+      bPass.onclick = async function () {
+        if (!confirm("Gerar um código provisório de 6 dígitos para " + u.nome + "? No próximo login, a pessoa precisará criar uma nova senha.")) return;
+        bPass.disabled = true;
+        var res = await chamar({ acao: "redefinirSenha", token: sessao.token, nome: u.nome });
+        bPass.disabled = false;
+        if (!res.ok) { msg($("msgAdm"), res.erro); return; }
+        msg($("msgAdm"), "Código provisório de " + u.nome + ": " + res.codigo, true);
+        prompt("Código provisório gerado para " + u.nome + " (copie e envie para a pessoa):", res.codigo);
+        carregarAdmin();
+      };
+      secBtns.push(bPass);
+
       if (st !== "bloqueado") secBtns.push(acaoAdmBtn("Bloquear", "no", { acao: "definirStatus", nome: u.nome, status: "bloqueado" }, "Dirigente bloqueado."));
       var bDel = acaoAdmBtn("Apagar conta", "no", { acao: "apagarDirigente", nome: u.nome }, "Conta removida.", "Apagar permanentemente a conta de " + u.nome + "? Isso remove login, permissões e designações.");
       secBtns.push(bDel);
     }
 
-    if (secBtns.length) {
+    if (!isAdm && secBtns.length) {
       var menuWrap = document.createElement("div"); menuWrap.className = "menu-adm-wrap";
       var btnMenu = document.createElement("button"); btnMenu.type = "button"; btnMenu.className = "btn-menu-adm";
       btnMenu.textContent = "⋮";
       btnMenu.title = "Mais ações";
       btnMenu.setAttribute("aria-label", "Mais ações");
       var menuLista = document.createElement("div"); menuLista.className = "menu-adm-lista";
-      menuLista.onclick = function (e) { if (e.target === menuLista) e.stopPropagation(); };
+      var mHead = document.createElement("div"); mHead.className = "menu-adm-head";
+      var mHandle = document.createElement("div"); mHandle.className = "sheet-handle";
+      mHandle.onclick = function (e) { e.stopPropagation(); fecharMenusAdm(); };
+      var mTit = document.createElement("span"); mTit.textContent = "Ações · " + u.nome;
+      mHead.appendChild(mHandle);
+      mHead.appendChild(mTit);
+      menuLista.appendChild(mHead);
+      menuLista.onclick = function (e) { e.stopPropagation(); };
       btnMenu.onclick = function (e) {
         e.stopPropagation();
         var jaAberto = menuWrap.classList.contains("aberto");
         fecharMenusAdm();
-        if (!jaAberto) menuWrap.classList.add("aberto");
+        if (!jaAberto) {
+          menuWrap.classList.add("aberto");
+          if ($("backdropMenuAdm") && window.innerWidth <= 639) $("backdropMenuAdm").classList.remove("hidden");
+        }
       };
       secBtns.forEach(function (sb) { menuLista.appendChild(sb); });
       menuWrap.appendChild(btnMenu);
@@ -2935,13 +3102,17 @@ function renderizarFrentesAdmin() {
 
   frentesOrdem.forEach(function (frente) {
     var card = document.createElement("div"); card.className = "frente-card";
+    var top = document.createElement("div"); top.className = "frente-card-top";
     var tit = document.createElement("div"); tit.className = "nm"; tit.textContent = frente;
-    card.appendChild(tit);
+    var badgeQtd = document.createElement("span"); badgeQtd.className = "frente-count";
+    top.appendChild(tit);
+    top.appendChild(badgeQtd);
+    card.appendChild(top);
 
     var edit = document.createElement("div"); edit.className = "frente-edit";
     var inp = document.createElement("input");
     inp.value = respAtual[frente] || "";
-    inp.placeholder = "Nomes separados por vírgula";
+    inp.placeholder = "Dirigentes Sup. separados por vírgula";
     var bSal = document.createElement("button"); bSal.type = "button"; bSal.textContent = "Salvar";
     bSal.onclick = async function () {
       bSal.disabled = true;
@@ -2955,13 +3126,18 @@ function renderizarFrentesAdmin() {
     };
     edit.appendChild(inp);
     edit.appendChild(bSal);
-    card.appendChild(edit);
+
+    var atualizarResumo = function () {
+      var atuais = inp.value.split(",").map(function (x) { return x.trim().toLowerCase(); }).filter(function (x) { return x; });
+      badgeQtd.textContent = atuais.length ? (atuais.length === 1 ? "1 responsável" : (atuais.length + " responsáveis")) : "Sem responsável";
+      return atuais;
+    };
 
     if (dirigentesPills.length) {
       var pills = document.createElement("div"); pills.className = "pills-resp";
       var btnPills = [];
       var sincronizarPills = function () {
-        var atuais = inp.value.split(",").map(function (x) { return x.trim().toLowerCase(); }).filter(function (x) { return x; });
+        var atuais = atualizarResumo();
         btnPills.forEach(function (item) {
           item.btn.classList.toggle("ativo", atuais.indexOf(item.nome.toLowerCase()) >= 0);
         });
@@ -2986,8 +3162,11 @@ function renderizarFrentesAdmin() {
       inp.oninput = sincronizarPills;
       sincronizarPills();
       card.appendChild(pills);
+    } else {
+      atualizarResumo();
     }
 
+    card.appendChild(edit);
     box.appendChild(card);
   });
 }
