@@ -477,7 +477,7 @@ button:disabled{opacity:.55;cursor:default}
 var API = "https://script.google.com/macros/s/AKfycbw0Qd_t6OxiVmr-mu_mvWdYSJhazM83FO6pmSwdvybdB2o3AlfVvxTBEdy7bEeCgzGe/exec";
 var $ = function (id) { return document.getElementById(id); };
 var sessao = null, dados = null, mapaLeaflet = null, camada = null, gpsMarker = null, gpsWatchId = null, gpsPrimeiroFix = false;
-var feitas = {}, pode = {}, podeMapa = {};
+var feitas = {}, pode = {}, podeMapa = {}, somenteLeituraMapa = {};
 var permissoesAte = {}, permissoesMapaAte = {}, designacoesAtivas = {}, minhasDesignacoes = {}, responsaveisFrente = {}, ultimoHistorico = {}, notasMapa = {};
 var notifAdmin = { total: 0, contas: 0, senhas: 0 }, hashAcesso = "", precisaAtualizarMapas = false;
 var mapaAtual = null, filtroStatus = "todos", filtroAdmin = "todos", adminListaCache = [], adminFrentesCache = [];
@@ -610,8 +610,10 @@ $("btnEntrar").onclick = async function () {
     token: r.token,
     nome: r.nome,
     admin: r.admin,
+    cargo: r.cargo || r.tipo || "Dirigente",
+    ehSup: !!r.ehSup,
     podeGerenciar: !!r.podeGerenciar,
-    tipo: r.tipo,
+    tipo: r.cargo || r.tipo || "Dirigente",
     trocarSenhaObrigatoria: !!r.trocarSenhaObrigatoria
   };
   gravarSessao(sessao); $("lSenha").value = ""; msg($("msgLogin"), "");
@@ -637,8 +639,9 @@ $("btnSair").onclick = function () {
 function atualizarIdentidadeTopo() {
   var nome = (sessao && sessao.nome) ? String(sessao.nome).trim() : "";
   var inicial = nome ? nome.charAt(0).toUpperCase() : "U";
-  var curta = !sessao ? "" : (sessao.admin ? "Admin" : (sessao.tipo === "permanente" ? "Perm." : "Temp."));
-  var completa = !sessao ? "" : (sessao.admin ? "Administrador" : (sessao.tipo === "permanente" ? "Dirigente Permanente" : "Dirigente Temporário"));
+  var ehSup = !!(sessao && !sessao.admin && (sessao.ehSup || sessao.cargo === "Dirigente Sup." || sessao.tipo === "Dirigente Sup."));
+  var curta = !sessao ? "" : (sessao.admin ? "Admin" : (ehSup ? "Sup." : "Dirig."));
+  var completa = !sessao ? "" : (sessao.admin ? "Administrador" : (ehSup ? "Dirigente Sup." : "Dirigente"));
   $("ola").textContent = nome ? ("Olá, " + nome) : "";
   $("navUserNome").textContent = nome;
   $("avatarInicial").textContent = inicial;
@@ -666,6 +669,7 @@ function atualizarBadgeAdmin() {
     var partes = [];
     if (notifAdmin.contas) partes.push(notifAdmin.contas + (notifAdmin.contas === 1 ? " conta" : " contas"));
     if (notifAdmin.senhas) partes.push(notifAdmin.senhas + (notifAdmin.senhas === 1 ? " senha" : " senhas"));
+    if (notifAdmin.solicitacoes) partes.push(notifAdmin.solicitacoes + (notifAdmin.solicitacoes === 1 ? " solicitação" : " solicitações"));
     btn.title = tot + (tot === 1 ? " pendência" : " pendências") + (partes.length ? " (" + partes.join(", ") + ")" : "");
   } else {
     b.textContent = "0";
@@ -1105,9 +1109,13 @@ function aplicarProgresso(r) {
   if (sessao && typeof r.podeGerenciar === "boolean") {
     sessao.admin = !!r.admin;
     sessao.podeGerenciar = !!r.podeGerenciar;
+    if (r.cargo) { sessao.cargo = r.cargo; sessao.tipo = r.cargo; }
+    if (typeof r.ehSup === "boolean") sessao.ehSup = !!r.ehSup;
     gravarSessao(sessao);
     atualizarBotoesTopo();
   }
+  somenteLeituraMapa = {};
+  Object.keys(r.somenteLeituraMapa || {}).forEach(function (k) { somenteLeituraMapa[normKey(k)] = !!r.somenteLeituraMapa[k]; });
   feitas = {};
   (r.feitas || []).forEach(function (f) {
     var mp = canonMapa(f.frente, f.mapa);
@@ -1142,11 +1150,11 @@ function aplicarProgresso(r) {
   atualizarBadgeAdmin();
   pulsarSync();
 
-  var novoHashAcesso = JSON.stringify({ adm: !!r.admin, p: r.pode || {}, pm: r.podeMapa || {} });
+  var novoHashAcesso = JSON.stringify({ adm: !!r.admin, p: r.pode || {}, pm: r.podeMapa || {}, sl: r.somenteLeituraMapa || {} });
   if (hashAcesso && novoHashAcesso !== hashAcesso) precisaAtualizarMapas = true;
   hashAcesso = novoHashAcesso;
   hashProg = JSON.stringify({
-    adm: !!(sessao && sessao.admin), pg: !!(sessao && sessao.podeGerenciar), f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente, uh: r.ultimoHistorico, nm: r.notasMapa, na: r.notificacoesAdmin
+    adm: !!(sessao && sessao.admin), pg: !!(sessao && sessao.podeGerenciar), sl: r.somenteLeituraMapa || {}, f: r.feitas, p: r.pode, pm: r.podeMapa, pa: r.permissoesAte, pma: r.permissoesMapaAte, da: r.designacoesAtivas, md: r.minhasDesignacoes, rf: r.responsaveisFrente, uh: r.ultimoHistorico, nm: r.notasMapa, na: r.notificacoesAdmin
   });
   verificarNovosMapasRecebidos();
 }
@@ -1290,7 +1298,16 @@ async function carregarProgresso() {
 
 function chave(m) { return m.g + "|" + m.n; }
 function feitasDe(m) { return feitas[chave(m)] || {}; }
-function podeNoMapa(m) { return !!(pode[m.g] || podeMapa[chave(m)]); }
+function mapaEhSomenteLeitura(m) {
+  if (!m) return false;
+  var km = chave(m);
+  if (Object.prototype.hasOwnProperty.call(somenteLeituraMapa, km)) return !!somenteLeituraMapa[km];
+  return !!m.somenteLeitura;
+}
+function podeNoMapa(m) {
+  if (!m || mapaEhSomenteLeitura(m)) return false;
+  return !!(pode[m.g] || podeMapa[chave(m)]);
+}
 
 function statusMapa(m) {
   var qs = Object.keys(m.q || {});
@@ -1393,8 +1410,10 @@ function montarFiltros() {
 function preencherMapasDesignar() {
   if (!dados) return;
   var g = $("dgFrente").value, dm = $("dgMapa"); dm.innerHTML = "";
+  var ehAdm = !!(sessao && sessao.admin);
   dados.mapas.forEach(function (m) {
     if (g && m.g !== g) return;
+    if (!ehAdm && mapaEhSomenteLeitura(m)) return;
     var o = document.createElement("option"); o.value = m.n; o.textContent = "Mapa " + m.n; dm.appendChild(o);
   });
 }
@@ -1686,7 +1705,9 @@ function mostrarInfo(m) {
   var t = document.createElement("div"); t.className = "tit"; t.textContent = "Mapa " + m.n + " · " + m.g; box.appendChild(t);
 
   var podeEste = podeNoMapa(m);
+  var somenteLeitura = mapaEhSomenteLeitura(m);
   var podeGer = !!(sessao && (sessao.admin || sessao.podeGerenciar));
+  var podeNota = !!(podeEste || (sessao && sessao.admin));
   var respFrente = responsaveisFrente[m.g];
   var desig = designacoesAtivas[k];
   var uh = ultimoHistorico[k];
@@ -1701,7 +1722,7 @@ function mostrarInfo(m) {
   }
 
   var notaAtual = notasMapa[k];
-  if ((notaAtual && notaAtual.texto) || podeEste || podeGer) {
+  if ((notaAtual && notaAtual.texto) || podeNota) {
     var nb = document.createElement("div"); nb.className = "nota-box";
     var nTit = document.createElement("div"); nTit.className = "st"; nTit.style.fontWeight = "700";
     nTit.textContent = "📝 Observação do mapa";
@@ -1718,7 +1739,7 @@ function mostrarInfo(m) {
         nb.appendChild(nMeta);
       }
     }
-    if (podeEste || podeGer) {
+    if (podeNota) {
       var nf = document.createElement("div"); nf.className = "nota-form";
       var inp = document.createElement("input");
       inp.id = "inpNotaMapa";
@@ -1788,7 +1809,7 @@ function mostrarInfo(m) {
   box.appendChild(bar);
 
   var dica = document.createElement("div"); dica.className = "st"; dica.style.marginBottom = "8px";
-  dica.textContent = podeEste ? "Toque numa quadra para marcar ou desmarcar:" : "Toque numa quadra para abrir o ponto no Google Maps:";
+  dica.textContent = podeEste ? "Toque numa quadra para marcar ou desmarcar:" : (somenteLeitura ? "Modo somente leitura (mapa não designado a você). Toque numa quadra para abrir no Google Maps:" : "Toque numa quadra para abrir o ponto no Google Maps:");
   box.appendChild(dica);
 
   var w = document.createElement("div"); w.className = "qs";
@@ -1817,7 +1838,7 @@ function mostrarInfo(m) {
   gps.onclick = function () { window.open(linkGPS(m.q[primeira][0], m.q[primeira][1]), "_blank"); };
   sel.appendChild(gps);
 
-  if (podeGer) {
+  if (podeGer && !somenteLeitura) {
     var dgBtn = document.createElement("button"); dgBtn.type = "button"; dgBtn.className = "sec";
     dgBtn.textContent = "👤 Designar mapa";
     dgBtn.onclick = async function () {
@@ -1883,9 +1904,15 @@ async function reiniciar(m) {
 }
 
 function preencherSelectDirigentes(lista) {
+  var ehAdm = !!(sessao && sessao.admin);
   var ativos = (lista || []).filter(function (u) {
     var st = String(u.status).toLowerCase();
-    return st === "aprovado" || st === "admin";
+    if (st !== "aprovado" && st !== "admin") return false;
+    if (!ehAdm) {
+      var tp = String(u.cargo || u.tipo || "").toLowerCase();
+      if (st === "admin" || u.ehSup || tp === "dirigente sup.") return false;
+    }
+    return true;
   });
   ["dgNome", "lbNome"].forEach(function (id) {
     var sel = $(id), anterior = sel.value;
@@ -2037,22 +2064,29 @@ async function carregarAdmin() {
 
 function renderizarAdmin() {
   var lista = adminListaCache || [];
-  var cont = { todos: lista.length, pendente: 0, permanente: 0, temporario: 0, bloqueado: 0 };
+  var ehUsuarioSup = function (u) {
+    var st = String(u.status || "").toLowerCase();
+    var tp = String(u.cargo || u.tipo || "").toLowerCase();
+    if (st === "admin") return false;
+    return !!(u.ehSup || tp === "dirigente sup." || tp === "dirigente sup" || (tp === "permanente" && u.autoridade));
+  };
+  var cont = { todos: lista.length, pendente: 0, sup: 0, dirigente: 0, bloqueado: 0 };
   lista.forEach(function (u) {
     var st = String(u.status || "").toLowerCase();
-    var tp = String(u.tipo || "temporario").toLowerCase();
     if (st === "pendente" || u.pedidoSenha) cont.pendente++;
     if (st === "bloqueado") cont.bloqueado++;
-    if (tp === "permanente") cont.permanente++;
-    else cont.temporario++;
+    if (st !== "admin") {
+      if (ehUsuarioSup(u)) cont.sup++;
+      else cont.dirigente++;
+    }
   });
 
   var chips = $("chipsAdmin"); chips.innerHTML = "";
   [
     { id: "todos", label: "Todos (" + cont.todos + ")" },
     { id: "pendente", label: "⏳ Pendentes (" + cont.pendente + ")" },
-    { id: "permanente", label: "★ Permanentes (" + cont.permanente + ")" },
-    { id: "temporario", label: "⏱️ Temporários (" + cont.temporario + ")" },
+    { id: "sup", label: "★ Dirigentes Sup. (" + cont.sup + ")" },
+    { id: "dirigente", label: "👤 Dirigentes (" + cont.dirigente + ")" },
     { id: "bloqueado", label: "🚫 Bloqueados (" + cont.bloqueado + ")" }
   ].forEach(function (cf) {
     var c = document.createElement("button");
@@ -2065,11 +2099,13 @@ function renderizarAdmin() {
 
   var filtrados = lista.filter(function (u) {
     var st = String(u.status || "").toLowerCase();
-    var tp = String(u.tipo || "temporario").toLowerCase();
     if (filtroAdmin === "todos") return true;
     if (filtroAdmin === "pendente") return st === "pendente" || !!u.pedidoSenha;
     if (filtroAdmin === "bloqueado") return st === "bloqueado";
-    return tp === filtroAdmin;
+    if (st === "admin") return false;
+    if (filtroAdmin === "sup") return ehUsuarioSup(u);
+    if (filtroAdmin === "dirigente") return !ehUsuarioSup(u);
+    return true;
   });
 
   var box = $("listaAdmin");
@@ -2081,8 +2117,8 @@ function renderizarAdmin() {
 
   filtrados.forEach(function (u) {
     var st = String(u.status || "").toLowerCase();
-    var tp = String(u.tipo || "temporario").toLowerCase();
     var isAdm = st === "admin";
+    var ehSup = ehUsuarioSup(u);
     var row = document.createElement("div"); row.className = "row";
     var info = document.createElement("div");
     var n = document.createElement("div"); n.className = "nm";
@@ -2092,15 +2128,9 @@ function renderizarAdmin() {
 
     if (!isAdm) {
       var bTipo = document.createElement("span");
-      bTipo.className = "badge-tipo" + (tp === "permanente" ? " perm" : "");
-      bTipo.textContent = tp === "permanente" ? "Permanente" : "Temporário";
+      bTipo.className = "badge-tipo" + (ehSup ? " perm" : "");
+      bTipo.textContent = ehSup ? "Dirigente Sup." : "Dirigente";
       n.appendChild(bTipo);
-      if (u.autoridade) {
-        var bAut = document.createElement("span");
-        bAut.className = "badge-aut";
-        bAut.textContent = "🔑 Autoridade Gerenciar";
-        n.appendChild(bAut);
-      }
     }
     if (u.pedidoSenha) {
       var bPed = document.createElement("span");
@@ -2157,11 +2187,10 @@ function renderizarAdmin() {
     }
 
     if (!isAdm && st === "aprovado") {
-      if (tp === "permanente") {
-        secBtns.push(acaoAdmBtn("Tornar Temporário", "sec-btn", { acao: "definirTipo", nome: u.nome, tipo: "temporario" }, "Tipo alterado para temporário."));
-        secBtns.push(acaoAdmBtn(u.autoridade ? "Revogar Autoridade" : "Conceder Autoridade", "sec-btn", { acao: "definirAutoridade", nome: u.nome, autoridade: !u.autoridade }, u.autoridade ? "Autoridade revogada." : "Autoridade concedida."));
+      if (ehSup) {
+        secBtns.push(acaoAdmBtn("Rebaixar para Dirigente", "sec-btn", { acao: "definirCargo", nome: u.nome, cargo: "Dirigente" }, "Cargo alterado para Dirigente."));
       } else {
-        secBtns.push(acaoAdmBtn("Tornar Permanente", "sec-btn", { acao: "definirTipo", nome: u.nome, tipo: "permanente" }, "Tipo alterado para permanente."));
+        secBtns.push(acaoAdmBtn("Promover a Dirigente Sup.", "sec-btn", { acao: "definirCargo", nome: u.nome, cargo: "Dirigente Sup." }, "Cargo alterado para Dirigente Sup."));
       }
     }
 
@@ -2253,8 +2282,8 @@ function renderizarFrentesAdmin() {
 
   var dirigentesPills = (adminListaCache || []).filter(function (u) {
     var st = String(u.status || "").toLowerCase();
-    var tp = String(u.tipo || "").toLowerCase();
-    return st === "admin" || (st === "aprovado" && tp === "permanente");
+    var tp = String(u.cargo || u.tipo || "").toLowerCase();
+    return st === "admin" || (st === "aprovado" && (!!u.ehSup || tp === "dirigente sup." || tp === "dirigente sup"));
   });
 
   frentesOrdem.forEach(function (frente) {
